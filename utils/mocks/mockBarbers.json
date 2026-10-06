@@ -1,0 +1,23 @@
+[
+  {
+    "id": "b-001",
+    "name": "Budi Santoso",
+    "specialty": "Fade & Pompadour",
+    "status": "Available",
+    "rating": 4.8
+  },
+  {
+    "id": "b-002",
+    "name": "Andi Pratama",
+    "specialty": "Classic Cut",
+    "status": "Busy",
+    "rating": 4.5
+  },
+  {
+    "id": "b-003",
+    "name": "Reza Rahardian",
+    "specialty": "Hair Color & Styling",
+    "status": "Off",
+    "rating": 4.9
+  }
+]

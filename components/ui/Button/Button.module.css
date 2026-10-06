@@ -1,0 +1,55 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-8);
+  font-weight: 600;
+  border-radius: var(--radius-btn);
+  padding: var(--spacing-16) var(--spacing-24);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+}
+
+.primary {
+  background-color: var(--color-secondary); /* Electric Orange */
+  color: var(--color-text-main);
+}
+
+.primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.3);
+}
+
+.secondary {
+  background-color: var(--color-surface);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-surface-hover);
+}
+
+.secondary:hover {
+  background-color: var(--color-surface-hover);
+  transform: translateY(-2px);
+}
+
+.danger {
+  background-color: var(--color-danger);
+  color: var(--color-text-main);
+}
+
+.danger:hover {
+  filter: brightness(1.1);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
