@@ -18,6 +18,7 @@
   --color-raised: #252528;        /* Raised - token pendukung */
   --color-border: #383B3D;        /* Border - token pendukung */
   --color-surface-hover: #2A2A2A;
+  --color-sidebar: #0B0B0C;       /* Sidebar background khusus */
 
   /* Layout Variables */
   --sidebar-width: 260px;

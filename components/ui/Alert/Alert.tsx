@@ -45,7 +45,7 @@ export const Alert: React.FC<AlertProps> = ({
     <div
       className={`
         flex items-start gap-3
-        ${config.bg} rounded-r-lg
+        ${config.bg} rounded-lg
         border-l-4 ${config.border}
         p-4 w-full
       `}
