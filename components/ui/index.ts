@@ -14,3 +14,4 @@ export { Card } from './Card/Card';
 export { Checkbox } from './Checkbox/Checkbox';
 export { Spinner } from './Spinner/Spinner';
 export { IconButton } from './IconButton/IconButton';
+export { Table, TableHeader, TableRow, TableHead, TableCell, TableBody, DataTable } from './Table/Table';

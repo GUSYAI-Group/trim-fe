@@ -1,10 +1,11 @@
+import { Metadata } from 'next';
 import React from 'react';
+import { BarbersView } from '@/modules/Barbers/views/BarbersView';
+
+export const metadata: Metadata = {
+  title: 'Kelola Kapster',
+};
 
 export default function BarbersPage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-[28px] font-extrabold tracking-tight">Kelola Kapster</h1>
-      <p className="text-text-muted">Manajemen data kapster barbershop.</p>
-    </div>
-  );
+  return <BarbersView />;
 }

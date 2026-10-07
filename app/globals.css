@@ -16,7 +16,7 @@
   /* Surface & Border Tokens */
   --color-surface: #1C1C1F;       /* Surface - token pendukung */
   --color-raised: #252528;        /* Raised - token pendukung */
-  --color-border: #383B3D;        /* Border - token pendukung */
+  --color-border: #303034;        /* Border - token pendukung */
   --color-surface-hover: #2A2A2A;
   --color-sidebar: #0B0B0C;       /* Sidebar background khusus */
 
@@ -50,4 +50,28 @@
   small, .caption {
     @apply text-[12px] font-normal leading-4 text-text-muted;
   }
+}
+
+/* === Custom Scrollbar === */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #4A4A50;
 }

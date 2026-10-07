@@ -13,6 +13,8 @@ interface ModalProps {
   secondaryLabel?: string;
   onPrimary?: () => void;
   onSecondary?: () => void;
+  children?: React.ReactNode;
+  hideHeaderBadge?: boolean;
 }
 
 const variantConfig: Record<ModalVariant, { icon: React.ReactNode; labelColor: string; primaryBtnClass: string }> = {
@@ -49,6 +51,8 @@ export const Modal: React.FC<ModalProps> = ({
   secondaryLabel,
   onPrimary,
   onSecondary,
+  children,
+  hideHeaderBadge,
 }) => {
   if (!isOpen) return null;
 
@@ -67,10 +71,14 @@ export const Modal: React.FC<ModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            {config.icon}
-            <span className={`text-[12px] font-semibold uppercase tracking-wider ${config.labelColor}`}>
-              {variantLabel[variant]}
-            </span>
+            {!hideHeaderBadge && (
+              <>
+                {config.icon}
+                <span className={`text-[12px] font-semibold uppercase tracking-wider ${config.labelColor}`}>
+                  {variantLabel[variant]}
+                </span>
+              </>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -81,8 +89,11 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
 
         {/* Content */}
-        <h2 className="text-[20px] font-bold text-text-main mb-2">{title}</h2>
+        <h2 className="text-[20px] font-bold text-text-main mb-2 font-outfit">{title}</h2>
         <p className="text-[14px] text-text-muted leading-relaxed mb-6">{description}</p>
+
+        {/* Custom Children / Form */}
+        {children && <div className="mb-8">{children}</div>}
 
         {/* Actions */}
         <div className="flex gap-3">

@@ -13,7 +13,10 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "TRIM Dashboard",
+  title: {
+    template: '%s | TRIM',
+    default: 'Dashboard | TRIM',
+  },
   description: "AI-Powered Barbershop Information System",
   icons: {
     icon: "/logo/logo-app.svg",

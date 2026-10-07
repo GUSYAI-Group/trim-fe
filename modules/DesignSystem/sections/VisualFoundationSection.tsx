@@ -31,7 +31,7 @@ export default function VisualFoundationSection() {
           Raised / <span className="text-text-main">#252528</span> · token pendukung
         </div>
         <div className="border border-border rounded-lg p-4 text-[14px] text-text-muted">
-          Border / <span className="text-text-main">#383B3D</span> · token pendukung
+          Border / <span className="text-text-main">#303034</span> · token pendukung
         </div>
       </div>
 

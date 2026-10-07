@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Bell, Search, ChevronDown, Menu } from 'lucide-react';
 
 interface NavbarProps {
@@ -33,14 +34,19 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 
   return (
     <header className="h-20 bg-primary border-b border-border px-4 md:px-8 flex items-center justify-between sticky top-0 z-40">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         {/* Mobile Hamburger Menu */}
         <button 
           onClick={onMenuClick}
-          className="lg:hidden p-2 text-text-muted hover:text-text-main hover:bg-surface rounded-lg transition-colors"
+          className="lg:hidden p-2 -ml-2 text-text-muted hover:text-text-main hover:bg-surface rounded-lg transition-colors"
         >
           <Menu className="w-6 h-6" />
         </button>
+
+        {/* Mobile Logo */}
+        <div className="lg:hidden flex items-center mt-1">
+          <Image src="/logo/logo-textwhite.svg" alt="TRIM Logo" width={100} height={32} className="object-contain" priority />
+        </div>
 
         {/* Search Bar - Solid grey without outline */}
         <div className="w-full max-w-110 hidden md:block">
