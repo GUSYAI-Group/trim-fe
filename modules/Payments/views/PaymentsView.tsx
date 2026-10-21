@@ -24,10 +24,10 @@ interface Payment {
 
 /* ─────────────────── Static data ─────────────────── */
 const PAID_PAYMENTS: Payment[] = [
-  { id: 1,  qrisRef: 'QRIS-20261006-8A3F', qrisId: 'id: e3a1b2c4...', bookingUuid: '7f2a1d9e...', customer: 'Rangga Utama',   paidAt: '6 Okt 2026 • 14:02', nominal: 'Rp60.000',  status: 'lunas',         hasPaidAt: true },
-  { id: 2,  qrisRef: 'QRIS-20261006-C7D2', qrisId: 'id: a1f4c8b2...', bookingUuid: '3c9e5a7b...', customer: 'Farhan Akbar',   paidAt: '6 Okt 2026 • 13:17', nominal: 'Rp100.000', status: 'lunas',         hasPaidAt: true },
-  { id: 3,  qrisRef: 'QRIS-20261006-4E9A', qrisId: 'id: 9d2e6f3c...', bookingUuid: '5a8d2c1f...', customer: 'Iqbal Fauzi',   paidAt: '6 Okt 2026 • 12:45', nominal: 'Rp75.000',  status: 'lunas',         hasPaidAt: true },
-  { id: 4,  qrisRef: 'QRIS-20261005-2B7E', qrisId: 'id: c4b8e1a7...', bookingUuid: '1e4f9b3d...', customer: 'Dimas Saputra', paidAt: '5 Okt 2026 • 16:30', nominal: 'Rp75.000',  status: 'dikembalikan',  hasPaidAt: true },
+  { id: 1,  qrisRef: 'QRIS-20261006-8A3F', qrisId: 'id: e3a1b2c4...', bookingUuid: '7f2a1d9e...', customer: 'Gus Zidan',   paidAt: '6 Okt 2026 • 14:02', nominal: 'Rp60.000',  status: 'lunas',         hasPaidAt: true },
+  { id: 2,  qrisRef: 'QRIS-20261006-C7D2', qrisId: 'id: a1f4c8b2...', bookingUuid: '3c9e5a7b...', customer: 'Gus Farhan',   paidAt: '6 Okt 2026 • 13:17', nominal: 'Rp100.000', status: 'lunas',         hasPaidAt: true },
+  { id: 3,  qrisRef: 'QRIS-20261006-4E9A', qrisId: 'id: 9d2e6f3c...', bookingUuid: '5a8d2c1f...', customer: 'Gus Ridho',   paidAt: '6 Okt 2026 • 12:45', nominal: 'Rp75.000',  status: 'lunas',         hasPaidAt: true },
+  { id: 4,  qrisRef: 'QRIS-20261005-2B7E', qrisId: 'id: c4b8e1a7...', bookingUuid: '1e4f9b3d...', customer: 'Gus Lefi', paidAt: '5 Okt 2026 • 16:30', nominal: 'Rp75.000',  status: 'dikembalikan',  hasPaidAt: true },
   { id: 5,  qrisRef: 'QRIS-20261005-F1C3', qrisId: 'id: b7a3d9e5...', bookingUuid: '8b2f4e6a...', customer: 'Yusuf Pratama', paidAt: '5 Okt 2026 • 11:52', nominal: 'Rp60.000',  status: 'lunas',         hasPaidAt: true },
   { id: 6,  qrisRef: 'QRIS-20261004-9D4B', qrisId: 'id: f2c5a8d1...', bookingUuid: '6c3a7f2e...', customer: 'Agung Saputra', paidAt: '4 Okt 2026 • 15:20', nominal: 'Rp75.000',  status: 'lunas',         hasPaidAt: true },
   { id: 7,  qrisRef: 'QRIS-20261003-6A2D', qrisId: 'id: 3e9b1f7a...', bookingUuid: '4d7e2b9c...', customer: 'Satria Wibowo', paidAt: '3 Okt 2026 • 09:30', nominal: 'Rp100.000', status: 'lunas',         hasPaidAt: true },

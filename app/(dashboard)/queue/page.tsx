@@ -1,10 +1,10 @@
-import React from 'react';
+import { Metadata } from 'next';
+import QueueView from '@/modules/Queue/views/QueueView';
+
+export const metadata: Metadata = {
+  title: 'Monitor Antrean Langsung | TRIM',
+};
 
 export default function QueuePage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-[28px] font-extrabold tracking-tight">Monitor Antrean</h1>
-      <p className="text-text-muted">Pantau antrean aktif secara real-time.</p>
-    </div>
-  );
+  return <QueueView />;
 }

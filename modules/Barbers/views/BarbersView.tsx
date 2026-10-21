@@ -1,20 +1,51 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Star, Users, Scissors, ChevronDown, ArrowRight, Info } from 'lucide-react';
-import { Card, Button, TableRow, TableHead, TableCell, DataTable } from '@/components/ui';
+import { Card, TableRow, TableHead, TableCell, DataTable } from '@/components/ui';
 
-const KAPSTER_DATA = [
-  { phone: '0812 3456 7890', name: 'Raka Putra', initials: 'RP', specialty: 'Fade & taper', finished: 8, rating: '4,9', statusText: 'Aktif', badgeType: 'success' },
-  { phone: '0813 7788 9900', name: 'Bima Saputra', initials: 'BS', specialty: 'Classic & pompadour', finished: 6, rating: '4,9', statusText: 'Aktif', badgeType: 'success' },
-  { phone: '0821 4455 6677', name: 'Dion Mahendra', initials: 'DM', specialty: 'Texture & crop', finished: 4, rating: '4,8', statusText: 'Aktif', badgeType: 'success' },
-  { phone: '0857 2211 3344', name: 'Arief Nugraha', initials: 'AN', specialty: 'Buzz cut & beard', finished: 0, rating: '5,0', statusText: 'Aktif', badgeType: 'success' },
-  { phone: '0819 6677 8899', name: 'Yoga Prasetyo', initials: 'YP', specialty: 'Mullet & wolf cut', finished: 0, rating: '4,9', statusText: 'Aktif', badgeType: 'success' },
-  { phone: '0878 1122 5566', name: 'Reza Firmansyah', initials: 'RF', specialty: 'Hair tattoo & color', finished: 0, rating: '4,8', statusText: 'Aktif', badgeType: 'success' },
+interface KapsterItem {
+  phone: string;
+  name: string;
+  initials: string;
+  specialty: string;
+  finished: number;
+  rating: string;
+  statusText: 'Aktif' | 'Nonaktif';
+  badgeType: 'success' | 'muted';
+}
+
+const KAPSTER_DATA: KapsterItem[] = [
+  { phone: '0812 3456 7890', name: 'Gus Farhan', initials: 'GF', specialty: 'Fade & taper', finished: 8, rating: '4,9', statusText: 'Aktif', badgeType: 'success' },
+  { phone: '0813 7788 9900', name: 'Lefi Dian', initials: 'LD', specialty: 'Classic & pompadour', finished: 6, rating: '4,9', statusText: 'Aktif', badgeType: 'success' },
+  { phone: '0821 4455 6677', name: 'Zidan Alex', initials: 'ZA', specialty: 'Texture & crop', finished: 4, rating: '4,8', statusText: 'Aktif', badgeType: 'success' },
+  { phone: '0857 2211 3344', name: 'Ridho Arman', initials: 'RA', specialty: 'Buzz cut & beard', finished: 0, rating: '5,0', statusText: 'Aktif', badgeType: 'success' },
+  { phone: '0819 6677 8899', name: 'Yoga Prasetyo', initials: 'YP', specialty: 'Mullet & wolf cut', finished: 0, rating: '4,7', statusText: 'Nonaktif', badgeType: 'muted' },
+  { phone: '0878 1122 5566', name: 'Reza Firmansyah', initials: 'RF', specialty: 'Hair tattoo & color', finished: 0, rating: '4,6', statusText: 'Nonaktif', badgeType: 'muted' },
 ];
 
 export function BarbersView() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<'Semua' | 'Aktif' | 'Nonaktif'>('Semua');
+
+  // Menghitung statistik
+  const totalCount = KAPSTER_DATA.length;
+  const activeCount = KAPSTER_DATA.filter((k) => k.statusText === 'Aktif').length;
+  const inactiveCount = KAPSTER_DATA.filter((k) => k.statusText === 'Nonaktif').length;
+
+  // Filter gabungan Search & Status
+  const filteredData = KAPSTER_DATA.filter((kapster) => {
+    const matchesSearch =
+      kapster.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      kapster.phone.includes(searchQuery);
+
+    const matchesStatus =
+      selectedStatus === 'Semua' || kapster.statusText === selectedStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="space-y-8 pb-24 font-space-grotesk relative min-h-screen">
       {/* Header */}
@@ -25,11 +56,14 @@ export function BarbersView() {
             Tim di balik setiap potongan. Atur spesialisasi, profil, dan status aktif kapster.
           </p>
         </header>
-        <Link href="/barbers/form">
-          <Button variant="primary" className="gap-2 shrink-0">
-            <Plus className="w-4 h-4" />
-            <span>Tambah kapster</span>
-          </Button>
+
+        {/* Link Tambah Kapster Langsung Bergaya Button */}
+        <Link
+          href="/barbers/form"
+          className="bg-secondary hover:bg-secondary/90 text-white px-5 py-2.5 rounded-xl text-sm font-bold font-outfit flex items-center justify-center gap-2 shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Tambah kapster</span>
         </Link>
       </div>
 
@@ -42,8 +76,8 @@ export function BarbersView() {
             <Users className="w-5 h-5 text-secondary" />
           </div>
           <div>
-            <h3 className="text-3xl font-extrabold text-white mb-2 font-outfit">6</h3>
-            <p className="text-[13px] text-success">6 profil kapster aktif</p>
+            <h3 className="text-3xl font-extrabold text-white mb-2 font-outfit">{totalCount}</h3>
+            <p className="text-[13px] text-emerald-400 font-medium">{activeCount} profil kapster aktif</p>
           </div>
         </Card>
 
@@ -67,7 +101,7 @@ export function BarbersView() {
           </div>
           <div>
             <h3 className="text-3xl font-extrabold text-white mb-2 font-outfit">4,9 / 5</h3>
-            <p className="text-[13px] text-success">126 ulasan pelanggan bulan ini</p>
+            <p className="text-[13px] text-emerald-400 font-medium">126 ulasan pelanggan bulan ini</p>
           </div>
         </Card>
       </div>
@@ -76,24 +110,62 @@ export function BarbersView() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Left: Tabs */}
         <div className="flex items-center gap-2 w-full md:w-auto">
-          <button className="px-4 py-2 bg-transparent border border-border text-white rounded-lg font-medium text-[14px]">Semua (6)</button>
-          <button className="px-4 py-2 text-text-muted hover:text-white rounded-lg font-medium text-[14px] transition-colors">Aktif (6)</button>
+          <button
+            onClick={() => setSelectedStatus('Semua')}
+            className={`px-4 py-2 rounded-lg font-medium text-[14px] transition-colors cursor-pointer ${
+              selectedStatus === 'Semua'
+                ? 'bg-raised border border-border text-white'
+                : 'text-text-muted hover:text-white'
+            }`}
+          >
+            Semua ({totalCount})
+          </button>
+          <button
+            onClick={() => setSelectedStatus('Aktif')}
+            className={`px-4 py-2 rounded-lg font-medium text-[14px] transition-colors cursor-pointer ${
+              selectedStatus === 'Aktif'
+                ? 'bg-raised border border-border text-white'
+                : 'text-text-muted hover:text-white'
+            }`}
+          >
+            Aktif ({activeCount})
+          </button>
+          <button
+            onClick={() => setSelectedStatus('Nonaktif')}
+            className={`px-4 py-2 rounded-lg font-medium text-[14px] transition-colors cursor-pointer ${
+              selectedStatus === 'Nonaktif'
+                ? 'bg-raised border border-border text-white'
+                : 'text-text-muted hover:text-white'
+            }`}
+          >
+            Nonaktif ({inactiveCount})
+          </button>
         </div>
 
-        {/* Right: Search & Filter */}
+        {/* Right: Search & Filter Dropdown */}
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative w-full md:w-72">
             <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
             <input 
               type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari nama atau nomor telepon" 
               className="w-full bg-raised border border-border rounded-lg pl-9 pr-4 py-2 text-[14px] text-white placeholder:text-text-muted focus:outline-none focus:border-secondary transition-colors font-outfit"
             />
           </div>
-          <button className="flex items-center gap-2 shrink-0 bg-raised border border-border rounded-lg px-4 py-2 text-white hover:bg-border transition-colors">
-            <span className="hidden sm:inline text-[14px] font-medium">Semua status</span>
-            <ChevronDown className="w-4 h-4 text-text-muted" />
-          </button>
+          <div className="relative">
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value as 'Semua' | 'Aktif' | 'Nonaktif')}
+              className="appearance-none bg-raised border border-border rounded-lg pl-4 pr-10 py-2 text-[14px] font-medium text-white hover:bg-border transition-colors focus:outline-none cursor-pointer font-outfit"
+            >
+              <option value="Semua" className="bg-surface text-white">Semua status</option>
+              <option value="Aktif" className="bg-surface text-white">Aktif</option>
+              <option value="Nonaktif" className="bg-surface text-white">Nonaktif</option>
+            </select>
+            <ChevronDown className="w-4 h-4 text-text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
         </div>
       </div>
 
@@ -110,61 +182,77 @@ export function BarbersView() {
           </>
         }
         pagination={{
-          text: "Menampilkan 1–6 dari 6 kapster",
+          text: `Menampilkan ${filteredData.length > 0 ? 1 : 0}–${filteredData.length} dari ${totalCount} kapster`,
           currentPage: 1
         }}
       >
-        {KAPSTER_DATA.map((kapster, idx) => (
-          <TableRow key={idx}>
-            <TableCell className="pl-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-raised border border-border/50 flex items-center justify-center text-secondary font-bold text-[12px] shrink-0 font-outfit">
-                  {kapster.initials}
-                </div>
-                <div>
-                  <p className="font-bold text-white text-[15px]">{kapster.name}</p>
-                  <p className="text-[13px] text-text-muted font-outfit mt-0.5">{kapster.phone}</p>
-                </div>
-              </div>
-            </TableCell>
-            <TableCell className="font-medium text-[14px]">{kapster.specialty}</TableCell>
-            <TableCell>
-              <div className={`px-2.5 py-1 text-[13px] rounded-md font-medium font-outfit flex items-center gap-1.5 w-fit ${
-                kapster.badgeType === 'success' 
-                  ? 'bg-success/10 text-success' 
-                  : 'bg-warning/10 text-warning'
-              }`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${kapster.badgeType === 'success' ? 'bg-success' : 'bg-warning'}`}></div>
-                {kapster.statusText}
-              </div>
-            </TableCell>
-            <TableCell className="font-medium flex items-center gap-1 font-outfit pt-6.5 pb-4 text-[14px]">
-              <Star className="w-3.5 h-3.5 fill-white" /> {kapster.rating}
-            </TableCell>
-            <TableCell className="font-medium font-outfit text-[14px]">{kapster.finished}</TableCell>
-            <TableCell className="pr-6">
-              <div className="flex items-center gap-5">
-                <button className="text-secondary font-bold hover:text-white transition-colors text-[14px]">Edit</button>
-                <button className="text-text-muted hover:text-white transition-colors flex items-center gap-1.5 font-bold text-[14px]">
-                  Detail <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
+        {filteredData.length > 0 ? (
+          filteredData.map((kapster, idx) => {
+            const rawPhone = kapster.phone.replace(/\s+/g, '');
+            return (
+              <TableRow key={idx}>
+                <TableCell className="pl-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-raised border border-border/50 flex items-center justify-center text-secondary font-bold text-[12px] shrink-0 font-outfit">
+                      {kapster.initials}
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-[15px]">{kapster.name}</p>
+                      <p className="text-[13px] text-text-muted font-outfit mt-0.5">{kapster.phone}</p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="font-medium text-[14px]">{kapster.specialty}</TableCell>
+                <TableCell>
+                  <div className={`px-2.5 py-1 text-[13px] rounded-md font-medium font-outfit flex items-center gap-1.5 w-fit ${
+                    kapster.badgeType === 'success' 
+                      ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20' 
+                      : 'bg-zinc-500/10 text-zinc-400 border border-border'
+                  }`}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${kapster.badgeType === 'success' ? 'bg-emerald-400' : 'bg-zinc-400'}`}></div>
+                    {kapster.statusText}
+                  </div>
+                </TableCell>
+                <TableCell className="font-medium flex items-center gap-1 font-outfit pt-6.5 pb-4 text-[14px]">
+                  <Star className="w-3.5 h-3.5 fill-white text-white" /> {kapster.rating}
+                </TableCell>
+                <TableCell className="font-medium font-outfit text-[14px]">{kapster.finished}</TableCell>
+                <TableCell className="pr-6">
+                  <div className="flex items-center gap-5">
+                    {/* Link Edit Langsung Tanpa Tag Button Tambahan */}
+                    <Link
+                      href={`/barbers/form?id=${rawPhone}`}
+                      className="text-secondary font-bold hover:text-white transition-colors text-[14px] cursor-pointer"
+                    >
+                      Edit
+                    </Link>
+                    <button className="text-text-muted hover:text-white transition-colors flex items-center gap-1.5 font-bold text-[14px] cursor-pointer">
+                      Detail <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })
+        ) : (
+          <TableRow>
+            <TableCell colSpan={6} className="text-center py-8 text-text-muted text-[14px]">
+              Tidak ada kapster yang cocok dengan kriteria pencarian/filter.
             </TableCell>
           </TableRow>
-        ))}
+        )}
       </DataTable>
 
       {/* Info Rule Banner */}
-      <div className="bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 flex items-start gap-4">
+      <div className="bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 flex items-start gap-4 shadow-md">
         <Info className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
         <div>
-          <h4 className="text-secondary font-bold text-[14px] mb-1.5">Nomor telepon unik • Aturan aplikasi</h4>
-          <p className="text-text-muted text-[13px] leading-relaxed">
+          <h4 className="text-secondary font-bold text-[14px] mb-1.5 font-outfit">Nomor telepon unik • Aturan aplikasi</h4>
+          <p className="text-text-muted text-[13px] leading-relaxed font-outfit">
             Profil kapster terhubung ke USERS melalui user_id. Status aktif disimpan di is_active; sedang melayani dihitung dari booking.
           </p>
         </div>
       </div>
-
     </div>
   );
 }
