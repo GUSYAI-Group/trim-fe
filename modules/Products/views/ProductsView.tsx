@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Plus, Search, Edit3, Package, CheckCircle2, AlertTriangle, AlertCircle, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 
 interface ProductItem {
   id: string;
+  rawId: string;
   name: string;
   category: string;
   price: string;
@@ -15,22 +17,28 @@ interface ProductItem {
 }
 
 const PRODUCTS_DATA: ProductItem[] = [
-  { id: 'prd-1', name: 'Pomade', category: 'Minyak Rambut', price: 'Rp35.000', stock: 12, minStock: 5, stockStatus: 'Aman', isActive: true },
-  { id: 'prd-2', name: 'Hair Spray', category: 'Hair Spray', price: 'Rp45.000', stock: 15, minStock: 5, stockStatus: 'Aman', isActive: true },
-  { id: 'prd-3', name: 'Hair Powder', category: 'Powder', price: 'Rp50.000', stock: 0, minStock: 5, stockStatus: 'Habis', isActive: true },
-  { id: 'prd-4', name: 'Hair Tonic', category: 'Hair Tonic', price: 'Rp65.000', stock: 10, minStock: 5, stockStatus: 'Aman', isActive: true },
-  { id: 'prd-5', name: 'Clay', category: 'Minyak Rambut', price: 'Rp30.000', stock: 3, minStock: 5, stockStatus: 'Menipis', isActive: true },
-  { id: 'prd-6', name: 'Vitamin', category: 'Serum', price: 'Rp55.000', stock: 9, minStock: 5, stockStatus: 'Aman', isActive: true },
+  { id: 'prd-1', rawId: 'pomade', name: 'Pomade', category: 'Minyak Rambut', price: 'Rp35.000', stock: 12, minStock: 5, stockStatus: 'Aman', isActive: true },
+  { id: 'prd-2', rawId: 'hair-spray', name: 'Hair Spray', category: 'Hair Spray', price: 'Rp45.000', stock: 15, minStock: 5, stockStatus: 'Aman', isActive: true },
+  { id: 'prd-3', rawId: 'hair-powder', name: 'Hair Powder', category: 'Powder', price: 'Rp50.000', stock: 0, minStock: 5, stockStatus: 'Habis', isActive: true },
+  { id: 'prd-4', rawId: 'hair-tonic', name: 'Hair Tonic', category: 'Hair Tonic', price: 'Rp65.000', stock: 10, minStock: 5, stockStatus: 'Aman', isActive: true },
+  { id: 'prd-5', rawId: 'clay', name: 'Clay', category: 'Minyak Rambut', price: 'Rp30.000', stock: 3, minStock: 5, stockStatus: 'Menipis', isActive: true },
+  { id: 'prd-6', rawId: 'vitamin', name: 'Vitamin', category: 'Serum', price: 'Rp55.000', stock: 9, minStock: 5, stockStatus: 'Aman', isActive: true },
 ];
 
 export default function ProductsView() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua kategori');
+  const [selectedStockStatus, setSelectedStockStatus] = useState('Semua status stok');
+  const [selectedActiveStatus, setSelectedActiveStatus] = useState('Semua status aktif');
 
   const filteredProducts = PRODUCTS_DATA.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'Semua kategori' || item.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesStock = selectedStockStatus === 'Semua status stok' || item.stockStatus === selectedStockStatus;
+    const matchesActive = selectedActiveStatus === 'Semua status aktif' || 
+      (selectedActiveStatus === 'Aktif' ? item.isActive : !item.isActive);
+    
+    return matchesSearch && matchesCategory && matchesStock && matchesActive;
   });
 
   return (
@@ -45,13 +53,18 @@ export default function ProductsView() {
             Kelola katalog, harga satuan, dan pantau stok produk barbershop.
           </p>
         </div>
-        <button className="bg-secondary hover:bg-secondary/90 text-white px-4 py-2.5 rounded-xl text-xs font-bold font-outfit flex items-center justify-center gap-2 shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer self-start sm:self-auto">
+
+        {/* Link Tambah Produk Bergaya Tombol */}
+        <Link
+          href="/products/form"
+          className="bg-secondary hover:bg-secondary/90 text-white px-4 py-2.5 rounded-xl text-xs font-bold font-outfit flex items-center justify-center gap-2 shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer self-start sm:self-auto shrink-0"
+        >
           <Plus className="w-4 h-4" />
           <span>Tambah produk</span>
-        </button>
+        </Link>
       </div>
 
-      {/* 4 Stat Cards Grid (Presisi Figma) */}
+      {/* 4 Stat Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 flex flex-col justify-between gap-4 border border-border bg-surface rounded-2xl">
           <div className="flex justify-between items-center text-text-muted">
@@ -104,6 +117,7 @@ export default function ProductsView() {
           <h2 className="text-base font-bold text-white font-outfit">Katalog produk</h2>
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* Search Box */}
             <div className="relative flex items-center bg-surface border border-border rounded-xl px-3 py-1.5 w-full sm:w-56">
               <Search className="w-3.5 h-3.5 text-text-muted mr-2 shrink-0" />
               <input
@@ -115,6 +129,7 @@ export default function ProductsView() {
               />
             </div>
 
+            {/* Dropdown Kategori */}
             <div className="relative">
               <select
                 value={selectedCategory}
@@ -131,16 +146,31 @@ export default function ProductsView() {
               <ChevronDown className="w-3.5 h-3.5 text-text-muted absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
 
+            {/* Dropdown Status Stok */}
             <div className="relative">
-              <select className="appearance-none bg-surface border border-border text-text-muted text-xs font-medium rounded-xl pl-3 pr-8 py-1.5 focus:outline-none focus:border-secondary cursor-pointer font-outfit">
+              <select
+                value={selectedStockStatus}
+                onChange={(e) => setSelectedStockStatus(e.target.value)}
+                className="appearance-none bg-surface border border-border text-text-muted text-xs font-medium rounded-xl pl-3 pr-8 py-1.5 focus:outline-none focus:border-secondary cursor-pointer font-outfit"
+              >
                 <option className="bg-surface text-white">Semua status stok</option>
+                <option className="bg-surface text-white">Aman</option>
+                <option className="bg-surface text-white">Menipis</option>
+                <option className="bg-surface text-white">Habis</option>
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-text-muted absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
 
+            {/* Dropdown Status Aktif */}
             <div className="relative">
-              <select className="appearance-none bg-surface border border-border text-text-muted text-xs font-medium rounded-xl pl-3 pr-8 py-1.5 focus:outline-none focus:border-secondary cursor-pointer font-outfit">
+              <select
+                value={selectedActiveStatus}
+                onChange={(e) => setSelectedActiveStatus(e.target.value)}
+                className="appearance-none bg-surface border border-border text-text-muted text-xs font-medium rounded-xl pl-3 pr-8 py-1.5 focus:outline-none focus:border-secondary cursor-pointer font-outfit"
+              >
                 <option className="bg-surface text-white">Semua status aktif</option>
+                <option className="bg-surface text-white">Aktif</option>
+                <option className="bg-surface text-white">Nonaktif</option>
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-text-muted absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -148,19 +178,19 @@ export default function ProductsView() {
         </div>
 
         {/* Tabel Data Katalog Produk */}
-        <div className="rounded-2xl border border-border bg-surface overflow-hidden">
+        <div className="rounded-2xl border border-border bg-surface overflow-hidden shadow-md">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-surface text-text-muted text-[11px] border-b border-border/60 font-outfit">
+              <thead className="bg-surface text-text-muted text-[11px] border-b border-border/60 font-outfit uppercase tracking-wider">
                 <tr>
-                  <th className="py-3.5 px-6 font-medium">Nama produk</th>
-                  <th className="py-3.5 px-5 font-medium">Kategori</th>
-                  <th className="py-3.5 px-5 font-medium">Harga unit</th>
-                  <th className="py-3.5 px-5 font-medium">Stok (unit)</th>
-                  <th className="py-3.5 px-5 font-medium">Minimum</th>
-                  <th className="py-3.5 px-5 font-medium">Status stok</th>
-                  <th className="py-3.5 px-5 font-medium">Status aktif</th>
-                  <th className="py-3.5 px-6 font-medium text-right">Aksi</th>
+                  <th className="py-3.5 px-6 font-semibold">Nama produk</th>
+                  <th className="py-3.5 px-5 font-semibold">Kategori</th>
+                  <th className="py-3.5 px-5 font-semibold">Harga unit</th>
+                  <th className="py-3.5 px-5 font-semibold">Stok (unit)</th>
+                  <th className="py-3.5 px-5 font-semibold">Minimum</th>
+                  <th className="py-3.5 px-5 font-semibold">Status stok</th>
+                  <th className="py-3.5 px-5 font-semibold">Status aktif</th>
+                  <th className="py-3.5 px-6 font-semibold text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50 text-text-main">
@@ -197,9 +227,14 @@ export default function ProductsView() {
                     </td>
                     <td className="py-3.5 px-6 text-right">
                       <div className="flex items-center justify-end gap-3">
-                        <button className="text-secondary font-bold text-xs hover:underline flex items-center gap-1 font-outfit cursor-pointer">
-                          <Edit3 className="w-3.5 h-3.5" /> Edit
-                        </button>
+                        {/* Link Edit Produk */}
+                        <Link
+                          href={`/products/form?id=${item.rawId}`}
+                          className="text-secondary font-bold text-xs hover:underline flex items-center gap-1 font-outfit cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </Link>
                         <button className="text-text-muted text-xs hover:text-white transition-colors cursor-pointer font-outfit">
                           Nonaktifkan
                         </button>
@@ -211,7 +246,7 @@ export default function ProductsView() {
             </table>
           </div>
 
-          {/* Table Footer / Pagination Presisi Figma */}
+          {/* Table Footer / Pagination */}
           <div className="py-3.5 px-6 border-t border-border flex items-center justify-between text-text-muted text-xs font-outfit">
             <span>Menampilkan 1–{filteredProducts.length} dari {PRODUCTS_DATA.length} produk</span>
             <div className="flex items-center gap-2">
@@ -228,14 +263,14 @@ export default function ProductsView() {
           </div>
         </div>
 
-        {/* Banner Notifikasi Bawah Figma */}
+        {/* Banner Notifikasi Bawah */}
         <div className="p-4 rounded-2xl bg-[#1c120c] border border-secondary/20 flex items-start gap-3 shadow-md">
           <AlertCircle className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-          <div className="space-y-0.5">
-            <h4 className="text-xs font-bold text-secondary font-outfit">
+          <div className="space-y-0.5 font-outfit">
+            <h4 className="text-xs font-bold text-secondary">
               Status aktif berbeda dari status stok
             </h4>
-            <p className="text-[11px] text-text-muted leading-relaxed font-outfit">
+            <p className="text-[11px] text-text-muted leading-relaxed">
               Aman: stok &gt; minimum. Menipis: 0 &lt; stok ≤ minimum. Habis: stok = 0. Produk aktif tetap dapat memiliki stok habis.
             </p>
           </div>

@@ -236,9 +236,9 @@ export function BarbersView() {
           })
         ) : (
           <TableRow>
-            <TableCell colSpan={6} className="text-center py-8 text-text-muted text-[14px]">
+            <td colSpan={6} className="text-center py-8 text-text-muted text-[14px]">
               Tidak ada kapster yang cocok dengan kriteria pencarian/filter.
-            </TableCell>
+            </td>
           </TableRow>
         )}
       </DataTable>

@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Card, Button } from '@/components/ui';
-import { Search, ChevronDown, ChevronLeft, ChevronRight, UserPlus, Shield, ShieldCheck, Scissors, User, Info, Crown, Briefcase, Wallet } from 'lucide-react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight, UserPlus, Shield, Info, Crown, Briefcase, Wallet } from 'lucide-react';
 
 /* ─────────────────── Types ─────────────────── */
 type Role = 'owner' | 'admin' | 'barber' | 'customer';
 
 interface Account {
   id: number;
+  slug: string; // Digunakan untuk query parameter ?id=
   initials: string;
   email: string;
   uuid: string;
@@ -21,12 +23,12 @@ interface Account {
 
 /* ─────────────────── Static data ─────────────────── */
 const ACCOUNTS: Account[] = [
-  { id: 1, initials: 'AP', email: 'aditya@trim.id', uuid: '8f2c...a1e4', role: 'owner',    createdAt: '12 Sep 2026', updatedAt: '6 Okt 2026', isOwner: true },
-  { id: 2, initials: 'DS', email: 'dimas@trim.id',  uuid: '9b1a...c7f2', role: 'admin',    createdAt: '12 Sep 2026', updatedAt: '6 Okt 2026' },
-  { id: 3, initials: 'RP', email: 'raka@trim.id',   uuid: '4e9d...b8c1', displayName: 'Raka Putra',   role: 'barber',   createdAt: '14 Sep 2026', updatedAt: '6 Okt 2026' },
-  { id: 4, initials: 'AL', email: 'alya@trim.id',   uuid: '1f3c...d9e8', displayName: 'Alya Lestari', role: 'customer', createdAt: '15 Sep 2026', updatedAt: '6 Okt 2026' },
-  { id: 5, initials: 'WP', email: 'wulan@trim.id',  uuid: '7a2b...f4c6', displayName: 'Wulan Pertiwi',role: 'customer', createdAt: '16 Sep 2026', updatedAt: '5 Okt 2026' },
-  { id: 6, initials: 'RH', email: 'rafi@trim.id',   uuid: '2d8e...a6f1', displayName: 'Rafi Hidayat', role: 'customer', createdAt: '17 Sep 2026', updatedAt: '28 Sep 2026' },
+  { id: 1, slug: 'aditya', initials: 'AP', email: 'aditya@trim.id', uuid: '8f2c...a1e4', role: 'owner',    createdAt: '12 Sep 2026', updatedAt: '6 Okt 2026', isOwner: true },
+  { id: 2, slug: 'dimas',  initials: 'DS', email: 'dimas@trim.id',  uuid: '9b1a...c7f2', role: 'admin',    createdAt: '12 Sep 2026', updatedAt: '6 Okt 2026' },
+  { id: 3, slug: 'arief',  initials: 'RP', email: 'raka@trim.id',   uuid: '4e9d...b8c1', displayName: 'Raka Putra',   role: 'barber',   createdAt: '14 Sep 2026', updatedAt: '6 Okt 2026' },
+  { id: 4, slug: 'alya',   initials: 'AL', email: 'alya@trim.id',   uuid: '1f3c...d9e8', displayName: 'Alya Lestari', role: 'customer', createdAt: '15 Sep 2026', updatedAt: '6 Okt 2026' },
+  { id: 5, slug: 'wulan',  initials: 'WP', email: 'wulan@trim.id',  uuid: '7a2b...f4c6', displayName: 'Wulan Pertiwi',role: 'customer', createdAt: '16 Sep 2026', updatedAt: '5 Okt 2026' },
+  { id: 6, slug: 'rafi',   initials: 'RH', email: 'rafi@trim.id',   uuid: '2d8e...a6f1', displayName: 'Rafi Hidayat', role: 'customer', createdAt: '17 Sep 2026', updatedAt: '28 Sep 2026' },
 ];
 
 const ROLE_DESCRIPTIONS: { role: Role; label: string; Icon: React.ElementType; description: string }[] = [
@@ -98,10 +100,15 @@ export function AccountsView() {
           <h1 className="text-[28px] font-extrabold text-white tracking-tight font-outfit">Manajemen Akun</h1>
           <p className="text-text-muted">Atur akun login dan hak akses tim. Kamu masuk sebagai Owner.</p>
         </header>
-        <Button variant="primary" className="shrink-0 gap-2 h-11 px-5 font-bold">
+
+        {/* Link ke Form Tambah Akun Pengguna */}
+        <Link
+          href="/accounts/form"
+          className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-secondary hover:bg-secondary/90 text-white font-bold text-xs font-outfit shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer shrink-0"
+        >
           <UserPlus className="w-4 h-4" />
-          Buat akun pengguna
-        </Button>
+          <span>Buat akun pengguna</span>
+        </Link>
       </div>
 
       {/* ── Info Banner ── */}
@@ -121,7 +128,7 @@ export function AccountsView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Left: role pill */}
         <div className="flex items-center gap-4">
-          <h2 className="text-[20px] font-bold text-white font-outfit">6 akun terdaftar</h2>
+          <h2 className="text-[20px] font-bold text-white font-outfit">{filtered.length} akun terdaftar</h2>
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#132A20] text-success text-[13px] font-medium font-outfit border-0">
             <span className="w-1.5 h-1.5 rounded-full bg-success" />
             4 role
@@ -146,7 +153,7 @@ export function AccountsView() {
           <div className="relative shrink-0">
             <button
               onClick={() => setRoleDropOpen((v) => !v)}
-              className="flex items-center gap-2 bg-raised border border-border rounded-lg px-4 py-2.5 text-white hover:bg-border transition-colors font-outfit text-[14px] font-medium"
+              className="flex items-center gap-2 bg-raised border border-border rounded-lg px-4 py-2.5 text-white hover:bg-border transition-colors font-outfit text-[14px] font-medium cursor-pointer"
             >
               <span className="hidden sm:inline">{roleOptions.find((o) => o.value === roleFilter)?.label ?? 'Semua peran'}</span>
               <ChevronDown className={`w-4 h-4 text-text-muted transition-transform ${roleDropOpen ? 'rotate-180' : ''}`} />
@@ -161,7 +168,7 @@ export function AccountsView() {
                       <button
                         key={opt.value}
                         onClick={() => { setRoleFilter(opt.value); setRoleDropOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-lg text-[14px] transition-colors flex items-center justify-between font-outfit ${
+                        className={`w-full text-left px-3 py-2.5 rounded-lg text-[14px] transition-colors flex items-center justify-between font-outfit cursor-pointer ${
                           roleFilter === opt.value ? 'bg-secondary/10 text-secondary font-medium' : 'text-white hover:bg-raised'
                         }`}
                       >
@@ -221,10 +228,16 @@ export function AccountsView() {
                       </div>
                     ) : (
                       <div className="flex items-center gap-4">
-                        <button className="text-[13px] font-bold text-secondary hover:brightness-125 transition-all">Edit</button>
+                        {/* Link Edit Berdasarkan query param ?id=slug */}
+                        <Link
+                          href={`/accounts/form?id=${acc.slug}`}
+                          className="text-[13px] font-bold text-secondary hover:brightness-125 transition-all cursor-pointer"
+                        >
+                          Edit
+                        </Link>
                         <button
                           onClick={() => setAccounts((prev) => prev.filter((a) => a.id !== acc.id))}
-                          className="text-[13px] font-bold text-danger hover:brightness-125 transition-all"
+                          className="text-[13px] font-bold text-danger hover:brightness-125 transition-all cursor-pointer"
                         >
                           Hapus
                         </button>
@@ -243,11 +256,11 @@ export function AccountsView() {
             Menampilkan 1–{filtered.length} dari {filtered.length} akun • UUID ditampilkan singkat
           </span>
           <div className="flex items-center gap-4">
-            <button className="p-1 text-text-muted hover:text-white transition-colors">
+            <button className="p-1 text-text-muted hover:text-white transition-colors cursor-pointer">
               <ChevronLeft className="w-4 h-4" />
             </button>
             <div className="w-7 h-7 rounded-md bg-[#612c12] flex items-center justify-center text-secondary font-medium font-outfit text-[13px]">1</div>
-            <button className="p-1 text-text-muted hover:text-white transition-colors">
+            <button className="p-1 text-text-muted hover:text-white transition-colors cursor-pointer">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
