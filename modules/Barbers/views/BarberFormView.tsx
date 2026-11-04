@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, Upload, Info, ChevronDown, ArrowUpRight, User, Lock, Star } from 'lucide-react';
-import { Card, Button } from '@/components/ui';
+import { Card, Button, Dropdown } from '@/components/ui';
 
 // Data Mockup untuk Auto-Fill Mode Edit
 const DUMMY_KAPSTER_MAP: Record<string, { name: string; phone: string; specialty: string; email: string; status: 'aktif' | 'nonaktif'; rating: string; finished: number }> = {
@@ -206,51 +206,19 @@ export function BarberFormView() {
                 <label className="text-[14px] font-medium text-white">
                   Email akun barber <span className="text-secondary">*</span>
                 </label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className={`w-full text-left bg-transparent border rounded-lg pl-4 pr-10 py-3 text-[14px] transition-colors appearance-none flex items-center justify-between font-outfit cursor-pointer ${
-                      isDropdownOpen ? 'border-secondary' : 'border-border hover:border-text-muted/30'
-                    } ${selectedEmail ? 'text-white' : 'text-text-muted'}`}
-                  >
-                    <span className="truncate">{selectedEmail || 'Pilih akun berdasarkan email'}</span>
-                    <ChevronDown
-                      className={`w-4 h-4 text-text-muted transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-                    />
-                  </button>
-
-                  {isDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1A1A1A] border border-border rounded-xl overflow-hidden z-50 shadow-2xl shadow-black/50 font-outfit">
-                      <div className="max-h-56 overflow-y-auto p-1.5 space-y-0.5">
-                        {['farhan@trim.id', 'lefi@trim.id', 'zidan@trim.id', 'ridho@trim.id', 'yoga@trim.id'].map((email) => (
-                          <button
-                            key={email}
-                            type="button"
-                            onClick={() => {
-                              setSelectedEmail(email);
-                              setIsDropdownOpen(false);
-                            }}
-                            className={`w-full text-left px-3 py-2.5 rounded-lg text-[14px] transition-colors flex items-center justify-between group cursor-pointer ${
-                              selectedEmail === email
-                                ? 'bg-secondary/10 text-secondary font-medium'
-                                : 'text-white hover:bg-raised'
-                            }`}
-                          >
-                            {email}
-                            {selectedEmail === email && (
-                              <div className="w-1.5 h-1.5 rounded-full bg-secondary"></div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {isDropdownOpen && (
-                    <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)}></div>
-                  )}
-                </div>
+                <Dropdown
+                  value={selectedEmail}
+                  onChange={setSelectedEmail}
+                  placeholder="Pilih akun berdasarkan email"
+                  variant="form"
+                  options={[
+                    'farhan@trim.id',
+                    'lefi@trim.id',
+                    'zidan@trim.id',
+                    'ridho@trim.id',
+                    'yoga@trim.id',
+                  ]}
+                />
                 <p className="text-[13px] text-text-muted">
                   Cari email, misalnya nama@trim.id. Hanya akun dengan role barber yang belum tertaut dapat dipilih.
                 </p>

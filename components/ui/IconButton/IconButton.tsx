@@ -29,7 +29,8 @@ export const IconButton: React.FC<IconButtonProps> = ({
       className={`
         w-12 h-12 rounded-lg
         flex items-center justify-center
-        transition-all duration-200 cursor-pointer
+        transition-all duration-150 ease-out cursor-pointer
+        active:scale-[0.96] motion-reduce:transform-none
         ${variantStyles[variant]}
         ${isDisabled ? 'pointer-events-none' : ''}
         ${className}

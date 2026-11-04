@@ -1,24 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  /* === Color Palette (Fondasi Visual - F.02) === */
-  --color-primary: #121212;       /* Street Black - Latar utama */
-  --color-secondary: #FF4500;     /* Electric Orange - CTA utama & aksen */
-  --color-cyber-yellow: #EAB308;  /* Cyber Yellow - Aksen pendukung terbatas */
-  --color-text-main: #FFFFFF;     /* Pure White - Teks utama */
-  --color-text-muted: #A1A1AA;    /* Zinc 400 - Helper, placeholder, hint */
+  /* === Color Palette === */
+  --color-primary: #121212;
+  /* Street Black - Latar utama */
+  --color-secondary: #FF4500;
+  /* Electric Orange - CTA utama & aksen */
+  --color-cyber-yellow: #EAB308;
+  /* Cyber Yellow - Aksen pendukung terbatas */
+  --color-text-main: #FFFFFF;
+  /* Pure White - Teks utama */
+  --color-text-muted: #A1A1AA;
+  /* Zinc 400 - Helper, placeholder, hint */
 
   /* Semantic Colors */
-  --color-success: #10B981;       /* Neon Green - Lunas / Selesai */
-  --color-danger: #F43F5E;        /* Rose Red - Batal / Error */
-  --color-warning: #FBBF24;       /* Amber - Pending / Ngantre */
+  --color-success: #10B981;
+  /* Neon Green - Lunas / Selesai */
+  --color-danger: #F43F5E;
+  /* Rose Red - Batal / Error */
+  --color-warning: #FBBF24;
+  /* Amber - Pending / Ngantre */
 
   /* Surface & Border Tokens */
-  --color-surface: #1C1C1F;       /* Surface - token pendukung */
-  --color-raised: #252528;        /* Raised - token pendukung */
-  --color-border: #303034;        /* Border - token pendukung */
+  --color-surface: #1C1C1F;
+  /* Surface - token pendukung */
+  --color-raised: #252528;
+  /* Raised - token pendukung */
+  --color-border: #303034;
+  /* Border - token pendukung */
   --color-surface-hover: #2A2A2A;
-  --color-sidebar: #0B0B0C;       /* Sidebar background khusus */
+  --color-sidebar: #0B0B0C;
+  /* Sidebar background khusus */
 
   /* Layout Variables */
   --sidebar-width: 260px;
@@ -31,6 +43,10 @@
 
 /* === Base Reset & Global Styles === */
 @layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
   body {
     background-color: var(--color-primary);
     color: var(--color-text-main);
@@ -45,17 +61,23 @@
     font-weight: 800;
     line-height: 36px;
   }
+
   h2 {
     font-size: 20px;
     font-weight: 700;
     line-height: 28px;
   }
-  p, span, label {
+
+  p,
+  span,
+  label {
     font-size: 14px;
     font-weight: 500;
     line-height: 20px;
   }
-  small, .caption {
+
+  small,
+  .caption {
     font-size: 12px;
     font-weight: 400;
     line-height: 16px;
@@ -63,16 +85,17 @@
   }
 }
 
-/* === Custom Utility: Hide Scrollbar (Sangat berguna untuk view non-scroll) === */
+/* === Custom Utility: Hide Scrollbar === */
 @utility no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+
   &::-webkit-scrollbar {
     display: none;
   }
 }
 
-/* === Custom Scrollbar Halus (Default UI) === */
+/* === Custom Scrollbar Halus === */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
@@ -94,4 +117,122 @@
 
 *::-webkit-scrollbar-thumb:hover {
   background: #4A4A50;
+}
+
+/* === Ultra-Professional Micro-animations & Page Transitions === */
+@keyframes pageEnterProfessional {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: pageEnterProfessional 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes shakeGentle {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-6px);
+  }
+  30% {
+    transform: translateX(6px);
+  }
+  45% {
+    transform: translateX(-4px);
+  }
+  60% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  90% {
+    transform: translateX(2px);
+  }
+}
+
+.animate-shake {
+  animation: shakeGentle 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  will-change: transform;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdownFadeIn 160ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top right;
+}
+
+@keyframes modalBackdropEnter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-modal-backdrop {
+  animation: modalBackdropEnter 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalContentEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-modal-content {
+  animation: modalContentEnter 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Accessible reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-page-enter,
+  .animate-shake,
+  .animate-dropdown,
+  .animate-modal-backdrop,
+  .animate-modal-content {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
 }

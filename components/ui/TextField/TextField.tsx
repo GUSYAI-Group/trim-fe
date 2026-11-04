@@ -21,13 +21,13 @@ export const TextField: React.FC<TextFieldProps> = ({
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={inputId} className="text-[14px] font-medium text-text-main">
+      <label htmlFor={inputId} className="text-[14px] font-medium text-text-main font-outfit">
         {label}
       </label>
       <input
         id={inputId}
         className={`
-          h-[48px] px-4 text-[14px] font-medium
+          h-[48px] px-4 text-[14px] font-medium font-outfit
           bg-transparent border rounded-lg
           text-text-main placeholder-text-muted
           outline-none transition-all duration-200
@@ -42,9 +42,9 @@ export const TextField: React.FC<TextFieldProps> = ({
         {...props}
       />
       {isError && errorText ? (
-        <span className="text-[12px] text-danger">{errorText}</span>
+        <span className="text-[12px] text-danger animate-dropdown font-outfit">{errorText}</span>
       ) : helperText ? (
-        <span className="text-[12px] text-text-muted">{helperText}</span>
+        <span className="text-[12px] text-text-muted font-outfit">{helperText}</span>
       ) : null}
     </div>
   );

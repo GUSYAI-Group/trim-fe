@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Card, Button } from '@/components/ui';
+import { Card, Dropdown } from '@/components/ui';
 import { Search, ChevronDown, ChevronLeft, ChevronRight, UserPlus, Shield, Info, Crown, Briefcase, Wallet } from 'lucide-react';
 
 /* ─────────────────── Types ─────────────────── */
@@ -71,7 +71,6 @@ function AvatarChip({ initials, role }: { initials: string; role: Role }) {
 export function AccountsView() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<Role | 'all'>('all');
-  const [roleDropOpen, setRoleDropOpen] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>(ACCOUNTS);
 
   const filtered = accounts.filter((a) => {
@@ -92,19 +91,21 @@ export function AccountsView() {
   ];
 
   return (
-    <div className="space-y-8 pb-24 font-space-grotesk relative min-h-screen">
+    <div className="space-y-6 text-white font-space-grotesk no-scrollbar selection:bg-secondary selection:text-white pb-16">
 
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <header className="space-y-2">
-          <h1 className="text-[28px] font-extrabold text-white tracking-tight font-outfit">Manajemen Akun</h1>
-          <p className="text-text-muted">Atur akun login dan hak akses tim. Kamu masuk sebagai Owner.</p>
-        </header>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-[28px] font-extrabold text-white tracking-tight font-outfit">Manajemen Akun</h1>
+          <p className="text-sm md:text-base text-text-muted mt-1 font-outfit">
+            Atur akun login dan hak akses tim. Kamu masuk sebagai Owner.
+          </p>
+        </div>
 
         {/* Link ke Form Tambah Akun Pengguna */}
         <Link
           href="/accounts/form"
-          className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-secondary hover:bg-secondary/90 text-white font-bold text-xs font-outfit shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer shrink-0"
+          className="bg-secondary hover:bg-secondary/90 text-white px-5 py-2.5 rounded-xl text-sm font-bold font-outfit flex items-center justify-center gap-2 shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer self-start sm:self-auto shrink-0"
         >
           <UserPlus className="w-4 h-4" />
           <span>Buat akun pengguna</span>
@@ -112,170 +113,145 @@ export function AccountsView() {
       </div>
 
       {/* ── Info Banner ── */}
-      <div className="bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 flex items-start gap-4">
-        <div className="w-5 h-5 rounded-full border-2 border-secondary flex items-center justify-center shrink-0 mt-0.5">
-          <Info className="w-3.5 h-3.5 text-secondary" />
-        </div>
-        <div>
-          <h4 className="text-secondary font-bold text-[14px] mb-1">Akses sesuai peran, bisnis tetap aman</h4>
-          <p className="text-text-muted text-[13px] leading-relaxed">
+      <div className="bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 flex items-start gap-4 shadow-md font-outfit">
+        <Info className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <h4 className="text-secondary font-bold text-[14px] font-outfit">Akses sesuai peran, bisnis tetap aman</h4>
+          <p className="text-text-muted text-[13px] leading-relaxed font-outfit">
             Role: customer, barber, admin, owner. Admin biasa tidak dapat menghapus akun Owner; pembatasan diterapkan oleh aplikasi.
           </p>
         </div>
       </div>
 
-      {/* ── Filters Row ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Left: role pill */}
-        <div className="flex items-center gap-4">
-          <h2 className="text-[20px] font-bold text-white font-outfit">{filtered.length} akun terdaftar</h2>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#132A20] text-success text-[13px] font-medium font-outfit border-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-success" />
-            4 role
-          </span>
-        </div>
-
-        {/* Right: search + dropdown */}
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* Search */}
-          <div className="relative flex-1 sm:w-72 sm:flex-none">
-            <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari email atau UUID"
-              className="w-full bg-raised border border-border rounded-lg pl-9 pr-4 py-2.5 text-[14px] text-white placeholder:text-text-muted focus:outline-none focus:border-secondary transition-colors font-outfit"
-            />
+      {/* ── Main Table Section ── */}
+      <div className="space-y-4 pt-1">
+        {/* Filters Row */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          {/* Left: role pill */}
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg md:text-[20px] font-bold text-white font-outfit">{filtered.length} akun terdaftar</h2>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#132A20] text-success text-[12px] font-medium font-outfit border-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-success" />
+              4 role
+            </span>
           </div>
 
-          {/* Role dropdown */}
-          <div className="relative shrink-0">
-            <button
-              onClick={() => setRoleDropOpen((v) => !v)}
-              className="flex items-center gap-2 bg-raised border border-border rounded-lg px-4 py-2.5 text-white hover:bg-border transition-colors font-outfit text-[14px] font-medium cursor-pointer"
-            >
-              <span className="hidden sm:inline">{roleOptions.find((o) => o.value === roleFilter)?.label ?? 'Semua peran'}</span>
-              <ChevronDown className={`w-4 h-4 text-text-muted transition-transform ${roleDropOpen ? 'rotate-180' : ''}`} />
-            </button>
+          {/* Right: search + dropdown */}
+          <div className="flex items-center gap-3">
+            {/* Search */}
+            <div className="relative flex-1 sm:w-64">
+              <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Cari email atau UUID"
+                className="w-full bg-surface border border-border rounded-xl pl-9 pr-4 py-2 text-[14px] text-white placeholder:text-text-muted focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all duration-200 font-outfit"
+              />
+            </div>
 
-            {roleDropOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setRoleDropOpen(false)} />
-                <div className="absolute top-full right-0 mt-2 w-44 bg-[#1A1A1A] border border-border rounded-xl overflow-hidden z-50 shadow-2xl shadow-black/50">
-                  <div className="p-1.5 space-y-0.5">
-                    {roleOptions.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => { setRoleFilter(opt.value); setRoleDropOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-lg text-[14px] transition-colors flex items-center justify-between font-outfit cursor-pointer ${
-                          roleFilter === opt.value ? 'bg-secondary/10 text-secondary font-medium' : 'text-white hover:bg-raised'
-                        }`}
-                      >
-                        {opt.label}
-                        {roleFilter === opt.value && <span className="w-1.5 h-1.5 rounded-full bg-secondary" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
+            {/* Role dropdown */}
+            <Dropdown
+              value={roleFilter}
+              onChange={(val) => setRoleFilter(val as Role | 'all')}
+              options={roleOptions}
+              align="right"
+            />
+          </div>
+        </div>
+
+        {/* Data Table Container */}
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-md">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-[#222225] border-b border-border">
+                <tr>
+                  <th className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Email / uuid singkat</th>
+                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit w-36">Peran</th>
+                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit w-36">Dibuat</th>
+                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit w-36">Diupdate</th>
+                  <th className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50 text-text-main">
+                {filtered.map((acc) => (
+                  <tr key={acc.id} className="hover:bg-raised/40 transition-colors">
+                    {/* Email / UUID */}
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <AvatarChip initials={acc.initials} role={acc.role} />
+                        <div>
+                          <p className="text-[15px] font-bold text-white font-outfit">{acc.email}</p>
+                          <p className="text-[12px] text-text-muted mt-0.5 font-outfit">uuid: {acc.uuid}</p>
+                          {acc.displayName && (
+                            <p className="text-[12px] text-text-muted font-outfit">{acc.displayName}</p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    {/* Role */}
+                    <td className="py-4 px-5"><RoleBadge role={acc.role} /></td>
+                    {/* Dibuat */}
+                    <td className="py-4 px-5 text-[14px] text-text-main font-outfit">{acc.createdAt}</td>
+                    {/* Diupdate */}
+                    <td className="py-4 px-5 text-[14px] text-text-main font-outfit">{acc.updatedAt}</td>
+                    {/* Aksi */}
+                    <td className="py-4 px-6 text-right">
+                      {acc.isOwner ? (
+                        <div className="flex items-center justify-end gap-2 text-[13px] text-text-muted font-outfit">
+                          <Shield className="w-3.5 h-3.5 shrink-0" />
+                          <span>Akun utama • Dilindungi</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-end gap-4">
+                          <Link
+                            href={`/accounts/form?id=${acc.slug}`}
+                            className="text-[14px] font-bold text-secondary hover:text-white transition-colors cursor-pointer font-outfit"
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            onClick={() => setAccounts((prev) => prev.filter((a) => a.id !== acc.id))}
+                            className="text-[14px] font-bold text-danger hover:brightness-125 transition-all cursor-pointer font-outfit"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="p-4 md:px-6 border-t border-border flex items-center justify-between text-[13px] text-text-muted font-outfit">
+            <span>
+              Menampilkan 1–{filtered.length} dari {filtered.length} akun • UUID ditampilkan singkat
+            </span>
+            <div className="flex items-center gap-3">
+              <button className="p-1 rounded text-text-muted hover:text-white disabled:opacity-40 transition-colors" disabled>
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="w-7 h-7 rounded-md bg-secondary text-white font-bold flex items-center justify-center text-[13px]">1</span>
+              <button className="p-1 rounded text-text-muted hover:text-white disabled:opacity-40 transition-colors" disabled>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── Data Table ── */}
-      <Card className="bg-surface border-border p-0! overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#222225] border-b border-border">
-                <th className="py-3 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wide">Email / uuid singkat</th>
-                <th className="py-3 px-4 text-[12px] font-medium text-text-muted uppercase tracking-wide w-36">Peran</th>
-                <th className="py-3 px-4 text-[12px] font-medium text-text-muted uppercase tracking-wide w-36">Dibuat</th>
-                <th className="py-3 px-4 text-[12px] font-medium text-text-muted uppercase tracking-wide w-36">Diupdate</th>
-                <th className="py-3 px-4 pr-6 text-[12px] font-medium text-text-muted uppercase tracking-wide">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((acc) => (
-                <tr key={acc.id} className="border-b border-border hover:bg-raised/30 transition-colors">
-                  {/* Email / UUID */}
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <AvatarChip initials={acc.initials} role={acc.role} />
-                      <div>
-                        <p className="text-[14px] font-bold text-white font-outfit">{acc.email}</p>
-                        <p className="text-[12px] text-text-muted mt-0.5 font-outfit">uuid: {acc.uuid}</p>
-                        {acc.displayName && (
-                          <p className="text-[12px] text-text-muted font-outfit">{acc.displayName}</p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  {/* Role */}
-                  <td className="py-4 px-4"><RoleBadge role={acc.role} /></td>
-                  {/* Dibuat */}
-                  <td className="py-4 px-4 text-[14px] text-text-main font-outfit">{acc.createdAt}</td>
-                  {/* Diupdate */}
-                  <td className="py-4 px-4 text-[14px] text-text-main font-outfit">{acc.updatedAt}</td>
-                  {/* Aksi */}
-                  <td className="py-4 px-4 pr-6">
-                    {acc.isOwner ? (
-                      <div className="flex items-center gap-2 text-[13px] text-text-muted font-outfit">
-                        <Shield className="w-3.5 h-3.5 shrink-0" />
-                        <span>Akun utama • Dilindungi</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-4">
-                        {/* Link Edit Berdasarkan query param ?id=slug */}
-                        <Link
-                          href={`/accounts/form?id=${acc.slug}`}
-                          className="text-[13px] font-bold text-secondary hover:brightness-125 transition-all cursor-pointer"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          onClick={() => setAccounts((prev) => prev.filter((a) => a.id !== acc.id))}
-                          className="text-[13px] font-bold text-danger hover:brightness-125 transition-all cursor-pointer"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="px-6 py-4 border-t border-border flex items-center justify-between text-[13px]">
-          <span className="text-text-muted font-outfit">
-            Menampilkan 1–{filtered.length} dari {filtered.length} akun • UUID ditampilkan singkat
-          </span>
-          <div className="flex items-center gap-4">
-            <button className="p-1 text-text-muted hover:text-white transition-colors cursor-pointer">
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <div className="w-7 h-7 rounded-md bg-[#612c12] flex items-center justify-center text-secondary font-medium font-outfit text-[13px]">1</div>
-            <button className="p-1 text-text-muted hover:text-white transition-colors cursor-pointer">
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </Card>
-
       {/* ── Role Description Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {ROLE_DESCRIPTIONS.map(({ role, label, Icon, description }) => (
-          <Card key={role} className="bg-surface border-border p-5 space-y-3">
+          <Card key={role} className="bg-surface border-border p-6 rounded-2xl space-y-3 shadow-sm">
             <div className="flex items-center gap-2.5">
               <Icon className="w-5 h-5 text-secondary" />
               <h3 className="text-[15px] font-bold font-outfit text-white">{label}</h3>
             </div>
-            <p className="text-[13px] text-text-muted leading-relaxed">{description}</p>
+            <p className="text-[13px] text-text-muted leading-relaxed font-outfit">{description}</p>
           </Card>
         ))}
       </div>

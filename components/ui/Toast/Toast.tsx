@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, XCircle, AlertTriangle, Info } from 'lucide-react';
 
 type ToastVariant = 'success' | 'error' | 'warning' | 'info';
@@ -52,32 +53,38 @@ export const Toast: React.FC<ToastProps> = ({
     }
   }, [isOpen, autoClose, onClose]);
 
-  if (!isOpen) return null;
-
   const config = toastConfig[variant];
 
   return (
-    <div
-      className={`
-        flex items-start gap-3
-        bg-surface border border-border rounded-lg
-        p-4 min-w-[320px] max-w-105
-        shadow-lg shadow-black/20
-      `}
-    >
-      <div className="shrink-0 mt-0.5">{config.icon}</div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[14px] font-semibold text-text-main">{title}</p>
-        {description && (
-          <p className="text-[12px] text-text-muted mt-0.5">{description}</p>
-        )}
-      </div>
-      <button
-        onClick={onClose}
-        className="shrink-0 text-text-muted hover:text-text-main transition-colors cursor-pointer"
-      >
-        <X className="w-4 h-4" />
-      </button>
-    </div>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: 12, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8, scale: 0.96 }}
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          className={`
+            flex items-start gap-3
+            bg-surface border border-border rounded-lg
+            p-4 min-w-[320px] max-w-105
+            shadow-xl shadow-black/40 font-outfit
+          `}
+        >
+          <div className="shrink-0 mt-0.5">{config.icon}</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[14px] font-semibold text-text-main">{title}</p>
+            {description && (
+              <p className="text-[12px] text-text-muted mt-0.5">{description}</p>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="shrink-0 text-text-muted hover:text-text-main transition-colors cursor-pointer p-0.5 rounded hover:bg-raised"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

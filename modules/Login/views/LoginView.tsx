@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function LoginView() {
   const router = useRouter();
@@ -10,104 +12,153 @@ export default function LoginView() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading || isSuccess) return;
     setErrorMessage("");
+
+    setIsLoading(true);
 
     // --- EMAIL DAN PASSWORD LOGIN ---
     const VALID_EMAIL = "admin@trim.id";
     const VALID_PASSWORD = "farhan123";
 
-    if (email === VALID_EMAIL && password === VALID_PASSWORD) {
-      // Pindah ke dashboard utama
-      router.push("/");
+    // Simulasi verifikasi autentikasi yang halus & responsif
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    if (email.trim() === VALID_EMAIL && password === VALID_PASSWORD) {
+      // Set status autentikasi di store
+      useAuthStore.getState().login("token-trim-admin-auth", {
+        id: "admin-1",
+        role: "Admin",
+        name: "aditya@trim.id",
+      });
+
+      setIsSuccess(true);
+      setIsLoading(false);
+
+      // Transisi halus keluar menuju dashboard
+      setTimeout(() => {
+        router.push("/");
+      }, 250);
     } else {
+      setIsLoading(false);
       setErrorMessage("Email atau kata sandi salah!");
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 450);
     }
   };
 
   return (
-    <div className="h-screen w-screen bg-[#0d0e11] text-white flex items-center justify-center p-3 md:p-6 overflow-hidden font-sans selection:bg-[#ff4500] selection:text-white">
-      {/* Outer Card Container */}
-      <div className="w-full max-w-6xl h-full max-h-[90vh] bg-[#121318] p-3 md:p-5 rounded-3xl border border-white/5 shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: isSuccess ? 0 : 1, scale: isSuccess ? 0.995 : 1 }}
+      transition={{ duration: isSuccess ? 0.25 : 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="min-h-screen w-full bg-[#111111] text-white flex items-center justify-center p-4 sm:p-6 lg:p-8 font-outfit selection:bg-[#FF4D00] selection:text-white"
+    >
+      {/* Split Screen Container */}
+      <div className="w-full max-w-7xl min-h-[640px] lg:h-[calc(100vh-4rem)] grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
         
-        {/* Kolom Kiri: Hero Card / Poster */}
-        <div className="relative h-full rounded-2xl overflow-hidden flex flex-col justify-between p-6 md:p-8 bg-neutral-900 border border-white/5">
+        {/* Kolom Kiri: Hero Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="relative rounded-3xl overflow-hidden flex flex-col justify-between p-8 sm:p-10 lg:p-12 border border-[#303030] bg-[#1A1A1A] min-h-[460px] lg:min-h-full shadow-2xl"
+        >
+          {/* Barber Promotional Image */}
           <img
             src="/login/barber-bg.jpg.png"
             alt="Barbershop Background"
-            className="absolute inset-0 w-full h-full object-cover object-center grayscale contrast-125 brightness-60"
+            className="absolute inset-0 w-full h-full object-cover object-center grayscale contrast-125 brightness-75 transition-transform duration-700 hover:scale-105"
           />
 
+          {/* Vignette Overlay for readable text */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/70" />
 
+          {/* Top Brand Header */}
           <div className="relative z-10">
-            <div className="flex items-center gap-1.5 text-xl md:text-2xl font-black tracking-wider">
-              TRIM<span className="h-2 w-2 rounded-sm bg-[#ff4500] inline-block"></span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-outfit">
+                TRIM
+              </span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[#FF4D00] inline-block mb-1"></span>
             </div>
-            <p className="text-[11px] text-neutral-400 mt-0.5 tracking-wide font-medium">
+            <p className="text-xs text-[#999999] font-medium font-outfit mt-1">
               AI-Powered Barbershop Information System
             </p>
           </div>
 
-          <div className="relative z-10 space-y-2">
-            <div className="w-8 h-1 bg-[#ff4500] rounded-full" />
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-none uppercase">
+          {/* Bottom Hero Typography */}
+          <div className="relative z-10 space-y-3">
+            <div className="w-12 h-1 bg-[#FF4D00] rounded-full" />
+            <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-black tracking-tight text-white leading-tight uppercase font-outfit">
               POTONG RAPI.<br />GERAK CEPAT.
             </h1>
-            <p className="text-xs text-neutral-300 font-light max-w-xs leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#999999] font-normal leading-relaxed font-outfit max-w-sm">
               Di balik potongan terbaik, ada operasional yang tertata.
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Kolom Kanan: Form Login */}
-        <div className="flex flex-col justify-between h-full py-1 md:py-2 px-2 md:px-4 overflow-y-auto">
+        {/* Kolom Kanan: Login Form */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col justify-between items-center h-full py-2 lg:py-4 px-2 sm:px-4"
+        >
           
-          <div className="text-center pt-1">
-            <span className="text-[10px] tracking-[0.25em] text-neutral-500 uppercase font-bold">
+          {/* Header Atas: RUANG OPERASIONAL */}
+          <div className="w-full text-center pt-2">
+            <span className="text-[11px] font-semibold tracking-[0.25em] text-[#999999] uppercase font-outfit">
               RUANG OPERASIONAL
             </span>
           </div>
 
-          <div className="my-auto py-2">
-            <div className="bg-[#181a20] p-5 md:p-7 rounded-2xl border border-white/5 shadow-xl">
-              <div className="mb-5">
-                <h2 className="text-lg md:text-xl font-bold tracking-tight text-white mb-1">
+          {/* Center: Card Form Login */}
+          <div className="w-full max-w-[460px] my-auto py-6">
+            <div className={`bg-[#1A1A1A] p-7 sm:p-9 rounded-2xl border border-[#303030] shadow-2xl transition-all duration-200 ${isShaking ? 'animate-shake' : ''}`}>
+              <div className="mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2 font-outfit">
                   Masuk ke Dashboard
                 </h2>
-                <p className="text-xs text-neutral-400 leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#999999] leading-relaxed font-outfit">
                   Gunakan akun Admin atau Owner untuk mengakses ruang operasional TRIM.
                 </p>
               </div>
 
               {/* Alert Pesan Error jika login gagal */}
               {errorMessage && (
-                <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-medium">
+                <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs text-center font-medium font-outfit animate-dropdown">
                   {errorMessage}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-3.5">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Field Email */}
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-neutral-300">
+                <div className="space-y-2">
+                  <label className="text-xs sm:text-sm font-medium text-white block font-outfit">
                     Email
                   </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@trim.id"
+                    placeholder="nama@contoh.com"
                     required
-                    className="w-full px-3.5 py-2 rounded-xl bg-[#0f1015] border border-neutral-800 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-[#ff4500] transition-colors"
+                    disabled={isLoading || isSuccess}
+                    className="w-full px-4 py-3 rounded-xl bg-[#111111] border border-[#303030] text-sm text-white placeholder-[#666666] focus:outline-none focus:border-[#FF4D00] focus:ring-2 focus:ring-[#FF4D00]/20 transition-all duration-200 font-outfit disabled:opacity-70"
                   />
                 </div>
 
-                {/* Field Password */}
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-neutral-300">
+                {/* Field Kata Sandi */}
+                <div className="space-y-2">
+                  <label className="text-xs sm:text-sm font-medium text-white block font-outfit">
                     Kata sandi
                   </label>
                   <div className="relative">
@@ -117,53 +168,74 @@ export default function LoginView() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       required
-                      className="w-full px-3.5 py-2 pr-24 rounded-xl bg-[#0f1015] border border-neutral-800 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-[#ff4500] transition-colors"
+                      disabled={isLoading || isSuccess}
+                      className="w-full px-4 py-3 pr-28 rounded-xl bg-[#111111] border border-[#303030] text-sm text-white placeholder-[#666666] focus:outline-none focus:border-[#FF4D00] focus:ring-2 focus:ring-[#FF4D00]/20 transition-all duration-200 font-outfit disabled:opacity-70"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400 hover:text-white flex items-center gap-1 transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#999999] hover:text-white flex items-center gap-1.5 transition-all duration-150 active:scale-95 cursor-pointer font-outfit select-none"
                     >
-                      {showPassword ? (
-                        <>
-                          <EyeOff className="w-3.5 h-3.5" />
-                          <span>Sembunyikan</span>
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Tampilkan</span>
-                        </>
-                      )}
+                      <span className="transition-transform duration-150 inline-flex items-center gap-1.5">
+                        {showPassword ? (
+                          <>
+                            <EyeOff className="w-4 h-4" />
+                            <span>Sembunyikan</span>
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="w-4 h-4" />
+                            <span>Tampilkan</span>
+                          </>
+                        )}
+                      </span>
                     </button>
                   </div>
                 </div>
 
-                <div className="text-xs text-neutral-400 pt-0.5">
+                {/* Tautan Lupa kata sandi */}
+                <div className="text-xs sm:text-sm text-[#999999] font-outfit pt-1">
                   Lupa kata sandi?{" "}
-                  <a href="#" className="text-[#ff4500] hover:underline font-medium">
+                  <a href="#" className="text-[#FF4D00] hover:underline font-medium transition-colors">
                     Hubungi Owner
                   </a>
                 </div>
 
+                {/* Tombol Utama Masuk */}
                 <button
                   type="submit"
-                  className="w-full mt-3 bg-[#ff4500] hover:bg-[#e03d00] text-white font-semibold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#ff4500]/20 transition-all duration-200 active:scale-[0.99]"
+                  disabled={isLoading || isSuccess}
+                  className="w-full mt-4 bg-[#FF4D00] hover:bg-[#FF4D00]/90 text-white font-bold py-3.5 px-4 rounded-xl text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-[#FF4D00]/25 transition-all duration-180 active:scale-[0.98] disabled:opacity-85 disabled:cursor-not-allowed cursor-pointer font-outfit select-none"
                 >
-                  <span>Masuk</span>
-                  <ArrowRight className="w-4 h-4" />
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <span>Memproses...</span>
+                    </>
+                  ) : isSuccess ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-white" />
+                      <span>Berhasil masuk...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Masuk</span>
+                      <ArrowRight className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+                    </>
+                  )}
                 </button>
               </form>
             </div>
           </div>
 
-          <div className="text-center pb-1 text-[10px] text-neutral-500 font-medium">
+          {/* Footer Bawah */}
+          <div className="w-full text-center pb-2 text-xs text-[#999999] font-medium font-outfit">
             TRIM / AI-Powered Barbershop Information System
           </div>
 
-        </div>
+        </motion.div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }
