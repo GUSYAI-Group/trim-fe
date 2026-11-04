@@ -20,7 +20,7 @@ export default function ActionsFormSection() {
       <div className="bg-surface border border-border rounded-2xl p-8 overflow-x-auto">
         <table className="w-full text-[14px]">
           <thead>
-            <tr className="text-text-muted text-left">
+            <tr className="text-text-muted text-left"> 
               <th className="py-2 pr-4 font-medium w-32">VARIAN / STATE</th>
               <th className="py-2 px-4 font-medium">Default / normal</th>
               <th className="py-2 px-4 font-medium">Disabled / nonaktif</th>
