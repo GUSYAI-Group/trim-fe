@@ -23,8 +23,10 @@
   /* Layout Variables */
   --sidebar-width: 260px;
   --header-height: 80px;
+}
 
-  /* Font Family */
+@theme inline {
+  /* Font Family (resolves next/font CSS variables on <html>) */
   --font-sans: var(--font-outfit-sans), sans-serif;
   --font-outfit: var(--font-outfit-sans), sans-serif;
   --font-mono: var(--font-space-grotesk-mono), monospace;
@@ -65,13 +67,14 @@
   }
 }
 
-/* === Custom Utility: Hide Scrollbar (Sangat berguna untuk view non-scroll) === */
-@utility no-scrollbar {
+/* === Custom Utility: Hide Scrollbar === */
+.no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* === Custom Scrollbar Halus (Default UI) === */
