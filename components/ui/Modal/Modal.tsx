@@ -13,6 +13,9 @@ interface ModalProps {
   secondaryLabel?: string;
   onPrimary?: () => void;
   onSecondary?: () => void;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm?: () => void;
   children?: React.ReactNode;
   hideHeaderBadge?: boolean;
 }
@@ -47,16 +50,22 @@ export const Modal: React.FC<ModalProps> = ({
   variant = 'info',
   title,
   description,
-  primaryLabel = 'Mengerti',
+  primaryLabel,
   secondaryLabel,
   onPrimary,
   onSecondary,
+  confirmText,
+  cancelText,
+  onConfirm,
   children,
   hideHeaderBadge,
 }) => {
   if (!isOpen) return null;
 
   const config = variantConfig[variant];
+  const resolvedPrimaryLabel = confirmText ?? primaryLabel ?? 'Mengerti';
+  const resolvedSecondaryLabel = cancelText ?? secondaryLabel;
+  const resolvedOnPrimary = onConfirm ?? onPrimary ?? onClose;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -81,6 +90,7 @@ export const Modal: React.FC<ModalProps> = ({
             )}
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="text-text-muted hover:text-text-main transition-colors cursor-pointer"
           >
@@ -89,7 +99,7 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
 
         {/* Content */}
-        <h2 className="text-[20px] font-bold text-text-main mb-2 font-outfit">{title}</h2>
+        <h2 className="text-[20px] font-bold text-text-main mb-2">{title}</h2>
         <p className="text-[14px] text-text-muted leading-relaxed mb-6">{description}</p>
 
         {/* Custom Children / Form */}
@@ -97,19 +107,21 @@ export const Modal: React.FC<ModalProps> = ({
 
         {/* Actions */}
         <div className="flex gap-3">
-          {secondaryLabel && (
+          {resolvedSecondaryLabel && (
             <button
+              type="button"
               onClick={onSecondary || onClose}
               className="flex-1 h-12 px-6 rounded-lg border border-border text-text-main font-semibold text-[14px] hover:bg-surface-hover transition-all cursor-pointer"
             >
-              {secondaryLabel}
+              {resolvedSecondaryLabel}
             </button>
           )}
           <button
-            onClick={onPrimary || onClose}
+            type="button"
+            onClick={resolvedOnPrimary}
             className={`flex-1 h-12 px-6 rounded-lg font-semibold text-[14px] transition-all cursor-pointer ${config.primaryBtnClass}`}
           >
-            {primaryLabel}
+            {resolvedPrimaryLabel}
           </button>
         </div>
       </div>

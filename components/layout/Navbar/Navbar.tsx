@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Bell, Search, ChevronDown, Menu } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface NavbarProps {
   onMenuClick?: () => void;
@@ -11,14 +13,12 @@ interface NavbarProps {
 export function Navbar({ onMenuClick }: NavbarProps) {
   const [search, setSearch] = useState('');
   const [currentTime, setCurrentTime] = useState('');
+  const { user } = useAuthStore();
 
-  // Setup real-time date and time display
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      // Contoh: Sel, 6 Okt 2026
       const optionsDate: Intl.DateTimeFormatOptions = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
-      // Mengubah "Selasa" menjadi "Sel" manual jika id-ID mengeluarkan nama panjang untuk 'short'
       const dateStr = now.toLocaleDateString('id-ID', optionsDate).replace('.', '');
       
       const hours = now.getHours().toString().padStart(2, '0');
@@ -32,13 +32,15 @@ export function Navbar({ onMenuClick }: NavbarProps) {
     return () => clearInterval(interval);
   }, []);
 
+  const roleLabel = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+
   return (
     <header className="h-20 bg-primary border-b border-border px-4 md:px-8 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center gap-2 sm:gap-4">
         {/* Mobile Hamburger Menu */}
         <button 
           onClick={onMenuClick}
-          className="lg:hidden p-2 -ml-2 text-text-muted hover:text-text-main hover:bg-surface rounded-lg transition-colors"
+          className="lg:hidden p-2 -ml-2 text-text-muted hover:text-text-main hover:bg-surface rounded-lg transition-colors cursor-pointer"
         >
           <Menu className="w-6 h-6" />
         </button>
@@ -48,21 +50,21 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           <Image src="/logo/logo-textwhite.svg" alt="TRIM Logo" width={100} height={32} className="object-contain" priority />
         </div>
 
-        {/* Search Bar - Solid grey without outline */}
+        {/* Search Bar */}
         <div className="w-full max-w-110 hidden md:block">
-        <div className="relative flex items-center bg-surface rounded-xl px-4 py-3">
-          <Search className="w-5 h-5 text-text-muted mr-3" />
-          <input 
-            type="text" 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari pelanggan, transaksi..." 
-            className="bg-transparent border-none outline-none text-[14px] text-text-main w-full placeholder:text-text-muted font-medium"
-          />
-          <div className="flex items-center justify-center text-text-muted text-[13px] font-bold px-2 whitespace-nowrap opacity-70">
-            ⌘ K
+          <div className="relative flex items-center bg-surface border border-border focus-within:border-secondary rounded-xl px-4 py-2.5 transition-colors">
+            <Search className="w-5 h-5 text-text-muted mr-3 shrink-0" />
+            <input 
+              type="text" 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari pelanggan, transaksi..." 
+              className="bg-transparent border-none outline-none text-[14px] text-text-main w-full placeholder:text-text-muted font-medium"
+            />
+            <div className="flex items-center justify-center text-text-muted text-[12px] font-bold px-2 whitespace-nowrap opacity-70 font-mono">
+              ⌘ K
+            </div>
           </div>
-        </div>
         </div>
       </div>
 
@@ -83,20 +85,23 @@ export function Navbar({ onMenuClick }: NavbarProps) {
         <div className="h-8 w-px bg-border" />
 
         {/* Profile Avatar */}
-        <div className="flex items-center gap-3 cursor-pointer hover:bg-raised/50 py-1.5 px-3 rounded-xl transition-colors group">
-          <div className="w-10 h-10 shrink-0 bg-secondary rounded-xl flex items-center justify-center text-white font-bold text-[14px]">
-            AP
+        <Link
+          href="/accounts"
+          className="flex items-center gap-3 cursor-pointer hover:bg-raised/50 py-1.5 px-3 rounded-xl transition-colors group"
+        >
+          <div className="w-10 h-10 shrink-0 bg-secondary rounded-xl flex items-center justify-center text-text-main font-bold text-[14px]">
+            {user.initials}
           </div>
           <div className="hidden sm:flex flex-col">
             <span className="text-[14px] text-text-main font-bold leading-tight">
-              aditya@trim.id
+              {user.email}
             </span>
             <span className="text-[12px] text-text-muted font-medium">
-              Owner
+              {roleLabel}
             </span>
           </div>
           <ChevronDown className="w-4 h-4 text-text-muted ml-1" />
-        </div>
+        </Link>
       </div>
     </header>
   );

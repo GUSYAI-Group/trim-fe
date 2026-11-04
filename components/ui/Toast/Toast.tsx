@@ -6,7 +6,7 @@ import { X, CheckCircle2, XCircle, AlertTriangle, Info } from 'lucide-react';
 type ToastVariant = 'success' | 'error' | 'warning' | 'info';
 
 interface ToastProps {
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
   variant?: ToastVariant;
   title: string;
@@ -38,7 +38,7 @@ const toastConfig: Record<ToastVariant, { icon: React.ReactNode; borderColor: st
 };
 
 export const Toast: React.FC<ToastProps> = ({
-  isOpen,
+  isOpen = true,
   onClose,
   variant = 'success',
   title,
@@ -73,6 +73,7 @@ export const Toast: React.FC<ToastProps> = ({
         )}
       </div>
       <button
+        type="button"
         onClick={onClose}
         className="shrink-0 text-text-muted hover:text-text-main transition-colors cursor-pointer"
       >

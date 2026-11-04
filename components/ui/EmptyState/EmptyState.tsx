@@ -1,10 +1,14 @@
 import React from 'react';
+import { Inbox } from 'lucide-react';
+import { Button } from '../Button/Button';
 
 interface EmptyStateProps {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   title: string;
   description: string;
   action?: React.ReactNode;
+  actionText?: string;
+  onAction?: () => void;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -12,15 +16,22 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
   action,
+  actionText,
+  onAction,
 }) => {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
-      <div className="w-16 h-16 rounded-full bg-surface flex items-center justify-center text-text-muted mb-6">
-        {icon}
+      <div className="w-16 h-16 rounded-full bg-surface border border-border flex items-center justify-center text-text-muted mb-6">
+        {icon ?? <Inbox className="w-7 h-7" />}
       </div>
       <h3 className="text-[16px] font-bold text-text-main mb-2">{title}</h3>
       <p className="text-[14px] text-text-muted max-w-[320px] mb-6">{description}</p>
-      {action}
+      {action ??
+        (actionText && onAction ? (
+          <Button variant="outline" size="sm" onClick={onAction}>
+            {actionText}
+          </Button>
+        ) : null)}
     </div>
   );
 };

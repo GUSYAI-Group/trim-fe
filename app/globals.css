@@ -22,11 +22,13 @@
 
   /* Layout Variables */
   --sidebar-width: 260px;
-  --header-height: 72px;
+  --header-height: 80px;
 
   /* Font Family */
-  --font-outfit: var(--font-outfit), sans-serif;
-  --font-space-grotesk: var(--font-space-grotesk), sans-serif;
+  --font-sans: var(--font-outfit-sans), sans-serif;
+  --font-outfit: var(--font-outfit-sans), sans-serif;
+  --font-mono: var(--font-space-grotesk-mono), monospace;
+  --font-space-grotesk: var(--font-space-grotesk-mono), monospace;
 }
 
 /* === Base Reset & Global Styles === */
@@ -34,12 +36,12 @@
   body {
     background-color: var(--color-primary);
     color: var(--color-text-main);
-    font-family: var(--font-outfit), sans-serif;
+    font-family: var(--font-sans);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Typography Scale */
+  /* Typography Scale (F.03.1) */
   h1 {
     font-size: 28px;
     font-weight: 800;
@@ -50,7 +52,7 @@
     font-weight: 700;
     line-height: 28px;
   }
-  p, span, label {
+  p, label {
     font-size: 14px;
     font-weight: 500;
     line-height: 20px;
@@ -93,5 +95,5 @@
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #4A4A50;
+  background: var(--color-surface-hover);
 }
