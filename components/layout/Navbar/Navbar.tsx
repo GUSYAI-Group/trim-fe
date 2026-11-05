@@ -461,27 +461,6 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                     <p className="text-[11px] text-secondary font-medium">Owner • Akses Penuh</p>
                   </div>
                   <div className="space-y-1">
-                    <Link
-                      href="/accounts"
-                      onClick={() => setIsProfileOpen(false)}
-                      className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-[13px] font-bold text-white hover:bg-raised transition-all cursor-pointer"
-                    >
-                      <span>Manajemen Akun</span>
-                    </Link>
-                    <Link
-                      href="/settings"
-                      onClick={() => setIsProfileOpen(false)}
-                      className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-[13px] font-bold text-white hover:bg-raised transition-all cursor-pointer"
-                    >
-                      <span>Pengaturan Toko</span>
-                    </Link>
-                    <Link
-                      href="/help"
-                      onClick={() => setIsProfileOpen(false)}
-                      className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-[13px] font-bold text-white hover:bg-raised transition-all cursor-pointer"
-                    >
-                      <span>Pusat Bantuan</span>
-                    </Link>
                     <div className="h-px bg-border/50 my-1" />
                     <button
                       type="button"
