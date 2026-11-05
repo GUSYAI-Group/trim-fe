@@ -62,14 +62,14 @@ export default function ServiceFormView() {
   return (
     <div className="space-y-6 pb-16 font-space-grotesk no-scrollbar selection:bg-secondary selection:text-white">
       {/* Breadcrumb & Header Dinamis */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs md:text-[13px] text-text-muted font-outfit">
+      <div className="space-y-1 font-outfit">
+        <div className="flex items-center gap-2 text-xs md:text-[13px] text-text-muted">
           <Link href="/services" className="hover:text-white transition-colors">
             Kelola Layanan
           </Link>
-          <span>›</span>
+          <span>/</span>
           <span className="text-white font-medium">
-            {isEditMode ? 'Edit layanan' : 'Tambah layanan'}
+            {isEditMode ? 'Edit Layanan' : 'Tambah Layanan'}
           </span>
         </div>
 

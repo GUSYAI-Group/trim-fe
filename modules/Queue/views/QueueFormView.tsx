@@ -67,7 +67,7 @@ export default function QueueFormView() {
     <div className="space-y-6 pb-20 font-space-grotesk no-scrollbar selection:bg-secondary selection:text-white">
       {/* Breadcrumb & Header */}
       <div className="space-y-1 font-outfit">
-        <div className="flex items-center gap-2 text-xs text-text-muted">
+        <div className="flex items-center gap-2 text-xs md:text-[13px] text-text-muted">
           <Link href="/queue" className="hover:text-white transition-colors">
             Monitor Antrean
           </Link>

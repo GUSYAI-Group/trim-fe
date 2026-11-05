@@ -20,13 +20,13 @@ export default function CreateServiceView() {
   return (
     <div className="space-y-6 pb-16 font-space-grotesk no-scrollbar selection:bg-secondary selection:text-white">
       {/* Breadcrumb & Top Bar */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs md:text-[13px] text-text-muted font-outfit">
+      <div className="space-y-1 font-outfit">
+        <div className="flex items-center gap-2 text-xs md:text-[13px] text-text-muted">
           <Link href="/services" className="hover:text-white transition-colors">
             Kelola Layanan
           </Link>
-          <span>›</span>
-          <span className="text-white font-medium">Tambah layanan</span>
+          <span>/</span>
+          <span className="text-white font-medium">Tambah Layanan</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">

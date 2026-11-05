@@ -54,27 +54,39 @@ export function BarberFormView() {
 
   return (
     <div className="pb-12 font-space-grotesk relative min-h-screen">
-      {/* Header Dinamis (Tambah Kapster vs Edit Kapster) */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-        <header className="space-y-2">
-          <h1 className="text-[28px] font-extrabold text-white tracking-tight font-outfit">
+      {/* Breadcrumb & Header Dinamis */}
+      <div className="space-y-1 font-outfit mb-8">
+        <div className="flex items-center gap-2 text-xs md:text-[13px] text-text-muted">
+          <Link href="/barbers" className="hover:text-white transition-colors">
+            Kelola Kapster
+          </Link>
+          <span>/</span>
+          <span className="text-white font-medium">
             {isEditMode ? 'Edit Kapster' : 'Tambah Kapster'}
-          </h1>
-          <p className="text-text-muted">
-            {isEditMode
-              ? `Perbarui profil ${name || 'kapster'}, spesialisasi, dan status aktifnya.`
-              : 'Lengkapi profil dan tautkan akun barber untuk mendaftarkan kapster.'}
-          </p>
-        </header>
-        <Link href="/barbers">
-          <Button
-            variant="secondary"
-            className="gap-2 shrink-0 bg-transparent border border-border text-text-main hover:bg-raised cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Kembali ke daftar</span>
-          </Button>
-        </Link>
+          </span>
+        </div>
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-1">
+          <header className="space-y-2">
+            <h1 className="text-2xl md:text-[28px] font-extrabold text-white tracking-tight">
+              {isEditMode ? 'Edit Kapster' : 'Tambah Kapster'}
+            </h1>
+            <p className="text-text-muted text-sm md:text-base">
+              {isEditMode
+                ? `Perbarui profil ${name || 'kapster'}, spesialisasi, dan status aktifnya.`
+                : 'Lengkapi profil dan tautkan akun barber untuk mendaftarkan kapster.'}
+            </p>
+          </header>
+          <Link href="/barbers">
+            <Button
+              variant="secondary"
+              className="gap-2 shrink-0 bg-transparent border border-border text-text-main hover:bg-raised cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Kembali ke daftar</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Main Layout Grid */}

@@ -82,7 +82,7 @@ export default function AccountFormView() {
     <div className="space-y-6 pb-20 font-space-grotesk no-scrollbar selection:bg-secondary selection:text-white">
       {/* Breadcrumb & Header Dinamis */}
       <div className="space-y-1 font-outfit">
-        <div className="flex items-center gap-2 text-xs text-text-muted">
+        <div className="flex items-center gap-2 text-xs md:text-[13px] text-text-muted">
           <Link href="/accounts" className="hover:text-white transition-colors">
             Manajemen Akun
           </Link>

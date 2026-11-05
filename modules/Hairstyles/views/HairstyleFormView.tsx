@@ -117,8 +117,8 @@ export default function HairstyleFormView() {
   return (
     <div className="space-y-6 pb-20 font-space-grotesk no-scrollbar selection:bg-secondary selection:text-white">
       {/* Breadcrumb & Top Bar */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs text-text-muted font-outfit">
+      <div className="space-y-1 font-outfit">
+        <div className="flex items-center gap-2 text-xs md:text-[13px] text-text-muted">
           <Link href="/hairstyles" className="hover:text-white transition-colors">
             Kelola Model Rambut
           </Link>
