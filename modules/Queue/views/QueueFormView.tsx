@@ -222,19 +222,17 @@ export default function QueueFormView() {
                   <div
                     key={srv.id}
                     onClick={() => toggleService(srv.id)}
-                    className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
-                      isSelected
+                    className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${isSelected
                         ? 'bg-[#1e140e] border-secondary'
                         : 'bg-raised/40 border-border hover:border-border/80'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center mt-0.5 border transition-colors ${
-                          isSelected
+                        className={`w-5 h-5 rounded-md flex items-center justify-center mt-0.5 border transition-colors ${isSelected
                             ? 'bg-secondary border-secondary text-white'
                             : 'bg-surface border-border'
-                        }`}
+                          }`}
                       >
                         {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                       </div>

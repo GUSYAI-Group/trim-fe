@@ -1,10 +1,12 @@
 import React from 'react';
+import { Metadata } from 'next';
+import { HelpView } from '@/modules/Help';
+
+export const metadata: Metadata = {
+  title: 'Pusat Bantuan — TRIM',
+  description: 'Pusat bantuan dan panduan operasional TRIM Barbershop Management.',
+};
 
 export default function HelpPage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-[28px] font-extrabold tracking-tight">Pusat Bantuan</h1>
-      <p className="text-text-muted">Panduan penggunaan TRIM Dashboard.</p>
-    </div>
-  );
+  return <HelpView />;
 }

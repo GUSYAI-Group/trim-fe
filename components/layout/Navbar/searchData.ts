@@ -19,16 +19,16 @@ export interface SearchItem {
   title: string;
   subtitle: string;
   category:
-    | 'Halaman'
-    | 'Aksi Cepat'
-    | 'Layanan'
-    | 'Kapster'
-    | 'Model Rambut'
-    | 'Produk'
-    | 'Antrean'
-    | 'Pembayaran'
-    | 'Akun'
-    | 'Pengaturan';
+  | 'Halaman'
+  | 'Aksi Cepat'
+  | 'Layanan'
+  | 'Kapster'
+  | 'Model Rambut'
+  | 'Produk'
+  | 'Antrean'
+  | 'Pembayaran'
+  | 'Akun'
+  | 'Pengaturan';
   href: string;
   icon: React.ElementType;
   badge?: string;
@@ -137,6 +137,17 @@ export const SEARCH_ITEMS: SearchItem[] = [
     badge: 'Halaman',
     keywords: ['bantuan', 'pusat bantuan', 'help', 'panduan', 'support', 'faq'],
   },
+  {
+    id: 'p-profile',
+    title: 'Profil Pengguna',
+    subtitle: 'Identitas akun, ubah kata sandi, preferensi, dan log aktivitas',
+    category: 'Halaman',
+    href: '/profile',
+    icon: UserRound,
+    badge: 'Halaman',
+    keywords: ['profil', 'profile', 'akun saya', 'ganti kata sandi', 'password', 'user', 'owner', 'aditya'],
+  },
+
 
   // ── 2. Aksi Cepat (Quick Actions) ──
   {
@@ -604,14 +615,14 @@ export const SEARCH_ITEMS: SearchItem[] = [
 
   // ── 9. Data Akun Pengguna ──
   {
-    id: 'u-aditya',
-    title: 'aditya@trim.id (Aditya Pratama)',
+    id: 'u-farhan',
+    title: 'farhan@trim.id (Farhan)',
     subtitle: 'Peran: Owner • Akun utama TRIM dengan akses penuh operasional',
     category: 'Akun',
     href: '/accounts',
     icon: Users,
     badge: 'Owner',
-    keywords: ['aditya@trim.id', 'aditya', 'owner', 'akun utama'],
+    keywords: ['farhan@trim.id', 'farhan', 'owner', 'akun utama'],
   },
   {
     id: 'u-dimas',

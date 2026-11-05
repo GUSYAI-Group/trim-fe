@@ -37,7 +37,7 @@ export function Sidebar() {
 
     return isActive
       ? "group flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary text-text-main font-bold shadow-lg shadow-secondary/20 transition-all duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98] motion-reduce:transform-none"
-      : "group flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-secondary/15 hover:text-text-main transition-all duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] font-medium active:scale-[0.98] motion-reduce:transform-none";
+      : "group flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-secondary/15 hover:text-text-main hover:translate-x-1 transition-all duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] font-medium active:scale-[0.98] motion-reduce:transform-none";
   };
 
   return (

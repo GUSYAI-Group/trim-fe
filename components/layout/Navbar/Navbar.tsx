@@ -14,6 +14,13 @@ import {
   X,
   ArrowRight,
   Sparkles,
+  CheckCheck,
+  Wallet,
+  Clock,
+  Package,
+  Scissors,
+  User,
+  LogOut,
 } from 'lucide-react';
 import { SEARCH_ITEMS, SearchItem } from './searchData';
 
@@ -23,6 +30,7 @@ interface NavbarProps {
 
 export function Navbar({ onMenuClick }: NavbarProps) {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [search, setSearch] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -30,6 +38,112 @@ export function Navbar({ onMenuClick }: NavbarProps) {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  interface NotificationItem {
+    id: string;
+    title: string;
+    description: string;
+    time: string;
+    type: 'payment' | 'queue' | 'inventory' | 'booking' | 'system';
+    isRead: boolean;
+    link?: string;
+  }
+
+  const [notifications, setNotifications] = useState<NotificationItem[]>([
+    {
+      id: 'n-1',
+      title: 'Pembayaran QRIS Berhasil',
+      description: 'Rp75.000 dari Gus Ridho telah diverifikasi oleh Pakkasir.',
+      time: '5 menit lalu',
+      type: 'payment',
+      isRead: false,
+      link: '/payments',
+    },
+    {
+      id: 'n-2',
+      title: 'Peringatan Antrean',
+      description: 'Rizky Maulana (A-024) belum check-in setelah 15 menit.',
+      time: '18 menit lalu',
+      type: 'queue',
+      isRead: false,
+      link: '/queue',
+    },
+    {
+      id: 'n-3',
+      title: 'Stok Produk Menipis',
+      description: 'Clay tersisa 3 unit. Segera lakukan restock inventaris.',
+      time: '45 menit lalu',
+      type: 'inventory',
+      isRead: false,
+      link: '/products',
+    },
+    {
+      id: 'n-4',
+      title: 'Booking Selesai',
+      description: 'Kapster Gus Farhan menyelesaikan cukuran ke-42 hari ini.',
+      time: '2 jam lalu',
+      type: 'booking',
+      isRead: true,
+      link: '/barbers',
+    },
+    {
+      id: 'n-5',
+      title: 'Sistem TRIM v1.0 Aktif',
+      description: 'Semua terminal kasir terhubung stabil dan sinkron.',
+      time: '1 hari lalu',
+      type: 'system',
+      isRead: true,
+      link: '/help',
+    },
+  ]);
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const handleMarkAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  };
+
+  const handleNotificationClick = (item: NotificationItem) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
+    );
+    if (item.link) {
+      setIsNotifOpen(false);
+      router.push(item.link);
+    }
+  };
+
+  const getNotifIcon = (type: NotificationItem['type']) => {
+    switch (type) {
+      case 'payment':
+        return <Wallet className="w-4 h-4 text-emerald-400" />;
+      case 'queue':
+        return <Clock className="w-4 h-4 text-warning" />;
+      case 'inventory':
+        return <Package className="w-4 h-4 text-purple-400" />;
+      case 'booking':
+        return <Scissors className="w-4 h-4 text-secondary" />;
+      case 'system':
+        return <Sparkles className="w-4 h-4 text-blue-400" />;
+    }
+  };
+
+  const getNotifIconStyle = (type: NotificationItem['type']) => {
+    switch (type) {
+      case 'payment':
+        return 'bg-emerald-950/40 border border-emerald-500/30';
+      case 'queue':
+        return 'bg-amber-950/40 border border-amber-500/30';
+      case 'inventory':
+        return 'bg-purple-950/40 border border-purple-500/30';
+      case 'booking':
+        return 'bg-secondary/15 border border-secondary/30';
+      case 'system':
+        return 'bg-blue-950/40 border border-blue-500/30';
+    }
+  };
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -78,6 +192,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
         setIsSearchOpen(false);
         setIsMobileSearchOpen(false);
         setIsProfileOpen(false);
+        setIsNotifOpen(false);
         searchInputRef.current?.blur();
       }
     };
@@ -117,6 +232,23 @@ export function Navbar({ onMenuClick }: NavbarProps) {
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isProfileOpen]);
+
+  // Handle click outside to close notification dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        notifRef.current &&
+        !notifRef.current.contains(event.target as Node)
+      ) {
+        setIsNotifOpen(false);
+      }
+    };
+
+    if (isNotifOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isNotifOpen]);
 
   // Filter search items based on input query
   const filteredResults = useMemo(() => {
@@ -236,11 +368,10 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           {/* Desktop Search Bar Container with Dropdown Palette */}
           <div ref={searchContainerRef} className="w-full max-w-110 hidden md:block relative">
             <div
-              className={`relative flex items-center bg-surface rounded-xl px-4 py-3 border transition-all ${
-                isSearchOpen
+              className={`relative flex items-center bg-surface rounded-xl px-4 py-3 border transition-all ${isSearchOpen
                   ? 'border-secondary ring-1 ring-secondary/30 shadow-lg shadow-black/40'
                   : 'border-border/60 hover:border-border'
-              }`}
+                }`}
             >
               <Search className="w-5 h-5 text-text-muted mr-3 shrink-0" />
               <input
@@ -326,28 +457,25 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                               key={item.id}
                               onClick={() => handleSelectResult(item)}
                               onMouseEnter={() => setSelectedIndex(flatIndex)}
-                              className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all font-outfit ${
-                                isSelected
+                              className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all font-outfit ${isSelected
                                   ? 'bg-raised text-white border-l-2 border-secondary pl-3.5'
                                   : 'text-text-muted hover:bg-raised/60 hover:text-white'
-                              }`}
+                                }`}
                             >
                               <div className="flex items-center gap-3 min-w-0 flex-1">
                                 <div
-                                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
-                                    isSelected
+                                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${isSelected
                                       ? 'bg-secondary/20 text-secondary border-secondary/30'
                                       : 'bg-surface text-text-muted border-border/50'
-                                  }`}
+                                    }`}
                                 >
                                   <Icon className="w-4 h-4" />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-2">
                                     <span
-                                      className={`text-[14px] font-bold truncate ${
-                                        isSelected ? 'text-white' : 'text-white/90'
-                                      }`}
+                                      className={`text-[14px] font-bold truncate ${isSelected ? 'text-white' : 'text-white/90'
+                                        }`}
                                     >
                                       {item.title}
                                     </span>
@@ -367,11 +495,10 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                                 </div>
                               </div>
                               <ArrowRight
-                                className={`w-4 h-4 shrink-0 transition-transform ${
-                                  isSelected
+                                className={`w-4 h-4 shrink-0 transition-transform ${isSelected
                                     ? 'text-secondary translate-x-0.5 opacity-100'
                                     : 'opacity-0 text-text-muted'
-                                }`}
+                                  }`}
                               />
                             </div>
                           );
@@ -410,14 +537,116 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             {currentTime || 'Memuat...'}
           </div>
 
-          {/* Notification Bell */}
-          <button
-            className="relative cursor-pointer text-text-muted hover:text-text-main transition-all duration-200 flex items-center p-2 rounded-xl hover:bg-surface active:scale-95 group"
-            aria-label="Notifikasi"
-          >
-            <Bell className="w-5 h-5 transition-transform duration-200 group-hover:rotate-12" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
-          </button>
+          {/* Notification Bell with Dropdown */}
+          <div ref={notifRef} className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setIsNotifOpen((prev) => !prev);
+                setIsProfileOpen(false);
+              }}
+              className={`relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 cursor-pointer select-none group ${isNotifOpen
+                  ? 'bg-raised text-secondary border border-secondary/40 shadow-sm shadow-secondary/10'
+                  : 'text-text-muted hover:text-white hover:bg-raised border border-border/60 hover:border-border'
+                }`}
+              aria-label="Notifikasi"
+              aria-expanded={isNotifOpen}
+            >
+              <Bell className={`w-5 h-5 transition-transform duration-200 ${isNotifOpen ? 'rotate-12 text-secondary' : 'group-hover:rotate-12'}`} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] px-1 items-center justify-center rounded-full bg-secondary text-[10px] font-extrabold text-white ring-2 ring-primary shadow-sm shadow-secondary/40 font-outfit select-none leading-none pointer-events-none">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            <AnimatePresence>
+              {isNotifOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                  transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute right-0 top-full mt-2 w-[340px] sm:w-[380px] rounded-2xl bg-[#1C1C1F] border border-border/80 shadow-2xl shadow-black/90 p-2 z-50 font-outfit overflow-hidden"
+                >
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-[14px] font-bold text-white">Notifikasi</h4>
+                      {unreadCount > 0 && (
+                        <span className="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-[11px] font-bold">
+                          {unreadCount} baru
+                        </span>
+                      )}
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleMarkAllAsRead}
+                        className="text-[11px] font-semibold text-text-muted hover:text-secondary flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <CheckCheck className="w-3.5 h-3.5" />
+                        <span>Tandai semua dibaca</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Notif Items List */}
+                  <div className="max-h-[340px] overflow-y-auto no-scrollbar divide-y divide-border/40 py-1">
+                    {notifications.length === 0 ? (
+                      <div className="py-8 text-center text-text-muted text-[13px]">
+                        Tidak ada notifikasi saat ini
+                      </div>
+                    ) : (
+                      notifications.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => handleNotificationClick(item)}
+                          className={`flex items-start gap-3 p-2.5 rounded-xl transition-all cursor-pointer ${item.isRead
+                              ? 'hover:bg-raised/40 opacity-75'
+                              : 'bg-raised/60 hover:bg-raised opacity-100'
+                            }`}
+                        >
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${getNotifIconStyle(item.type)}`}>
+                            {getNotifIcon(item.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <p className={`text-[13px] truncate ${item.isRead ? 'font-medium text-white/90' : 'font-bold text-white'}`}>
+                                {item.title}
+                              </p>
+                              {!item.isRead && (
+                                <span className="w-2 h-2 rounded-full bg-secondary shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-[12px] text-text-muted line-clamp-2 mt-0.5 leading-snug">
+                              {item.description}
+                            </p>
+                            <span className="text-[10px] text-text-muted/70 mt-1 block">
+                              {item.time}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="px-3 py-2 border-t border-border/50 bg-[#141414] rounded-b-xl flex items-center justify-between text-[11px] text-text-muted">
+                    <span>Notifikasi otomatis real-time</span>
+                    <Link
+                      href="/queue"
+                      onClick={() => setIsNotifOpen(false)}
+                      className="text-secondary font-bold hover:underline flex items-center gap-1"
+                    >
+                      <span>Buka Antrean</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Divider */}
           <div className="h-8 w-px bg-border" />
@@ -426,24 +655,28 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           <div ref={profileRef} className="relative">
             <button
               type="button"
-              onClick={() => setIsProfileOpen((prev) => !prev)}
+              onClick={() => {
+                setIsProfileOpen((prev) => !prev);
+                setIsNotifOpen(false);
+              }}
               className="flex items-center gap-3 cursor-pointer hover:bg-raised/60 active:scale-[0.98] py-1.5 px-3 rounded-xl transition-all duration-150 group font-outfit select-none"
             >
               <div className="w-10 h-10 shrink-0 bg-secondary rounded-xl flex items-center justify-center text-white font-bold text-[14px] shadow-sm shadow-secondary/20 transition-transform group-hover:scale-105">
-                AP
+                {user?.name
+                  ? user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                  : 'AP'}
               </div>
               <div className="hidden sm:flex flex-col text-left">
                 <span className="text-[14px] text-text-main font-bold leading-tight">
-                  aditya@trim.id
+                  {user?.name || 'aditya@trim.id'}
                 </span>
                 <span className="text-[12px] text-text-muted font-medium">
-                  Owner
+                  {user?.role || 'Owner'}
                 </span>
               </div>
               <ChevronDown
-                className={`w-4 h-4 text-text-muted ml-1 transition-transform duration-200 ${
-                  isProfileOpen ? 'rotate-180 text-white' : ''
-                }`}
+                className={`w-4 h-4 text-text-muted ml-1 transition-transform duration-200 ${isProfileOpen ? 'rotate-180 text-white' : ''
+                  }`}
               />
             </button>
 
@@ -454,13 +687,17 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.98 }}
                   transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-                  className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-[#1C1C1F] border border-border/80 shadow-2xl shadow-black/80 p-1.5 z-50 font-outfit"
+                  className="absolute right-0 top-full mt-2 w-48 rounded-2xl bg-[#1C1C1F] border border-border/80 shadow-2xl shadow-black/80 p-1.5 z-50 font-outfit"
                 >
-                  <div className="px-3.5 py-2.5 border-b border-border/50 mb-1">
-                    <p className="text-[13px] font-bold text-white truncate">aditya@trim.id</p>
-                    <p className="text-[11px] text-secondary font-medium">Owner • Akses Penuh</p>
-                  </div>
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsProfileOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium text-text-muted hover:text-white hover:bg-raised transition-colors cursor-pointer"
+                    >
+                      <User className="w-4 h-4 text-secondary" />
+                      <span>Profil Saya</span>
+                    </Link>
                     <div className="h-px bg-border/50 my-1" />
                     <button
                       type="button"
@@ -472,6 +709,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                       className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-[13px] font-bold text-rose-400 hover:bg-rose-500/10 transition-all cursor-pointer"
                     >
                       <span>Keluar (Logout)</span>
+                      <LogOut className="w-4 h-4" />
                     </button>
                   </div>
                 </motion.div>

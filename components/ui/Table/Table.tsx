@@ -17,7 +17,7 @@ export function TableHeader({ children }: { children: React.ReactNode }) {
 }
 
 export function TableRow({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <tr className={`border-b border-border hover:bg-raised/40 transition-colors duration-150 ${className}`}>{children}</tr>;
+  return <tr className={`border-b border-border hover:bg-raised/70 transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${className}`}>{children}</tr>;
 }
 
 export function TableHead({ children, className = '' }: { children: React.ReactNode; className?: string }) {

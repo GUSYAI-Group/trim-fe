@@ -23,27 +23,27 @@ interface Account {
 
 /* ─────────────────── Static data ─────────────────── */
 const ACCOUNTS: Account[] = [
-  { id: 1, slug: 'aditya', initials: 'AP', email: 'aditya@trim.id', uuid: '8f2c...a1e4', role: 'owner',    createdAt: '12 Sep 2026', updatedAt: '6 Okt 2026', isOwner: true },
-  { id: 2, slug: 'dimas',  initials: 'DS', email: 'dimas@trim.id',  uuid: '9b1a...c7f2', role: 'admin',    createdAt: '12 Sep 2026', updatedAt: '6 Okt 2026' },
-  { id: 3, slug: 'arief',  initials: 'RP', email: 'raka@trim.id',   uuid: '4e9d...b8c1', displayName: 'Raka Putra',   role: 'barber',   createdAt: '14 Sep 2026', updatedAt: '6 Okt 2026' },
-  { id: 4, slug: 'alya',   initials: 'AL', email: 'alya@trim.id',   uuid: '1f3c...d9e8', displayName: 'Alya Lestari', role: 'customer', createdAt: '15 Sep 2026', updatedAt: '6 Okt 2026' },
-  { id: 5, slug: 'wulan',  initials: 'WP', email: 'wulan@trim.id',  uuid: '7a2b...f4c6', displayName: 'Wulan Pertiwi',role: 'customer', createdAt: '16 Sep 2026', updatedAt: '5 Okt 2026' },
-  { id: 6, slug: 'rafi',   initials: 'RH', email: 'rafi@trim.id',   uuid: '2d8e...a6f1', displayName: 'Rafi Hidayat', role: 'customer', createdAt: '17 Sep 2026', updatedAt: '28 Sep 2026' },
+  { id: 1, slug: 'aditya', initials: 'AP', email: 'aditya@trim.id', uuid: '8f2c...a1e4', role: 'owner', createdAt: '12 Sep 2026', updatedAt: '6 Okt 2026', isOwner: true },
+  { id: 2, slug: 'dimas', initials: 'DS', email: 'dimas@trim.id', uuid: '9b1a...c7f2', role: 'admin', createdAt: '12 Sep 2026', updatedAt: '6 Okt 2026' },
+  { id: 3, slug: 'arief', initials: 'RP', email: 'raka@trim.id', uuid: '4e9d...b8c1', displayName: 'Raka Putra', role: 'barber', createdAt: '14 Sep 2026', updatedAt: '6 Okt 2026' },
+  { id: 4, slug: 'alya', initials: 'AL', email: 'alya@trim.id', uuid: '1f3c...d9e8', displayName: 'Alya Lestari', role: 'customer', createdAt: '15 Sep 2026', updatedAt: '6 Okt 2026' },
+  { id: 5, slug: 'wulan', initials: 'WP', email: 'wulan@trim.id', uuid: '7a2b...f4c6', displayName: 'Wulan Pertiwi', role: 'customer', createdAt: '16 Sep 2026', updatedAt: '5 Okt 2026' },
+  { id: 6, slug: 'rafi', initials: 'RH', email: 'rafi@trim.id', uuid: '2d8e...a6f1', displayName: 'Rafi Hidayat', role: 'customer', createdAt: '17 Sep 2026', updatedAt: '28 Sep 2026' },
 ];
 
 const ROLE_DESCRIPTIONS: { role: Role; label: string; Icon: React.ElementType; description: string }[] = [
-  { role: 'owner',    label: 'Owner',    Icon: Crown,     description: 'Akses penuh, buat akun staf, dan pengaturan toko.' },
-  { role: 'admin',    label: 'Admin',    Icon: Shield,    description: 'Kelola operasional dan staf. Tidak dapat menghapus akun Owner.' },
-  { role: 'barber',   label: 'Barber',   Icon: Briefcase, description: 'Kelola profil kapster dan layanan yang ditugaskan.' },
-  { role: 'customer', label: 'Customer', Icon: Wallet,    description: 'Akses profil pelanggan dan riwayat reservasi.' },
+  { role: 'owner', label: 'Owner', Icon: Crown, description: 'Akses penuh, buat akun staf, dan pengaturan toko.' },
+  { role: 'admin', label: 'Admin', Icon: Shield, description: 'Kelola operasional dan staf. Tidak dapat menghapus akun Owner.' },
+  { role: 'barber', label: 'Barber', Icon: Briefcase, description: 'Kelola profil kapster dan layanan yang ditugaskan.' },
+  { role: 'customer', label: 'Customer', Icon: Wallet, description: 'Akses profil pelanggan dan riwayat reservasi.' },
 ];
 
 /* ─────────────────── Helpers ─────────────────── */
 const ROLE_STYLES: Record<Role, { badge: string; dot: string; avatar: string }> = {
-  owner:    { badge: 'bg-secondary/20 text-secondary border border-secondary/30', dot: 'bg-secondary', avatar: 'bg-raised border border-border text-secondary' },
-  admin:    { badge: 'bg-raised border border-border text-text-muted',            dot: 'bg-text-muted', avatar: 'bg-raised border border-border text-secondary' },
-  barber:   { badge: 'bg-raised border border-border text-text-muted',            dot: 'bg-text-muted', avatar: 'bg-raised border border-border text-secondary' },
-  customer: { badge: 'bg-raised border border-border text-text-muted',            dot: 'bg-text-muted', avatar: 'bg-raised border border-border text-secondary' },
+  owner: { badge: 'bg-secondary/20 text-secondary border border-secondary/30', dot: 'bg-secondary', avatar: 'bg-raised border border-border text-secondary' },
+  admin: { badge: 'bg-raised border border-border text-text-muted', dot: 'bg-text-muted', avatar: 'bg-raised border border-border text-secondary' },
+  barber: { badge: 'bg-raised border border-border text-text-muted', dot: 'bg-text-muted', avatar: 'bg-raised border border-border text-secondary' },
+  customer: { badge: 'bg-raised border border-border text-text-muted', dot: 'bg-text-muted', avatar: 'bg-raised border border-border text-secondary' },
 };
 
 const ROLE_LABELS: Record<Role, string> = { owner: 'Owner', admin: 'Admin', barber: 'Barber', customer: 'Customer' };
@@ -83,10 +83,10 @@ export function AccountsView() {
   });
 
   const roleOptions: { value: Role | 'all'; label: string }[] = [
-    { value: 'all',      label: 'Semua peran' },
-    { value: 'owner',    label: 'Owner' },
-    { value: 'admin',    label: 'Admin' },
-    { value: 'barber',   label: 'Barber' },
+    { value: 'all', label: 'Semua peran' },
+    { value: 'owner', label: 'Owner' },
+    { value: 'admin', label: 'Admin' },
+    { value: 'barber', label: 'Barber' },
     { value: 'customer', label: 'Customer' },
   ];
 

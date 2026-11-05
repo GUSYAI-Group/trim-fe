@@ -43,7 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
         h-12 px-6 text-[14px] font-semibold
         rounded-lg
         transition-all duration-180 ease-[cubic-bezier(0.16,1,0.3,1)]
-        active:scale-[0.97] motion-reduce:transform-none
+        hover:scale-[1.015] active:scale-[0.97] motion-reduce:transform-none
         cursor-pointer select-none
         ${variantStyles[variant]}
         ${fullWidth ? 'w-full' : ''}

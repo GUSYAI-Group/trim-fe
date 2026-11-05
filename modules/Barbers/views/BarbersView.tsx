@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Star, Users, Scissors, ChevronDown, ChevronLeft, ChevronRight, ArrowRight, Info } from 'lucide-react';
+import { Plus, Search, Star, Users, Scissors, ChevronLeft, ChevronRight, ArrowRight, Info, X, Phone, CheckCircle, Clock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TableRow, TableHead, TableCell, DataTable, Dropdown } from '@/components/ui';
 
 interface KapsterItem {
@@ -16,7 +17,7 @@ interface KapsterItem {
   badgeType: 'success' | 'muted';
 }
 
-const KAPSTER_DATA: KapsterItem[] = [
+const INITIAL_KAPSTERS: KapsterItem[] = [
   { phone: '0812 3456 7890', name: 'Gus Farhan', initials: 'GF', specialty: 'Fade & taper', finished: 8, rating: '4,9', statusText: 'Aktif', badgeType: 'success' },
   { phone: '0813 7788 9900', name: 'Lefi Dian', initials: 'LD', specialty: 'Classic & pompadour', finished: 6, rating: '4,9', statusText: 'Aktif', badgeType: 'success' },
   { phone: '0821 4455 6677', name: 'Zidan Alex', initials: 'ZA', specialty: 'Texture & crop', finished: 4, rating: '4,8', statusText: 'Aktif', badgeType: 'success' },
@@ -26,16 +27,56 @@ const KAPSTER_DATA: KapsterItem[] = [
 ];
 
 export function BarbersView() {
+  const [kapsters, setKapsters] = useState<KapsterItem[]>(INITIAL_KAPSTERS);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<'Semua' | 'Aktif' | 'Nonaktif'>('Semua');
+  const [detailKapster, setDetailKapster] = useState<KapsterItem | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Menghitung statistik
-  const totalCount = KAPSTER_DATA.length;
-  const activeCount = KAPSTER_DATA.filter((k) => k.statusText === 'Aktif').length;
-  const inactiveCount = KAPSTER_DATA.filter((k) => k.statusText === 'Nonaktif').length;
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Toggle status kapster
+  const handleToggleStatus = (phone: string) => {
+    setKapsters((prev) =>
+      prev.map((k) => {
+        if (k.phone === phone) {
+          const nextStatus = k.statusText === 'Aktif' ? 'Nonaktif' : 'Aktif';
+          const nextBadge = nextStatus === 'Aktif' ? 'success' : 'muted';
+          showToast(`Status ${k.name} diubah menjadi ${nextStatus}`);
+          return {
+            ...k,
+            statusText: nextStatus,
+            badgeType: nextBadge,
+          };
+        }
+        return k;
+      })
+    );
+
+    // If modal is open for this kapster, update it too
+    if (detailKapster && detailKapster.phone === phone) {
+      setDetailKapster((prev) => {
+        if (!prev) return null;
+        const nextStatus = prev.statusText === 'Aktif' ? 'Nonaktif' : 'Aktif';
+        return {
+          ...prev,
+          statusText: nextStatus,
+          badgeType: nextStatus === 'Aktif' ? 'success' : 'muted',
+        };
+      });
+    }
+  };
+
+  // Menghitung statistik dinamis
+  const totalCount = kapsters.length;
+  const activeCount = kapsters.filter((k) => k.statusText === 'Aktif').length;
+  const inactiveCount = kapsters.filter((k) => k.statusText === 'Nonaktif').length;
 
   // Filter gabungan Search & Status
-  const filteredData = KAPSTER_DATA.filter((kapster) => {
+  const filteredData = kapsters.filter((kapster) => {
     const matchesSearch =
       kapster.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       kapster.phone.includes(searchQuery);
@@ -48,6 +89,27 @@ export function BarbersView() {
 
   return (
     <div className="space-y-6 text-white font-space-grotesk no-scrollbar selection:bg-secondary selection:text-white pb-16">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#1E1E22] border border-secondary/40 shadow-2xl shadow-secondary/20 font-outfit text-[14px] text-white"
+          >
+            <div className="w-2 h-2 rounded-full bg-secondary animate-ping" />
+            <span className="font-semibold">{toastMessage}</span>
+            <button
+              onClick={() => setToastMessage(null)}
+              className="ml-2 text-text-muted hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -175,7 +237,7 @@ export function BarbersView() {
               <>
                 <TableHead className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Nama</TableHead>
                 <TableHead className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Spesialisasi</TableHead>
-                <TableHead className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Status aktif</TableHead>
+                <TableHead className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Status aktif (Klik)</TableHead>
                 <TableHead className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Rating</TableHead>
                 <TableHead className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Selesai hari ini</TableHead>
                 <TableHead className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit text-right">Aksi</TableHead>
@@ -200,16 +262,21 @@ export function BarbersView() {
                     </TableCell>
                     <TableCell className="py-4 px-5 font-medium text-[14px] text-white font-outfit">{kapster.specialty}</TableCell>
                     <TableCell className="py-4 px-5">
-                      <div className={`px-2.5 py-1 text-[13px] rounded-md font-medium font-outfit flex items-center gap-1.5 w-fit ${kapster.badgeType === 'success'
-                          ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20'
-                          : 'bg-zinc-500/10 text-zinc-400 border border-border'
-                        }`}>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleStatus(kapster.phone)}
+                        title="Klik untuk ubah status aktif/nonaktif"
+                        className={`px-2.5 py-1 text-[13px] rounded-md font-medium font-outfit flex items-center gap-1.5 w-fit cursor-pointer active:scale-95 transition-all hover:opacity-90 ${kapster.badgeType === 'success'
+                            ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/40'
+                            : 'bg-zinc-500/10 text-zinc-400 border border-border hover:border-zinc-500/40'
+                          }`}
+                      >
                         <div className={`w-1.5 h-1.5 rounded-full ${kapster.badgeType === 'success' ? 'bg-emerald-400' : 'bg-zinc-400'}`}></div>
-                        {kapster.statusText}
-                      </div>
+                        <span>{kapster.statusText}</span>
+                      </button>
                     </TableCell>
                     <TableCell className="py-4 px-5 font-medium text-[14px] text-white font-outfit">
-                      <span className="flex items-center gap-1 font-outfit">
+                      <span className="flex items-center gap-1 font-outfit text-amber-400 font-bold">
                         ★ {kapster.rating}
                       </span>
                     </TableCell>
@@ -222,7 +289,11 @@ export function BarbersView() {
                         >
                           Edit
                         </Link>
-                        <button className="text-text-muted hover:text-white transition-colors flex items-center gap-1 font-medium text-[14px] font-outfit cursor-pointer group">
+                        <button
+                          type="button"
+                          onClick={() => setDetailKapster(kapster)}
+                          className="text-text-muted hover:text-white transition-colors flex items-center gap-1 font-medium text-[14px] font-outfit cursor-pointer group active:scale-95"
+                        >
                           <span>Detail</span>
                           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                         </button>
@@ -264,10 +335,115 @@ export function BarbersView() {
         <div className="space-y-1">
           <h4 className="text-secondary font-bold text-[14px] font-outfit">Nomor telepon unik • Aturan aplikasi</h4>
           <p className="text-text-muted text-[13px] leading-relaxed font-outfit">
-            Profil kapster terhubung ke USERS melalui user_id. Status aktif disimpan di is_active; sedang melayani dihitung dari booking.
+            Profil kapster terhubung ke USERS melalui user_id. Klik badge status aktif untuk mengubah status kapster secara langsung.
           </p>
         </div>
       </div>
+
+      {/* Kapster Detail Modal */}
+      <AnimatePresence>
+        {detailKapster && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDetailKapster(null)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="relative w-full max-w-lg bg-[#161616] border border-border rounded-2xl shadow-2xl overflow-hidden font-outfit z-10 p-6 space-y-6"
+            >
+              <div className="flex items-center justify-between border-b border-border pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-raised border border-border flex items-center justify-center text-secondary font-extrabold text-base">
+                    {detailKapster.initials}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">{detailKapster.name}</h3>
+                    <p className="text-xs text-text-muted mt-0.5">{detailKapster.specialty}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDetailKapster(null)}
+                  className="p-2 text-text-muted hover:text-white rounded-lg hover:bg-surface cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4 text-sm">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-xl bg-surface border border-border">
+                    <span className="text-xs text-text-muted block">Status Akun</span>
+                    <span className={`text-sm font-bold mt-1 inline-flex items-center gap-1.5 ${detailKapster.statusText === 'Aktif' ? 'text-emerald-400' : 'text-zinc-400'}`}>
+                      <span className={`w-2 h-2 rounded-full ${detailKapster.statusText === 'Aktif' ? 'bg-emerald-400' : 'bg-zinc-400'}`} />
+                      {detailKapster.statusText}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface border border-border">
+                    <span className="text-xs text-text-muted block">Rating Kepuasan</span>
+                    <span className="text-sm font-bold text-amber-400 mt-1 inline-flex items-center gap-1">
+                      ★ {detailKapster.rating} / 5.0
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-surface border border-border flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-secondary" />
+                    <div>
+                      <span className="text-xs text-text-muted block">Kontak WhatsApp</span>
+                      <span className="text-sm font-bold text-white">{detailKapster.phone}</span>
+                    </div>
+                  </div>
+                  <a
+                    href={`https://wa.me/${detailKapster.phone.replace(/[^0-9]/g, '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-bold text-secondary hover:underline"
+                  >
+                    Hubungi →
+                  </a>
+                </div>
+
+                <div className="p-3 rounded-xl bg-surface border border-border space-y-1">
+                  <div className="flex items-center justify-between text-xs text-text-muted">
+                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Jam Kerja Hari Ini</span>
+                    <span className="text-white font-medium">10:00 - 21:00 WIB</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-text-muted pt-2 border-t border-border/50">
+                    <span>Pelanggan Dituntaskan Hari Ini</span>
+                    <span className="text-emerald-400 font-bold">{detailKapster.finished} orang</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 pt-2 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => handleToggleStatus(detailKapster.phone)}
+                  className="px-4 py-2.5 rounded-xl bg-surface border border-border text-xs font-bold text-white hover:bg-raised transition-colors cursor-pointer active:scale-95"
+                >
+                  {detailKapster.statusText === 'Aktif' ? 'Nonaktifkan Kapster' : 'Aktifkan Kapster'}
+                </button>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/barbers/form?id=${detailKapster.phone.replace(/\s+/g, '')}`}
+                    className="px-4 py-2.5 rounded-xl bg-secondary text-white text-xs font-bold hover:bg-secondary/90 transition-colors cursor-pointer active:scale-95"
+                  >
+                    Edit Profil
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

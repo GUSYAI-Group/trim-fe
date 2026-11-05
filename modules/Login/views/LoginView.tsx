@@ -62,7 +62,7 @@ export default function LoginView() {
     >
       {/* Split Screen Container */}
       <div className="w-full max-w-7xl min-h-[640px] lg:h-[calc(100vh-4rem)] grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-        
+
         {/* Kolom Kiri: Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -112,7 +112,7 @@ export default function LoginView() {
           transition={{ duration: 0.45, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
           className="flex flex-col justify-between items-center h-full py-2 lg:py-4 px-2 sm:px-4"
         >
-          
+
           {/* Header Atas: RUANG OPERASIONAL */}
           <div className="w-full text-center pt-2">
             <span className="text-[11px] font-semibold tracking-[0.25em] text-[#999999] uppercase font-outfit">
