@@ -158,7 +158,7 @@ export default function ProfileView() {
           type="button"
           onClick={() => {
             logout();
-            router.push('/login');
+            window.location.href = '/login';
           }}
           className="self-start sm:self-auto px-4 py-2.5 rounded-xl border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-[13px] font-bold font-outfit flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
         >

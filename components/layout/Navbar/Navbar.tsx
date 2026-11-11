@@ -704,7 +704,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                       onClick={() => {
                         setIsProfileOpen(false);
                         useAuthStore.getState().logout();
-                        router.push('/login');
+                        window.location.href = '/login';
                       }}
                       className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-[13px] font-bold text-rose-400 hover:bg-rose-500/10 transition-all cursor-pointer"
                     >

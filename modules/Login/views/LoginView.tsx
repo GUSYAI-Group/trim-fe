@@ -54,20 +54,17 @@ export default function LoginView() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isSuccess ? 0 : 1, scale: isSuccess ? 0.995 : 1 }}
-      transition={{ duration: isSuccess ? 0.25 : 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="min-h-screen w-full bg-[#111111] text-white flex items-center justify-center p-4 sm:p-6 lg:p-8 font-outfit selection:bg-[#FF4D00] selection:text-white"
-    >
+    <div className="min-h-screen w-full bg-[#111111] text-white flex items-center justify-center p-4 sm:p-6 lg:p-8 font-outfit selection:bg-[#FF4D00] selection:text-white">
       {/* Split Screen Container */}
-      <div className="w-full max-w-7xl min-h-[640px] lg:h-[calc(100vh-4rem)] grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+      <motion.div
+        initial={false}
+        animate={{ opacity: isSuccess ? 0 : 1, y: 0, scale: isSuccess ? 0.995 : 1 }}
+        transition={{ duration: isSuccess ? 0.25 : 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-7xl min-h-[640px] lg:h-[calc(100vh-4rem)] grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch"
+      >
 
         {/* Kolom Kiri: Hero Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        <div
           className="relative rounded-3xl overflow-hidden flex flex-col justify-between p-8 sm:p-10 lg:p-12 border border-[#303030] bg-[#1A1A1A] min-h-[460px] lg:min-h-full shadow-2xl"
         >
           {/* Barber Promotional Image */}
@@ -103,13 +100,10 @@ export default function LoginView() {
               Di balik potongan terbaik, ada operasional yang tertata.
             </p>
           </div>
-        </motion.div>
+        </div>
 
         {/* Kolom Kanan: Login Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+        <div
           className="flex flex-col justify-between items-center h-full py-2 lg:py-4 px-2 sm:px-4"
         >
 
@@ -232,10 +226,9 @@ export default function LoginView() {
           <div className="w-full text-center pb-2 text-xs text-[#999999] font-medium font-outfit">
             TRIM / AI-Powered Barbershop Information System
           </div>
+        </div>
 
-        </motion.div>
-
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
