@@ -2,53 +2,33 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Upload, AlertCircle, Image as ImageIcon } from 'lucide-react';
-
-// Data Mockup untuk Auto-Fill Mode Edit
-const DUMMY_HAIRSTYLE: Record<
-  string,
-  {
-    name: string;
-    description: string;
-    hairType: string;
-    careLevel: string;
-    imageUrl: string;
-    imageName: string;
-    status: 'aktif' | 'nonaktif';
-    uuid: string;
-  }
-> = {
-  'skin-fade': {
-    name: 'Skin fade',
-    description: 'Potongan rapi dengan transisi halus dari kulit ke rambut bagian atas.',
-    hairType: 'Lurus',
-    careLevel: '2',
-    imageUrl: 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&q=80&w=300',
-    imageName: 'skin-fade.jpg',
-    status: 'aktif',
-    uuid: '7ad26b3e-9f12-4ca8-b0d3-82f5b157c490',
-  },
-};
+import { useTrimStore } from '@/store/useTrimStore';
 
 export default function HairstyleFormView() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('id'); // Menangkap query ?id=... (contoh: ?id=skin-fade)
   const isEditMode = Boolean(editId);
+
+  const hairstyles = useTrimStore((s) => s.hairstyles);
+  const addHairstyle = useTrimStore((s) => s.addHairstyle);
+  const updateHairstyle = useTrimStore((s) => s.updateHairstyle);
 
   // Form States
   const [name, setName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
-  const [hairType, setHairType] = useState('');
-  const [careLevel, setCareLevel] = useState('');
+  const [hairType, setHairType] = useState('Lurus');
+  const [careLevel, setCareLevel] = useState('2');
   const [status, setStatus] = useState<'aktif' | 'nonaktif'>('aktif');
   const [imageName, setImageName] = useState('');
   const [uuid, setUuid] = useState('');
 
   // Pemetaan Bentuk Wajah States
-  const [faceShapes, setFaceShapes] = useState({
-    oval: false,
+  const [faceShapes, setFaceShapes] = useState<{ [key: string]: boolean }>({
+    oval: true,
     bulat: false,
     persegi: false,
     lonjong: false,
@@ -66,27 +46,47 @@ export default function HairstyleFormView() {
 
   // Auto-fill form jika masuk Mode Edit
   useEffect(() => {
-    if (isEditMode && editId && DUMMY_HAIRSTYLE[editId]) {
-      const data = DUMMY_HAIRSTYLE[editId];
-      setName(data.name);
-      setDescription(data.description);
-      setHairType(data.hairType);
-      setCareLevel(data.careLevel);
-      setImageUrl(data.imageUrl);
-      setImageName(data.imageName);
-      setStatus(data.status);
-      setUuid(data.uuid);
-    }
-  }, [isEditMode, editId]);
+    if (isEditMode && editId) {
+      const found = hairstyles.find(
+        (h) => h.id === editId || h.name.toLowerCase().replace(/\s+/g, '-') === editId.toLowerCase()
+      );
+      if (found) {
+        setName(found.name);
+        setDescription(found.description.replace(/^Deskripsi:\s*/, ''));
+        setHairType(found.hairType);
+        setCareLevel(found.maintenanceLevel.toString());
+        setImageUrl(found.image);
+        setImageName(`${found.id}.png`);
+        setStatus(found.isAiActive ? 'aktif' : 'nonaktif');
+        setUuid(found.id.toUpperCase());
 
-  // Handler Submit dengan Validasi Persis Figma
+        // Fill face shapes
+        const shapeMap: { [key: string]: boolean } = {
+          oval: false,
+          bulat: false,
+          persegi: false,
+          lonjong: false,
+          berlian: false,
+          segitiga: false,
+        };
+        found.faceShapes.forEach((shape) => {
+          const lower = shape.toLowerCase();
+          if (shapeMap[lower] !== undefined) {
+            shapeMap[lower] = true;
+          }
+        });
+        setFaceShapes(shapeMap);
+      }
+    }
+  }, [isEditMode, editId, hairstyles]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: typeof errors = {};
 
     // 1. Validasi URL Gambar
-    if (imageUrl && !imageUrl.startsWith('https://')) {
-      newErrors.imageUrl = 'URL gambar tidak valid. Gunakan alamat lengkap seperti https://domain.com/foto.jpg';
+    if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+      newErrors.imageUrl = 'URL gambar tidak valid. Gunakan alamat lengkap https:// atau path lokal /';
     }
 
     // 2. Validasi Nama Model
@@ -94,23 +94,55 @@ export default function HairstyleFormView() {
       newErrors.name = 'Nama model wajib diisi.';
     }
 
-    // 3. Validasi Level Perawatan (Harus Bilangan Bulat)
-    if (careLevel && (!Number.isInteger(Number(careLevel)) || Number(careLevel) <= 0 || careLevel.includes('.'))) {
-      newErrors.careLevel = `Level perawatan harus bilangan bulat, bukan ${careLevel}.`;
+    // 3. Validasi Level Perawatan
+    const parsedCare = parseInt(careLevel, 10);
+    if (!careLevel || isNaN(parsedCare) || parsedCare < 1 || parsedCare > 5) {
+      newErrors.careLevel = 'Level perawatan harus bilangan bulat antara 1 sampai 5.';
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setHasErrors(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      setErrors({});
-      setHasErrors(false);
-      alert(isEditMode ? 'Model rambut berhasil diperbarui!' : 'Model rambut berhasil disimpan!');
+      return;
     }
+
+    setErrors({});
+    setHasErrors(false);
+
+    // Selected face shapes
+    const selectedFaceShapes = Object.entries(faceShapes)
+      .filter(([_, isChecked]) => isChecked)
+      .map(([shape]) => shape.charAt(0).toUpperCase() + shape.slice(1));
+
+    const finalShapes = selectedFaceShapes.length > 0 ? selectedFaceShapes : ['Oval'];
+
+    if (isEditMode && editId) {
+      updateHairstyle(editId, {
+        name: name.trim(),
+        description: description.trim() ? `Deskripsi: ${description.trim()}` : `Deskripsi: Potongan gaya ${name.trim()}.`,
+        hairType: hairType.trim() || 'Lurus',
+        maintenanceLevel: parsedCare,
+        image: imageUrl.trim() || '/hairstyles/skin-fade.jpg.png',
+        isAiActive: status === 'aktif',
+        faceShapes: finalShapes,
+      });
+    } else {
+      addHairstyle({
+        name: name.trim(),
+        description: description.trim() ? `Deskripsi: ${description.trim()}` : `Deskripsi: Potongan gaya ${name.trim()}.`,
+        hairType: hairType.trim() || 'Lurus',
+        maintenanceLevel: parsedCare,
+        image: imageUrl.trim() || '/hairstyles/skin-fade.jpg.png',
+        isAiActive: status === 'aktif',
+        faceShapes: finalShapes,
+      });
+    }
+
+    router.push('/hairstyles');
   };
 
-  const toggleFaceShape = (shape: keyof typeof faceShapes) => {
+  const toggleFaceShape = (shape: string) => {
     setFaceShapes((prev) => ({ ...prev, [shape]: !prev[shape] }));
   };
 
@@ -149,16 +181,13 @@ export default function HairstyleFormView() {
         </div>
       </div>
 
-      {/* Top Banner Error Validation (Tampilan 3 Figma) */}
+      {/* Top Banner Error Validation */}
       {hasErrors && (
         <div className="p-5 rounded-lg border-l-4 border-rose-500 bg-[#2a1215] flex items-start gap-4 shadow-lg font-outfit">
           <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
           <div className="space-y-1 text-xs">
             <h4 className="font-bold text-rose-400 text-[14px]">Model rambut belum dapat disimpan</h4>
-            <p className="text-rose-200/80 font-medium text-[13px]">Periksa kembali field yang ditandai.</p>
-            <p className="text-text-muted text-[12px] leading-relaxed">
-              3 field perlu diperbaiki: Nama model, URL gambar, dan Level perawatan. Data input tetap dipertahankan. Perbaiki field yang ditandai, lalu coba simpan kembali.
-            </p>
+            <p className="text-rose-200/80 font-medium text-[13px]">Periksa kembali field yang ditandai merah.</p>
           </div>
         </div>
       )}
@@ -176,65 +205,17 @@ export default function HairstyleFormView() {
               </p>
             </div>
 
-            {/* Upload Foto Referensi */}
-            <div className="space-y-2">
-              <label className="block text-[14px] font-bold text-white font-outfit">
-                Foto referensi <span className="text-secondary">*</span>
-              </label>
-
-              {isEditMode && imageName ? (
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-2xl bg-raised border border-border/80 overflow-hidden shrink-0 relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-[14px] font-bold text-white font-outfit">{imageName}</p>
-                    <label className="cursor-pointer inline-block">
-                      <input type="file" className="hidden" />
-                      <div className="px-4 py-2 bg-raised hover:bg-border border border-border rounded-xl text-sm font-bold text-white font-outfit flex items-center gap-2 transition-colors">
-                        <Upload className="w-4 h-4" />
-                        <span>Ganti gambar</span>
-                      </div>
-                    </label>
-                    <p className="text-[13px] text-text-muted font-outfit">
-                      Foto referensi saat ini tetap digunakan jika tidak diganti.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-2xl bg-raised/60 border border-border/80 flex flex-col items-center justify-center shrink-0 text-text-muted">
-                    <ImageIcon className="w-6 h-6" />
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-[14px] font-bold text-white font-outfit">Unggah referensi model rambut</p>
-                    <label className="cursor-pointer inline-block">
-                      <input type="file" className="hidden" />
-                      <div className="px-4 py-2 bg-raised hover:bg-border border border-border rounded-xl text-sm font-bold text-white font-outfit flex items-center gap-2 transition-colors">
-                        <Upload className="w-4 h-4" />
-                        <span>Unggah gambar</span>
-                      </div>
-                    </label>
-                    <p className="text-[13px] text-text-muted font-outfit">
-                      Gunakan foto yang memperlihatkan potongan dengan jelas.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* URL Gambar */}
             <div className="space-y-1.5">
               <label className="block text-[14px] font-bold text-white font-outfit">
-                {isEditMode ? 'URL gambar pengganti' : 'Atau gunakan URL gambar'}
+                URL gambar referensi
               </label>
               <div className="relative">
                 <input
                   type="text"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://..."
+                  placeholder="https://... atau /hairstyles/skin-fade.jpg.png"
                   className={`w-full bg-raised/60 border rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors font-outfit ${
                     errors.imageUrl ? 'border-rose-500 pr-10' : 'border-border/80 focus:border-secondary'
                   }`}
@@ -247,7 +228,7 @@ export default function HairstyleFormView() {
                 <p className="text-[13px] text-rose-400 font-outfit font-medium">{errors.imageUrl}</p>
               ) : (
                 <p className="text-[13px] text-text-muted font-outfit">
-                  Unggahan atau URL gambar akan mengisi image_url.
+                  Gunakan URL gambar online atau jalur gambar lokal.
                 </p>
               )}
             </div>
@@ -271,12 +252,8 @@ export default function HairstyleFormView() {
                   <AlertCircle className="w-4 h-4 text-rose-400 absolute right-3 top-1/2 -translate-y-1/2" />
                 )}
               </div>
-              {errors.name ? (
+              {errors.name && (
                 <p className="text-[13px] text-rose-400 font-outfit font-medium">{errors.name}</p>
-              ) : (
-                <p className="text-[13px] text-text-muted font-outfit">
-                  Gunakan nama yang mudah dikenali pelanggan.
-                </p>
               )}
             </div>
 
@@ -287,12 +264,9 @@ export default function HairstyleFormView() {
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Jelaskan karakteristik potongan rambut"
+                placeholder="Jelaskan karakteristik potongan rambut..."
                 className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl p-4 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors font-outfit resize-none"
               />
-              <p className="text-[13px] text-text-muted font-outfit">
-                Jelaskan bentuk potongan dan karakteristik utamanya.
-              </p>
             </div>
 
             {/* Tipe Rambut & Level Perawatan */}
@@ -303,20 +277,21 @@ export default function HairstyleFormView() {
                   type="text"
                   value={hairType}
                   onChange={(e) => setHairType(e.target.value)}
-                  placeholder="Contoh: Lurus"
+                  placeholder="Contoh: Lurus, Bergelombang, Keriting"
                   className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors font-outfit"
                 />
-                <p className="text-[13px] text-text-muted font-outfit">Contoh: Lurus, Bergelombang, atau Keriting.</p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[14px] font-bold text-white font-outfit">Level perawatan</label>
+                <label className="block text-[14px] font-bold text-white font-outfit">Level perawatan (1-5)</label>
                 <div className="relative">
                   <input
-                    type="text"
+                    type="number"
+                    min="1"
+                    max="5"
                     value={careLevel}
                     onChange={(e) => setCareLevel(e.target.value)}
-                    placeholder="Masukkan bilangan bulat"
+                    placeholder="1 - 5"
                     className={`w-full bg-raised/60 border rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors font-outfit ${
                       errors.careLevel ? 'border-rose-500 pr-10' : 'border-border/80 focus:border-secondary'
                     }`}
@@ -325,12 +300,8 @@ export default function HairstyleFormView() {
                     <AlertCircle className="w-4 h-4 text-rose-400 absolute right-3 top-1/2 -translate-y-1/2" />
                   )}
                 </div>
-                {errors.careLevel ? (
+                {errors.careLevel && (
                   <p className="text-[13px] text-rose-400 font-outfit font-medium">{errors.careLevel}</p>
-                ) : (
-                  <p className="text-[13px] text-text-muted font-outfit">
-                    Bilangan bulat; skala dan rentang level belum ditentukan.
-                  </p>
                 )}
               </div>
             </div>
@@ -339,8 +310,8 @@ export default function HairstyleFormView() {
           {/* Card 2: Pemetaan Bentuk Wajah */}
           <div className="p-6 md:p-8 rounded-2xl bg-surface border border-border space-y-4 shadow-md font-outfit">
             <div>
-              <h2 className="text-lg font-bold text-white">Pemetaan bentuk wajah</h2>
-              <p className="text-[13px] text-text-muted mt-0.5">Rancangan saja • tidak wajib dan tidak disimpan</p>
+              <h2 className="text-lg font-bold text-white">Pemetaan bentuk wajah yang cocok</h2>
+              <p className="text-[13px] text-text-muted mt-0.5">Pilih bentuk wajah rekomendasi untuk AI Scanner</p>
             </div>
 
             <div className="flex flex-wrap gap-3 pt-1">
@@ -366,10 +337,6 @@ export default function HairstyleFormView() {
                 </button>
               ))}
             </div>
-
-            <p className="text-[13px] text-text-muted leading-relaxed pt-2">
-              Relasi HAIRSTYLES-FACE_SHAPES M:N belum memiliki tabel penghubung. Pilihan di atas hanya contoh rancangan, bukan data tersimpan.
-            </p>
           </div>
         </div>
 
@@ -378,7 +345,7 @@ export default function HairstyleFormView() {
           {/* Status Model */}
           <div className="p-6 rounded-2xl bg-surface border border-border space-y-4">
             <div>
-              <h3 className="text-base font-bold text-white">Status model</h3>
+              <h3 className="text-base font-bold text-white">Status AI</h3>
               <p className="text-[13px] text-text-muted mt-0.5">
                 {isEditMode ? `${name || 'Model'} saat ini ${status}.` : 'Pilih status awal model rambut.'}
               </p>
@@ -401,7 +368,7 @@ export default function HairstyleFormView() {
                 >
                   {status === 'aktif' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                 </div>
-                <span>Aktif</span>
+                <span>Aktif AI</span>
               </button>
 
               <button
@@ -423,10 +390,6 @@ export default function HairstyleFormView() {
                 <span>Nonaktif</span>
               </button>
             </div>
-
-            <p className="text-[13px] text-text-muted leading-relaxed">
-              Model aktif dapat digunakan untuk rekomendasi AI. Model nonaktif tidak ditampilkan pada rekomendasi.
-            </p>
           </div>
 
           {/* Informasi Sistem */}
@@ -434,38 +397,23 @@ export default function HairstyleFormView() {
             <div>
               <h3 className="text-base font-bold text-white">Informasi sistem</h3>
               <p className="text-[13px] text-text-muted mt-0.5">
-                {isEditMode ? 'Identitas model • hanya baca' : 'Diisi otomatis, bukan bagian dari form.'}
+                {isEditMode ? 'Identitas model • tersimpan' : 'Dibuat otomatis oleh sistem'}
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <p className="text-[13px] text-text-muted">ID model (UUID)</p>
+              <p className="text-[13px] text-text-muted">ID model</p>
               <p className="text-[14px] font-bold text-white break-all">
                 {isEditMode ? uuid : 'Dibuat setelah disimpan'}
               </p>
-              {isEditMode && <p className="text-[12px] text-text-muted">Contoh ID model • tidak dapat diedit.</p>}
             </div>
-          </div>
-
-          {/* Banner Info Bawah (Cokelat Figma) */}
-          <div className="bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 space-y-1 shadow-md font-outfit">
-            <h4 className="text-[14px] font-bold text-secondary">
-              {isEditMode ? 'Perubahan model' : 'Sebelum menyimpan'}
-            </h4>
-            <p className="text-[13px] text-text-muted leading-relaxed">
-              {isEditMode
-                ? 'Perubahan baru diterapkan setelah disimpan. Simpan perubahan hanya memperbarui atribut model, bukan pemetaan wajah.'
-                : 'Pastikan nama dan foto referensi terisi. Simpan model hanya menyimpan atribut model, bukan pemetaan wajah.'}
-            </p>
           </div>
         </div>
 
         {/* Action Controls Footer */}
         <div className="lg:col-span-3 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border/60 font-outfit">
           <p className="text-[13px] text-text-muted">
-            {hasErrors
-              ? 'Perbaiki 3 field yang ditandai, lalu simpan kembali. Data input tetap dipertahankan, Model belum dibuat.'
-              : 'Lengkapi nama dan foto referensi sebelum menyimpan.'}
+            Lengkapi nama dan informasi sebelum menyimpan model rambut.
           </p>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <Link href="/hairstyles" className="w-full sm:w-auto">

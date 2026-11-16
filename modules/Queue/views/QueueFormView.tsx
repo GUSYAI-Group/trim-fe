@@ -2,44 +2,58 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ChevronDown, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Check } from 'lucide-react';
 import { Dropdown } from '@/components/ui';
-
-interface ServiceOption {
-  id: string;
-  name: string;
-  duration: number; // menit
-  price: number;
-}
-
-const AVAILABLE_SERVICES: ServiceOption[] = [
-  { id: 'srv-1', name: 'Potong reguler', duration: 35, price: 60000 },
-  { id: 'srv-2', name: 'Skin fade', duration: 45, price: 75000 },
-  { id: 'srv-3', name: 'Potong + beard trim', duration: 60, price: 100000 },
-  { id: 'srv-4', name: 'Potong anak', duration: 30, price: 50000 },
-  { id: 'srv-5', name: 'Hair wash', duration: 15, price: 20000 },
-  { id: 'srv-6', name: 'Styling', duration: 15, price: 25000 },
-];
+import { useTrimStore } from '@/store/useTrimStore';
 
 export default function QueueFormView() {
+  const router = useRouter();
+
+  const kapsters = useTrimStore((s) => s.kapsters);
+  const services = useTrimStore((s) => s.services);
+  const waitingList = useTrimStore((s) => s.waitingList);
+  const addWalkInQueue = useTrimStore((s) => s.addWalkInQueue);
+
+  // Active kapsters
+  const activeKapsters = kapsters.filter((k) => k.statusText === 'Aktif');
+  const barberOptions =
+    activeKapsters.length > 0 ? activeKapsters.map((k) => k.name) : ['Gus Farhan', 'Lefi Dian'];
+
+  // Active services
+  const activeServices = services.filter((s) => s.isActive);
+  const availableServices =
+    activeServices.length > 0
+      ? activeServices.map((s) => ({
+          id: s.id,
+          name: s.name,
+          duration: s.duration,
+          price: s.price,
+        }))
+      : [
+          { id: '1', name: 'Potong reguler', duration: 35, price: 60000 },
+          { id: '2', name: 'Skin fade', duration: 45, price: 75000 },
+          { id: '5', name: 'Hair wash', duration: 15, price: 20000 },
+        ];
+
+  // Next Queue Number
+  const nextQueueNo = `A-0${waitingList.length + 22}`;
+
   // Form States - Informasi Booking
   const [customer, setCustomer] = useState('Satria Wibowo');
-  const [barber, setBarber] = useState('Raka Putra');
-  const [bookingDate, setBookingDate] = useState('7 Oktober 2026');
-  const [startTime, setStartTime] = useState('10:00 WIB');
-  const [bookingStatus, setBookingStatus] = useState('confirmed');
+  const [barber, setBarber] = useState(barberOptions[0] || 'Gus Farhan');
+  const [bookingDate, setBookingDate] = useState('Hari ini');
+  const [startTime, setStartTime] = useState('15:00 WIB');
+  const [selectedServices, setSelectedServices] = useState<string[]>([
+    availableServices[0]?.id || '1',
+  ]);
+  const [estimatedWaitTime, setEstimatedWaitTime] = useState('10');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Form States - Pilihan Layanan (Default terpilih: Potong reguler & Hair wash sesuai Figma)
-  const [selectedServices, setSelectedServices] = useState<string[]>(['srv-1', 'srv-5']);
-
-  // Form States - Konteks Antrean
-  const [queueStatus, setQueueStatus] = useState('waiting');
-  const [estimatedWaitTime, setEstimatedWaitTime] = useState('0');
-
-  // Kalkulasi Otomatis Total Durasi & Harga
+  // Calculations
   const selectedServiceObjects = useMemo(() => {
-    return AVAILABLE_SERVICES.filter((srv) => selectedServices.includes(srv.id));
-  }, [selectedServices]);
+    return availableServices.filter((srv) => selectedServices.includes(srv.id));
+  }, [availableServices, selectedServices]);
 
   const totalDuration = useMemo(() => {
     return selectedServiceObjects.reduce((acc, curr) => acc + curr.duration, 0);
@@ -52,7 +66,9 @@ export default function QueueFormView() {
   // Handler Pilihan Layanan
   const toggleService = (id: string) => {
     if (selectedServices.includes(id)) {
-      setSelectedServices(selectedServices.filter((sId) => sId !== id));
+      if (selectedServices.length > 1) {
+        setSelectedServices(selectedServices.filter((sId) => sId !== id));
+      }
     } else {
       setSelectedServices([...selectedServices, id]);
     }
@@ -60,7 +76,32 @@ export default function QueueFormView() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Antrean untuk ${customer} berhasil dibuat!`);
+    setErrorMessage('');
+
+    if (!customer.trim()) {
+      setErrorMessage('Nama pelanggan wajib diisi.');
+      return;
+    }
+
+    if (selectedServices.length === 0) {
+      setErrorMessage('Pilih minimal satu layanan.');
+      return;
+    }
+
+    const serviceNames = selectedServiceObjects.map((s) => s.name).join(' + ');
+
+    addWalkInQueue({
+      queueNo: nextQueueNo,
+      timeRange: `${startTime.replace(' WIB', '')}–${totalDuration} mnt`,
+      customerName: customer.trim(),
+      serviceDetail: `${serviceNames} • ${totalDuration} menit`,
+      kapsterName: barber,
+      statusText: `Tunggu ${estimatedWaitTime} menit`,
+      statusFlowText: 'waiting / in_queue',
+      checkInTime: `Check-in ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`,
+    });
+
+    router.push('/queue');
   };
 
   return (
@@ -81,7 +122,7 @@ export default function QueueFormView() {
               Tambah Antrean
             </h1>
             <p className="text-text-muted text-xs md:text-sm mt-0.5">
-              Buat booking beserta antreannya dalam satu penyimpanan.
+              Buat antrean walk-in atau booking baru langsung ke papan antrean TRIM Bandung.
             </p>
           </div>
 
@@ -95,6 +136,12 @@ export default function QueueFormView() {
         </div>
       </div>
 
+      {errorMessage && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 font-outfit text-sm">
+          {errorMessage}
+        </div>
+      )}
+
       {/* Main Grid Layout */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Kolom Kiri Utama */}
@@ -102,9 +149,9 @@ export default function QueueFormView() {
           {/* Card 1: Informasi Booking */}
           <div className="p-6 md:p-8 rounded-2xl bg-surface border border-border space-y-6 shadow-md font-outfit">
             <div>
-              <h2 className="text-lg font-bold text-white">Informasi booking</h2>
+              <h2 className="text-lg font-bold text-white">Informasi antrean</h2>
               <p className="text-[12px] text-text-muted uppercase tracking-wider mt-0.5">
-                BOOKINGS • Pelanggan dan jadwal layanan
+                Pelanggan dan kapster yang melayani
               </p>
             </div>
 
@@ -112,96 +159,58 @@ export default function QueueFormView() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-[14px] font-bold text-white">
-                  Pelanggan • customer_id
+                  Nama pelanggan *
                 </label>
-                <Dropdown
+                <input
+                  type="text"
                   value={customer}
-                  onChange={setCustomer}
-                  variant="form"
-                  options={['Satria Wibowo', 'Budi Santoso', 'Aditya Pratama']}
+                  onChange={(e) => setCustomer(e.target.value)}
+                  placeholder="Contoh: Budi Santoso"
+                  required
+                  className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors font-outfit"
                 />
-                <p className="text-[13px] text-text-muted">Pilih pelanggan yang sudah terdaftar.</p>
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-[14px] font-bold text-white">
-                  Kapster • barber_id
+                  Pilih kapster *
                 </label>
                 <Dropdown
                   value={barber}
                   onChange={setBarber}
                   variant="form"
-                  options={['Raka Putra', 'Andi Wijaya']}
+                  options={barberOptions}
                 />
-                <p className="text-[13px] text-text-muted">
-                  Skin fade • Aktif. Hanya kapster aktif dapat dipilih.
-                </p>
               </div>
             </div>
 
-            {/* Row 2: Tanggal, Jam Mulai, Jam Selesai */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Row 2: Waktu & Tanggal */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-[14px] font-bold text-white">
-                  Tanggal • booking_date
+                  Waktu mulai perkiraan
                 </label>
-                <Dropdown
-                  value={bookingDate}
-                  onChange={setBookingDate}
-                  variant="form"
-                  options={['7 Oktober 2026']}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-[14px] font-bold text-white">
-                  Mulai • start_time
-                </label>
-                <Dropdown
+                <input
+                  type="text"
                   value={startTime}
-                  onChange={setStartTime}
-                  variant="form"
-                  options={['10:00 WIB', '11:00 WIB']}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  placeholder="Contoh: 15:00 WIB"
+                  className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-[14px] text-white outline-none"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-[14px] font-bold text-white">
-                  Selesai • end_time
+                  Estimasi tunggu (menit)
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    disabled
-                    value="10:50 WIB"
-                    className="w-full bg-raised/40 border border-border/60 rounded-xl px-4 py-2.5 text-[14px] text-white/70 outline-none cursor-not-allowed"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] uppercase bg-surface px-1.5 py-0.5 rounded border border-border text-text-muted">
-                    OTOMATIS
-                  </span>
-                </div>
+                <input
+                  type="number"
+                  min="0"
+                  value={estimatedWaitTime}
+                  onChange={(e) => setEstimatedWaitTime(e.target.value)}
+                  className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-[14px] text-white outline-none"
+                />
               </div>
-            </div>
-            <p className="text-[13px] text-text-muted">
-              Waktu selesai dihitung dari waktu mulai + total durasi layanan ({totalDuration} menit).
-            </p>
-
-            {/* Status Booking */}
-            <div className="space-y-1.5 pt-2 border-t border-border/60">
-              <label className="block text-[14px] font-bold text-white">
-                Status booking • BOOKINGS.status
-              </label>
-              <Dropdown
-                value={bookingStatus}
-                onChange={setBookingStatus}
-                variant="form"
-                options={['confirmed', 'pending', 'checked_in']}
-              />
-              <p className="text-[13px] text-text-muted leading-relaxed">
-                Booking mendatang • Belum masuk papan aktif sampai check-in.
-                <br />
-                Status booking: pending, confirmed, checked_in, in_queue, in_service, completed, cancelled, no_show.
-              </p>
             </div>
           </div>
 
@@ -210,29 +219,31 @@ export default function QueueFormView() {
             <div>
               <h2 className="text-lg font-bold text-white">Pilihan layanan</h2>
               <p className="text-[12px] text-text-muted uppercase tracking-wider mt-0.5">
-                SERVICES → BOOKING_SERVICES • Bisa memilih lebih dari satu layanan aktif
+                Pilih satu atau lebih layanan yang dipesan pelanggan
               </p>
             </div>
 
             {/* Checkbox Grid Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {AVAILABLE_SERVICES.map((srv) => {
+              {availableServices.map((srv) => {
                 const isSelected = selectedServices.includes(srv.id);
                 return (
                   <div
                     key={srv.id}
                     onClick={() => toggleService(srv.id)}
-                    className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${isSelected
+                    className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                      isSelected
                         ? 'bg-[#1e140e] border-secondary'
                         : 'bg-raised/40 border-border hover:border-border/80'
-                      }`}
+                    }`}
                   >
                     <div className="flex items-start gap-3">
                       <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center mt-0.5 border transition-colors ${isSelected
+                        className={`w-5 h-5 rounded-md flex items-center justify-center mt-0.5 border transition-colors ${
+                          isSelected
                             ? 'bg-secondary border-secondary text-white'
                             : 'bg-surface border-border'
-                          }`}
+                        }`}
                       >
                         {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                       </div>
@@ -247,30 +258,6 @@ export default function QueueFormView() {
                 );
               })}
             </div>
-
-            {/* List Snapshot Harga Layanan */}
-            <div className="p-5 rounded-xl bg-raised/50 border border-border/80 space-y-3">
-              <h4 className="text-[14px] font-bold text-white">Harga tersimpan per layanan</h4>
-              {selectedServiceObjects.map((srv) => (
-                <div key={srv.id} className="flex justify-between items-center text-[13px]">
-                  <div>
-                    <p className="font-bold text-white">{srv.name}</p>
-                    <p className="text-[12px] text-text-muted">
-                      Harga saat ini Rp{srv.price.toLocaleString('id-ID')} • {srv.duration} menit
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-white">
-                      Rp{srv.price.toLocaleString('id-ID')}
-                    </p>
-                    <p className="text-[11px] text-text-muted">price_at_booking</p>
-                  </div>
-                </div>
-              ))}
-              <p className="text-[12px] text-text-muted pt-2 border-t border-border/50">
-                Harga saat ini menjadi snapshot price_at_booking saat booking disimpan.
-              </p>
-            </div>
           </div>
         </div>
 
@@ -279,136 +266,65 @@ export default function QueueFormView() {
           {/* Card Ringkasan Booking */}
           <div className="p-6 rounded-2xl bg-surface border border-border space-y-4">
             <div>
-              <h3 className="text-base font-bold text-white">Ringkasan booking</h3>
+              <h3 className="text-base font-bold text-white">Ringkasan Antrean</h3>
               <p className="text-[12px] text-text-muted mt-0.5">
-                Total harga • total_price
+                Total estimasi biaya & pengerjaan
               </p>
             </div>
 
             <div>
-              <h2 className="text-3xl font-extrabold text-white">
+              <h2 className="text-3xl font-extrabold text-secondary">
                 Rp{totalPrice.toLocaleString('id-ID')}
               </h2>
               <p className="text-[13px] text-text-muted mt-1">
-                {selectedServices.length} layanan • {totalDuration} menit • Tanpa perubahan tersimpan
+                {selectedServices.length} layanan • {totalDuration} menit
               </p>
             </div>
 
             <div className="pt-3 border-t border-border/60 text-[13px] space-y-1">
-              <p className="font-bold text-white">{bookingDate}</p>
+              <p className="font-bold text-white">{customer}</p>
               <p className="text-text-muted">
-                {startTime}–10:50 WIB • {barber}
+                Kapster: <span className="text-white font-medium">{barber}</span>
               </p>
             </div>
           </div>
 
-          {/* Card Konteks Antrean */}
+          {/* Card Nomor Antrean */}
           <div className="p-6 rounded-2xl bg-surface border border-border space-y-4">
-            <div>
-              <h3 className="text-base font-bold text-white">Konteks antrean</h3>
-              <p className="text-[12px] text-text-muted uppercase tracking-wider mt-0.5">
-                QUEUES • Terhubung 1:1 ke booking
-              </p>
-            </div>
-
-            {/* Nomor Antrean (Autogenerated) */}
-            <div className="space-y-1.5">
-              <label className="block text-[14px] font-bold text-white">
-                Nomor antrean • queue_number
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  disabled
-                  value="A-029 • Pratinjau"
-                  className="w-full bg-raised/40 border border-border/60 rounded-xl px-4 py-2.5 text-[14px] text-white/70 outline-none cursor-not-allowed"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] uppercase bg-surface px-1.5 py-0.5 rounded border border-border text-text-muted">
-                  OTOMATIS
-                </span>
+            <h3 className="text-base font-bold text-white">Nomor Antrean</h3>
+            <div className="p-4 rounded-xl bg-raised/50 border border-secondary/30 flex items-center justify-between">
+              <div>
+                <span className="text-xs text-text-muted block">Nomor Tiket</span>
+                <span className="text-2xl font-extrabold text-secondary">{nextQueueNo}</span>
               </div>
-              <p className="text-[12px] text-text-muted">
-                Nomor final dibuat otomatis saat disimpan.
-              </p>
-            </div>
-
-            {/* Status Antrean */}
-            <div className="space-y-1.5">
-              <label className="block text-[14px] font-bold text-white">
-                Status antrean • QUEUES.status
-              </label>
-              <Dropdown
-                value={queueStatus}
-                onChange={setQueueStatus}
-                variant="form"
-                options={['waiting', 'in_progress', 'completed']}
-              />
-              <p className="text-[12px] text-text-muted">
-                Status: waiting, in_progress, completed, skipped.
-              </p>
-            </div>
-
-            {/* Estimasi Tunggu */}
-            <div className="space-y-1.5">
-              <label className="block text-[14px] font-bold text-white">
-                Estimasi tunggu (menit)
-              </label>
-              <input
-                type="number"
-                value={estimatedWaitTime}
-                onChange={(e) => setEstimatedWaitTime(e.target.value)}
-                className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-[14px] text-white outline-none"
-              />
-              <p className="text-[12px] text-text-muted leading-tight">
-                estimated_wait_time_mins • Bilangan bulat ≥ 0. Dapat disesuaikan oleh operator.
-              </p>
-            </div>
-
-            {/* Waktu Masuk */}
-            <div className="space-y-1 text-[13px] pt-2 border-t border-border/60">
-              <h4 className="font-bold text-white">Waktu masuk • joined_at</h4>
-              <p className="text-[12px] text-text-muted leading-relaxed">
-                Diisi otomatis saat pelanggan benar-benar bergabung ke antrean, bukan waktu booking mendatang.
-              </p>
-              <p className="text-[11px] text-text-muted leading-relaxed pt-1">
-                booking_id ditautkan otomatis ke booking yang dibuat bersama antrean ini.
-              </p>
+              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-950/40 border border-amber-500/20 text-amber-400">
+                Menunggu
+              </span>
             </div>
           </div>
+        </div>
 
-          {/* Card Pembayaran Dikelola Terpisah */}
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-2 text-[13px]">
-            <h4 className="font-bold text-white">Pembayaran dikelola terpisah</h4>
-            <p className="text-text-muted leading-relaxed text-[13px]">
-              PAYMENTS adalah record terpisah 1:1 dengan booking. Tidak ada input pembayaran pada form ini.
-            </p>
-            <p className="text-text-muted leading-relaxed text-[11px] pt-1 border-t border-border/50">
-              UUID dan created_at dibuat otomatis. Pilihan awal dan aturan validasi adalah aturan aplikasi, bukan default atau CHECK pada schema.
-            </p>
+        {/* Sticky Bottom Bar */}
+        <div className="lg:col-span-3 bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 flex flex-col sm:flex-row items-center justify-between gap-4 font-outfit shadow-md">
+          <span className="text-[13px] text-text-muted">
+            Periksa data antrean sebelum menyimpan ke monitor langsung.
+          </span>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <Link
+              href="/queue"
+              className="px-5 py-2.5 rounded-xl bg-raised border border-border text-sm font-bold text-white hover:bg-border transition-colors cursor-pointer text-center"
+            >
+              Batal
+            </Link>
+            <button
+              type="submit"
+              className="px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-sm font-bold text-white shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer text-center"
+            >
+              Simpan antrean
+            </button>
           </div>
         </div>
       </form>
-
-      {/* Sticky Bottom Bar */}
-      <div className="bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 flex flex-col sm:flex-row items-center justify-between gap-4 font-outfit shadow-md">
-        <span className="text-[13px] text-text-muted">
-          Pelanggan &amp; kapster wajib dipilih; pilih layanan aktif dan jadwal tanpa bentrok.
-        </span>
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <Link
-            href="/queue"
-            className="px-5 py-2.5 rounded-xl bg-raised border border-border text-sm font-bold text-white hover:bg-border transition-colors cursor-pointer text-center"
-          >
-            Batal
-          </Link>
-          <button
-            onClick={handleSubmit}
-            className="px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-sm font-bold text-white shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer text-center"
-          >
-            Simpan antrean
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

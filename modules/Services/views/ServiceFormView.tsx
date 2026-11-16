@@ -2,61 +2,82 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { ArrowLeft, ChevronDown, Info } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft, Info } from 'lucide-react';
 import { Dropdown } from '@/components/ui';
-
-// Data Mockup Layanan untuk Mode Edit
-const DUMMY_SERVICES: Record<
-  string,
-  { name: string; duration: string; price: string; category: string; isActive: boolean }
-> = {
-  '1': { name: 'Potong reguler', duration: '35', price: '60.000', category: 'Potong rambut', isActive: true },
-  '2': { name: 'Skin fade', duration: '45', price: '75.000', category: 'Potong rambut', isActive: true },
-  '3': { name: 'Potong + beard trim', duration: '60', price: '100.000', category: 'Paket', isActive: true },
-  '4': { name: 'Potong anak', duration: '30', price: '50.000', category: 'Potong rambut', isActive: true },
-  '5': { name: 'Hair wash', duration: '15', price: '20.000', category: 'Perawatan', isActive: true },
-  '6': { name: 'Styling', duration: '15', price: '25.000', category: 'Styling', isActive: true },
-  '7': { name: 'Hair color', duration: '90', price: '250.000', category: 'Pewarnaan', isActive: true },
-};
+import { useTrimStore } from '@/store/useTrimStore';
 
 export default function ServiceFormView() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('id'); // Menangkap ?id=...
   const isEditMode = Boolean(editId);
 
+  const services = useTrimStore((s) => s.services);
+  const addService = useTrimStore((s) => s.addService);
+  const updateService = useTrimStore((s) => s.updateService);
+
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('Potong rambut');
   const [isActive, setIsActive] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Auto-fill saat mode edit
   useEffect(() => {
-    if (isEditMode && editId && DUMMY_SERVICES[editId]) {
-      const data = DUMMY_SERVICES[editId];
-      setName(data.name);
-      setDuration(data.duration);
-      setPrice(data.price);
-      setCategory(data.category);
-      setIsActive(data.isActive);
-    } else {
-      // Reset form jika mode tambah
-      setName('');
-      setDuration('');
-      setPrice('');
-      setCategory('');
-      setIsActive(true);
+    if (isEditMode && editId) {
+      const found = services.find((s) => s.id === editId);
+      if (found) {
+        setName(found.name);
+        setDuration(found.duration.toString());
+        setPrice(found.price.toLocaleString('id-ID'));
+        setCategory(found.category);
+        setIsActive(found.isActive);
+      }
     }
-  }, [isEditMode, editId]);
+  }, [isEditMode, editId, services]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(
-      isEditMode
-        ? `Layanan "${name}" berhasil diperbarui!`
-        : `Layanan "${name}" berhasil dibuat!`
-    );
+    setErrorMessage('');
+
+    if (!name.trim()) {
+      setErrorMessage('Nama layanan wajib diisi.');
+      return;
+    }
+
+    const dur = parseInt(duration, 10);
+    if (isNaN(dur) || dur <= 0) {
+      setErrorMessage('Durasi layanan harus berupa angka positif dalam menit.');
+      return;
+    }
+
+    const cleanPrice = parseInt(price.replace(/[^0-9]/g, ''), 10);
+    if (isNaN(cleanPrice) || cleanPrice < 0) {
+      setErrorMessage('Harga layanan tidak boleh kosong atau negatif.');
+      return;
+    }
+
+    if (isEditMode && editId) {
+      updateService(editId, {
+        name: name.trim(),
+        duration: dur,
+        price: cleanPrice,
+        category: category || 'Potong rambut',
+        isActive,
+      });
+    } else {
+      addService({
+        name: name.trim(),
+        duration: dur,
+        price: cleanPrice,
+        category: category || 'Potong rambut',
+        isActive,
+      });
+    }
+
+    router.push('/services');
   };
 
   return (
@@ -94,6 +115,12 @@ export default function ServiceFormView() {
           </Link>
         </div>
       </div>
+
+      {errorMessage && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 font-outfit text-sm">
+          {errorMessage}
+        </div>
+      )}
 
       {/* Grid Content Utama */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -150,7 +177,7 @@ export default function ServiceFormView() {
                   </span>
                 </div>
                 <p className="text-[13px] text-text-muted font-outfit">
-                  duration_minutes dalam menit.
+                  Estimasi waktu pengerjaan kapster.
                 </p>
               </div>
 
@@ -196,7 +223,7 @@ export default function ServiceFormView() {
                 ]}
               />
               <p className="text-[13px] text-text-muted font-outfit">
-                Pilih kategori yang sesuai dengan layanan.
+                Pilih kelompok layanan pada katalog booking.
               </p>
             </div>
 
@@ -251,77 +278,25 @@ export default function ServiceFormView() {
           </div>
         </form>
 
-        {/* Kolom Kanan: Panduan & Status Info */}
-        <div className="space-y-6 font-outfit">
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-4">
-            <div className="flex items-center gap-2 text-secondary font-bold text-[15px] border-b border-border/60 pb-3">
-              <Info className="w-5 h-5 text-secondary shrink-0" />
-              <span>Panduan pengisian</span>
-            </div>
-
-            <div className="space-y-1">
-              <h4 className="text-[14px] font-bold text-white">Durasi untuk penjadwalan</h4>
-              <p className="text-[13px] text-text-muted leading-relaxed">
-                Isi duration_minutes dalam menit. Gunakan perkiraan waktu yang dibutuhkan untuk menyelesaikan layanan.
-              </p>
-            </div>
-
-            <hr className="border-border/50" />
-
-            <div className="space-y-1">
-              <h4 className="text-[14px] font-bold text-white">Harga dalam rupiah</h4>
-              <p className="text-[13px] text-text-muted leading-relaxed">
-                Harga tidak boleh negatif. Tarif ini ditampilkan di aplikasi pelanggan untuk booking baru.
-              </p>
-            </div>
-
-            <hr className="border-border/50" />
-
-            <div className="space-y-1.5">
-              <h4 className="text-[14px] font-bold text-white">Kategori yang tersedia</h4>
-              <ul className="space-y-1.5 text-[13px] text-text-muted pl-4">
-                <li className="list-disc text-secondary">
-                  <span className="text-text-muted">Potong rambut</span>
-                </li>
-                <li className="list-disc text-secondary">
-                  <span className="text-text-muted">Paket</span>
-                </li>
-                <li className="list-disc text-secondary">
-                  <span className="text-text-muted">Perawatan</span>
-                </li>
-                <li className="list-disc text-secondary">
-                  <span className="text-text-muted">Styling</span>
-                </li>
-                <li className="list-disc text-secondary">
-                  <span className="text-text-muted">Pewarnaan</span>
-                </li>
-              </ul>
+        {/* Kolom Kanan: Panduan */}
+        <div className="space-y-6">
+          <div className="p-6 rounded-2xl bg-surface border border-border space-y-4 shadow-md font-outfit">
+            <h3 className="text-base font-bold text-white">Panduan Pengisian</h3>
+            <div className="space-y-3 text-sm text-text-muted">
+              <div>
+                <p className="font-semibold text-white">1. Kategori & Durasi</p>
+                <p className="text-xs mt-0.5">
+                  Durasi menentukan slot waktu antrean dan ketersediaan kapster pada sistem booking otomatis.
+                </p>
+              </div>
+              <div className="border-t border-border/60 pt-3">
+                <p className="font-semibold text-white">2. Penetapan Tarif</p>
+                <p className="text-xs mt-0.5">
+                  Tarif baru akan langsung aktif dan berlaku untuk seluruh pemesanan yang dibuat selanjutnya.
+                </p>
+              </div>
             </div>
           </div>
-
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-2">
-            <h4 className="text-[14px] font-bold text-white">
-              {isEditMode ? 'Perubahan layanan' : 'Siap tampil di menu'}
-            </h4>
-            <p className="text-[13px] text-text-muted leading-relaxed">
-              {isEditMode
-                ? 'Perubahan berlaku setelah disimpan. Menonaktifkan layanan akan menyembunyikannya dari pilihan booking baru.'
-                : 'Aktifkan layanan agar dapat dipilih pelanggan. Nonaktifkan jika layanan belum siap menerima booking.'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Warning Rule Banner */}
-      <div className="bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 flex items-start gap-4 shadow-md font-outfit">
-        <Info className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <h4 className="text-secondary font-bold text-[14px]">
-            Harga booking tidak berubah saat tarif layanan diperbarui
-          </h4>
-          <p className="text-[13px] text-text-muted leading-relaxed">
-            Harga tersimpan di BOOKING_SERVICES.price_at_booking. Jadwal berada di BOOKINGS.start_time/end_time. Harga tidak boleh negatif.
-          </p>
         </div>
       </div>
     </div>

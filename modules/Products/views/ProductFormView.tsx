@@ -2,113 +2,31 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { ArrowLeft, ChevronDown, Info, Upload, Image as ImageIcon } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft, Info, Upload, Image as ImageIcon } from 'lucide-react';
 import { Dropdown } from '@/components/ui';
-
-// Data Mockup Lengkap untuk 6 Produk (Match Tabel Katalog Produk)
-const DUMMY_PRODUCTS: Record<
-  string,
-  {
-    name: string;
-    category: string;
-    price: string;
-    stock: string;
-    minStock: string;
-    isActive: boolean;
-    description: string;
-    uuid: string;
-    createdAt: string;
-    updatedAt: string;
-  }
-> = {
-  'pomade': {
-    name: 'Pomade',
-    category: 'Minyak Rambut',
-    price: '35000',
-    stock: '12',
-    minStock: '5',
-    isActive: true,
-    description: 'Pomade dengan formula ringan dan tahan lama, cocok untuk semua jenis rambut. Memberikan hasil rambut terlihat basah rapi, berkilau, dan mudah ditata.',
-    uuid: 'UUID dari sistem',
-    createdAt: 'Dikelola sistem',
-    updatedAt: 'Dikelola sistem',
-  },
-  'hair-spray': {
-    name: 'Hair Spray',
-    category: 'Hair Spray',
-    price: '45000',
-    stock: '15',
-    minStock: '5',
-    isActive: true,
-    description: 'Hair spray dengan daya kunci tinggi untuk menjaga tatanan rambut tetap maksimal sepanjang hari.',
-    uuid: 'PRD-77B21C90-891A',
-    createdAt: 'Dikelola sistem',
-    updatedAt: 'Dikelola sistem',
-  },
-  'hair-powder': {
-    name: 'Hair Powder',
-    category: 'Powder',
-    price: '50000',
-    stock: '0',
-    minStock: '5',
-    isActive: true,
-    description: 'Bedak penataan rambut untuk memberikan volume ekstra dan efek matte natural tanpa rasa lengket.',
-    uuid: 'PRD-34E98D12-55C4',
-    createdAt: 'Dikelola sistem',
-    updatedAt: 'Dikelola sistem',
-  },
-  'hair-tonic': {
-    name: 'Hair Tonic',
-    category: 'Hair Tonic',
-    price: '65000',
-    stock: '10',
-    minStock: '5',
-    isActive: true,
-    description: 'Nutrisi kulit kepala untuk memperkuat akar rambut, mengurangi kerontokan, dan memberikan sensasi segar.',
-    uuid: 'PRD-12A55F67-99E1',
-    createdAt: 'Dikelola sistem',
-    updatedAt: 'Dikelola sistem',
-  },
-  'clay': {
-    name: 'Clay',
-    category: 'Minyak Rambut',
-    price: '30000',
-    stock: '3',
-    minStock: '5',
-    isActive: true,
-    description: 'Clay pembuat tekstur rambut dengan daya pegang kuat dan hasil akhir natural matte.',
-    uuid: 'PRD-66C43D88-11A0',
-    createdAt: 'Dikelola sistem',
-    updatedAt: 'Dikelola sistem',
-  },
-  'vitamin': {
-    name: 'Vitamin',
-    category: 'Serum',
-    price: '55000',
-    stock: '9',
-    minStock: '5',
-    isActive: true,
-    description: 'Serum vitamin rambut kaya kelembapan untuk menutrisi rambut kering dan rusak agar kembali lembut.',
-    uuid: 'PRD-90E11B34-44F2',
-    createdAt: 'Dikelola sistem',
-    updatedAt: 'Dikelola sistem',
-  },
-};
+import { useTrimStore } from '@/store/useTrimStore';
 
 export default function ProductFormView() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const editId = searchParams.get('id'); // Menangkap ?id=... (contoh: ?id=pomade)
+  const editId = searchParams.get('id'); // Menangkap ?id=... (contoh: ?id=pomade atau ?id=prd-1)
   const isEditMode = Boolean(editId);
+
+  const products = useTrimStore((s) => s.products);
+  const addProduct = useTrimStore((s) => s.addProduct);
+  const updateProduct = useTrimStore((s) => s.updateProduct);
 
   // Form States
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('Minyak Rambut');
   const [price, setPrice] = useState('');
-  const [stock, setStock] = useState('');
-  const [minStock, setMinStock] = useState('');
+  const [stock, setStock] = useState('10');
+  const [minStock, setMinStock] = useState('5');
   const [isActive, setIsActive] = useState(true);
   const [description, setDescription] = useState('');
+  const [targetId, setTargetId] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Systems Info States
   const [uuid, setUuid] = useState('Belum dibuat');
@@ -117,40 +35,81 @@ export default function ProductFormView() {
 
   // Auto-fill form jika masuk Mode Edit
   useEffect(() => {
-    if (isEditMode && editId && DUMMY_PRODUCTS[editId]) {
-      const data = DUMMY_PRODUCTS[editId];
-      setName(data.name);
-      setCategory(data.category);
-      setPrice(data.price);
-      setStock(data.stock);
-      setMinStock(data.minStock);
-      setIsActive(data.isActive);
-      setDescription(data.description);
-      setUuid(data.uuid);
-      setCreatedAt(data.createdAt);
-      setUpdatedAt(data.updatedAt);
-    } else {
-      // Reset form jika Mode Tambah
-      setName('');
-      setCategory('');
-      setPrice('');
-      setStock('');
-      setMinStock('');
-      setIsActive(true);
-      setDescription('');
-      setUuid('Belum dibuat');
-      setCreatedAt('Belum dibuat');
-      setUpdatedAt('Belum dibuat');
+    if (isEditMode && editId) {
+      const found = products.find(
+        (p) => p.rawId === editId || p.id === editId || p.id.toLowerCase() === editId.toLowerCase()
+      );
+      if (found) {
+        setTargetId(found.id);
+        setName(found.name);
+        setCategory(found.category);
+        setPrice(found.price.replace(/[^0-9]/g, ''));
+        setStock(found.stock.toString());
+        setMinStock(found.minStock.toString());
+        setIsActive(found.isActive);
+        setDescription(`${found.name} kualitas premium untuk perawatan rambut.`);
+        setUuid(found.id.toUpperCase());
+        setCreatedAt('14 Nov 2026, 08:00 WIB');
+        setUpdatedAt('Hari ini');
+      }
     }
-  }, [isEditMode, editId]);
+  }, [isEditMode, editId, products]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(
-      isEditMode
-        ? `Perubahan produk "${name}" berhasil disimpan!`
-        : `Produk "${name}" berhasil ditambahkan!`
-    );
+    setErrorMessage('');
+
+    if (!name.trim()) {
+      setErrorMessage('Nama produk wajib diisi.');
+      return;
+    }
+
+    const cleanPrice = parseInt(price.replace(/[^0-9]/g, ''), 10);
+    if (isNaN(cleanPrice) || cleanPrice < 0) {
+      setErrorMessage('Harga produk tidak boleh kosong atau negatif.');
+      return;
+    }
+
+    const stockNum = parseInt(stock, 10);
+    if (isNaN(stockNum) || stockNum < 0) {
+      setErrorMessage('Stok produk harus berupa angka non-negatif.');
+      return;
+    }
+
+    const minStockNum = parseInt(minStock, 10);
+    if (isNaN(minStockNum) || minStockNum < 0) {
+      setErrorMessage('Batas minimum stok harus berupa angka non-negatif.');
+      return;
+    }
+
+    const formattedPrice = `Rp${cleanPrice.toLocaleString('id-ID')}`;
+    const generatedRawId = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    if (isEditMode && targetId) {
+      updateProduct(targetId, {
+        name: name.trim(),
+        category: category || 'Minyak Rambut',
+        price: formattedPrice,
+        stock: stockNum,
+        minStock: minStockNum,
+        isActive,
+      });
+    } else {
+      addProduct({
+        rawId: generatedRawId,
+        name: name.trim(),
+        category: category || 'Minyak Rambut',
+        price: formattedPrice,
+        stock: stockNum,
+        minStock: minStockNum,
+        isActive,
+      });
+    }
+
+    router.push('/products');
   };
 
   return (
@@ -189,67 +148,51 @@ export default function ProductFormView() {
         </div>
       </div>
 
-      {/* Top Banner Warning Info */}
-      <div className="bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 flex items-start gap-4 shadow-md font-outfit">
-        <Info className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <h4 className="font-bold text-secondary text-[14px]">
-            {isEditMode
-              ? 'Perubahan stok dicatat sebagai penyesuaian persediaan'
-              : 'Harga dan persediaan harus nonnegatif'}
-          </h4>
-          <p className="text-text-muted text-[13px] leading-relaxed">
-            {isEditMode
-              ? 'Aturan rancangan: jika stok diubah, perubahan perlu dicatat sebagai adjustment pada INVENTORY_TRANSACTIONS. Belum ada perubahan yang disimpan.'
-              : 'Gunakan harga unit decimal ≥ 0, serta stok dan ambang minimum berupa bilangan bulat ≥ 0. Foto dan deskripsi bersifat opsional.'}
-          </p>
+      {errorMessage && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 font-outfit text-sm">
+          {errorMessage}
         </div>
-      </div>
+      )}
 
-      {/* Main Form Grid */}
+      {/* Grid Content Utama */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Kolom Kiri Utama */}
+        {/* Kolom Kiri: Form */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="p-6 md:p-8 rounded-2xl bg-surface border border-border space-y-6 shadow-md font-outfit">
+          <div className="p-6 md:p-8 rounded-2xl bg-surface border border-border space-y-6 shadow-md">
             <div className="flex justify-between items-center border-b border-border/60 pb-4">
               <div>
-                <h2 className="text-[20px] font-bold text-white">Informasi produk</h2>
-                <p className="text-[14px] text-text-muted mt-1">
-                  {isEditMode
-                    ? `Perbarui detail ${name || 'produk'} sesuai katalog toko.`
-                    : 'Lengkapi detail produk yang akan ditampilkan kepada pelanggan.'}
+                <h2 className="text-[20px] font-bold text-white font-outfit">Informasi produk</h2>
+                <p className="text-[14px] text-text-muted font-outfit mt-1">
+                  Lengkapi data produk yang akan ditampilkan di katalog TRIM.
                 </p>
               </div>
-              <span className="text-[13px] text-text-muted shrink-0">* Wajib diisi</span>
+              <span className="text-[13px] text-text-muted font-outfit shrink-0">* Wajib diisi</span>
             </div>
 
             {/* Nama Produk */}
             <div className="space-y-1.5">
-              <label className="block text-[14px] font-bold text-white">
+              <label className="block text-[14px] font-bold text-white font-outfit">
                 Nama produk *
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Contoh: Pomade"
+                placeholder="Contoh: Pomade Water-based"
                 required
-                className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors"
+                className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors font-outfit"
               />
-              <p className="text-[13px] text-text-muted">
-                Gunakan nama yang mudah dikenali pelanggan.
-              </p>
             </div>
 
             {/* Kategori */}
             <div className="space-y-1.5">
-              <label className="block text-[14px] font-bold text-white">
+              <label className="block text-[14px] font-bold text-white font-outfit">
                 Kategori *
               </label>
               <Dropdown
                 value={category}
                 onChange={setCategory}
-                placeholder="Pilih kategori produk"
+                placeholder="Pilih kategori"
                 variant="form"
                 options={[
                   'Minyak Rambut',
@@ -259,82 +202,75 @@ export default function ProductFormView() {
                   'Serum',
                 ]}
               />
-              <p className="text-[13px] text-text-muted">
-                Pilihan: Minyak Rambut, Hair Spray, Powder, Hair Tonic, Serum.
-              </p>
             </div>
 
-            {/* Harga, Stok, & Ambang Minimum */}
+            {/* Harga & Stok */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Harga Unit */}
-              <div className="space-y-1.5 sm:col-span-1">
-                <label className="block text-[14px] font-bold text-white">
-                  Harga unit
+              <div className="space-y-1.5">
+                <label className="block text-[14px] font-bold text-white font-outfit">
+                  Harga (Rp) *
                 </label>
-                <div className="relative flex items-center">
-                  <span className="absolute left-4 text-[14px] text-text-muted pointer-events-none">
-                    Rp
-                  </span>
-                  <input
-                    type="text"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="Contoh: 35000"
-                    className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl pl-12 pr-4 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors"
-                  />
-                </div>
-                <p className="text-[12px] text-text-muted leading-tight">
-                  Harga dalam Rupiah • decimal ≥ 0.
-                </p>
+                <input
+                  type="text"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="35000"
+                  required
+                  className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors font-outfit"
+                />
               </div>
 
-              {/* Stok Awal / Stok Saat Ini */}
-              <div className="space-y-1.5 sm:col-span-1">
-                <label className="block text-[14px] font-bold text-white">
-                  {isEditMode ? 'Stok saat ini' : 'Stok awal'}
+              <div className="space-y-1.5">
+                <label className="block text-[14px] font-bold text-white font-outfit">
+                  Stok saat ini *
                 </label>
-                <div className="relative flex items-center">
-                  <input
-                    type="number"
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    placeholder="Contoh: 12"
-                    className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl pl-4 pr-16 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors"
-                  />
-                  <span className="absolute right-4 text-[14px] text-text-muted pointer-events-none">
-                    unit
-                  </span>
-                </div>
-                <p className="text-[12px] text-text-muted">Bilangan bulat ≥ 0.</p>
+                <input
+                  type="number"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  placeholder="10"
+                  min="0"
+                  required
+                  className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors font-outfit"
+                />
               </div>
 
-              {/* Ambang Stok Minimum */}
-              <div className="space-y-1.5 sm:col-span-1">
-                <label className="block text-[14px] font-bold text-white">
-                  Ambang stok minimum
+              <div className="space-y-1.5">
+                <label className="block text-[14px] font-bold text-white font-outfit">
+                  Batas min. stok *
                 </label>
-                <div className="relative flex items-center">
-                  <input
-                    type="number"
-                    value={minStock}
-                    onChange={(e) => setMinStock(e.target.value)}
-                    placeholder="Contoh: 5"
-                    className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl pl-4 pr-16 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors"
-                  />
-                  <span className="absolute right-4 text-[14px] text-text-muted pointer-events-none">
-                    unit
-                  </span>
-                </div>
-                <p className="text-[12px] text-text-muted">Bilangan bulat ≥ 0.</p>
+                <input
+                  type="number"
+                  value={minStock}
+                  onChange={(e) => setMinStock(e.target.value)}
+                  placeholder="5"
+                  min="0"
+                  required
+                  className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors font-outfit"
+                />
               </div>
+            </div>
+
+            {/* Deskripsi */}
+            <div className="space-y-1.5">
+              <label className="block text-[14px] font-bold text-white font-outfit">
+                Deskripsi produk
+              </label>
+              <textarea
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Tuliskan manfaat, petunjuk pemakaian, dan keunggulan produk..."
+                className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl p-4 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors font-outfit resize-none"
+              />
             </div>
 
             {/* Status Aktif */}
-            <div className="flex items-center justify-between border-t border-border/60 pt-4">
+            <div className="flex items-center justify-between border-t border-border/60 pt-4 font-outfit">
               <div>
-                <p className="text-[14px] font-bold text-white">Status aktif</p>
+                <p className="text-[14px] font-bold text-white">Status siap jual</p>
                 <p className="text-[13px] text-text-muted mt-0.5">
-                  Produk aktif tersedia di katalog toko.
+                  Produk aktif dapat dipilih dan dijual langsung di kasir TRIM.
                 </p>
               </div>
               <div className="flex items-center gap-2.5">
@@ -357,51 +293,10 @@ export default function ProductFormView() {
               </div>
             </div>
 
-            {/* Deskripsi */}
-            <div className="space-y-1.5">
-              <label className="block text-[14px] font-bold text-white">Deskripsi</label>
-              <textarea
-                rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Masukkan deskripsi produk..."
-                className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl p-4 text-[14px] text-white placeholder:text-text-muted outline-none transition-colors resize-none font-outfit"
-              />
-              <p className="text-[13px] text-text-muted">
-                Boleh dikosongkan. Disimpan sebagai description.
-              </p>
-            </div>
-
-            {/* Foto Produk (Hanya tampil di Mode Tambah pada Kolom Kiri) */}
-            {!isEditMode && (
-              <div className="space-y-2 border-t border-border/60 pt-4">
-                <label className="block text-[14px] font-bold text-white">Foto produk</label>
-                <div className="p-8 border-2 border-dashed border-border/80 hover:border-secondary/50 rounded-2xl bg-raised/30 flex flex-col items-center justify-center text-center space-y-3 transition-colors cursor-pointer">
-                  <div className="w-10 h-10 rounded-xl bg-raised border border-border flex items-center justify-center text-text-muted">
-                    <ImageIcon className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[13px] text-text-muted">Belum ada foto diunggah</p>
-                    <label className="cursor-pointer inline-block pt-1">
-                      <input type="file" className="hidden" />
-                      <div className="px-5 py-2.5 bg-raised hover:bg-border border border-border rounded-xl text-sm font-bold text-white flex items-center gap-2 transition-colors">
-                        <Upload className="w-4 h-4" />
-                        <span>Pilih foto</span>
-                      </div>
-                    </label>
-                  </div>
-                  <p className="text-[12px] text-text-muted">Format JPG atau PNG</p>
-                </div>
-                <p className="text-[13px] text-text-muted">
-                  URL foto disimpan pada image_url setelah unggahan berhasil.
-                </p>
-              </div>
-            )}
-
             {/* Action Buttons */}
             <div className="flex items-center justify-between pt-4 border-t border-border/60 font-outfit">
               <span className="text-[13px] text-text-muted">
-                {isEditMode ? 'Periksa kembali perubahan produk sebelum menyimpan.' : 'Periksa detail sebelum menyimpan.'}
+                {isEditMode ? 'Periksa kembali perubahan sebelum menyimpan.' : 'Periksa detail sebelum menyimpan.'}
               </span>
               <div className="flex items-center gap-3">
                 <Link
@@ -431,75 +326,11 @@ export default function ProductFormView() {
             </div>
 
             <div className="space-y-1">
-              <h4 className="font-bold text-white text-[14px]">Harga dalam rupiah</h4>
+              <h4 className="font-bold text-white text-[14px]">Perhitungan status stok</h4>
               <p className="text-text-muted text-[13px] leading-relaxed">
-                {isEditMode
-                  ? 'Harga tidak boleh negatif. Tarif ini ditampilkan di katalog untuk penjualan baru.'
-                  : 'Harga tidak boleh negatif. Gunakan nilai decimal nonnegatif, contoh: 35000,50.'}
+                Status stok akan otomatis berstatus Aman jika stok &gt; batas minimum, Menipis jika ≤ batas minimum, atau Habis jika 0.
               </p>
             </div>
-
-            {!isEditMode && (
-              <>
-                <hr className="border-border/50" />
-                <div className="space-y-1">
-                  <h4 className="font-bold text-white text-[14px]">Persediaan</h4>
-                  <p className="text-text-muted text-[13px] leading-relaxed">
-                    Stok awal dan ambang minimum menggunakan bilangan bulat ≥ 0.
-                  </p>
-                </div>
-              </>
-            )}
-
-            <hr className="border-border/50" />
-
-            <div className="space-y-1.5">
-              <h4 className="font-bold text-white text-[14px]">Kategori yang tersedia</h4>
-              <ul className="space-y-1.5 text-text-muted text-[13px] pl-4">
-                <li className="list-disc text-secondary"><span className="text-text-muted">Minyak Rambut</span></li>
-                <li className="list-disc text-secondary"><span className="text-text-muted">Hair Spray</span></li>
-                <li className="list-disc text-secondary"><span className="text-text-muted">Powder</span></li>
-                <li className="list-disc text-secondary"><span className="text-text-muted">Hair Tonic</span></li>
-                <li className="list-disc text-secondary"><span className="text-text-muted">Serum</span></li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Foto Produk di Mode Edit */}
-          {isEditMode && (
-            <div className="p-6 rounded-2xl bg-surface border border-border space-y-3">
-              <div className="space-y-0.5">
-                <h4 className="font-bold text-white text-[14px]">Foto produk</h4>
-                <p className="text-text-muted text-[13px]">Opsional • Image_url</p>
-              </div>
-
-              <div className="p-6 border-2 border-dashed border-border/80 rounded-2xl bg-raised/30 flex flex-col items-center justify-center text-center space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-raised border border-border flex items-center justify-center text-text-muted">
-                  <ImageIcon className="w-4 h-4" />
-                </div>
-                <p className="text-[13px] text-text-muted">Foto belum tersedia</p>
-                <label className="cursor-pointer inline-block pt-1">
-                  <input type="file" className="hidden" />
-                  <div className="px-4 py-2 bg-raised hover:bg-border border border-border rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition-colors">
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Pilih foto</span>
-                  </div>
-                </label>
-                <p className="text-[12px] text-text-muted">Format JPG atau PNG</p>
-              </div>
-
-              <p className="text-[13px] text-text-muted">
-                URL foto disimpan pada image_url setelah unggahan berhasil.
-              </p>
-            </div>
-          )}
-
-          {/* Card Status Tampil di Menu */}
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-2">
-            <h4 className="font-bold text-white text-[14px]">Siap tampil di menu</h4>
-            <p className="text-text-muted text-[13px] leading-relaxed">
-              Aktifkan produk agar tampil di katalog. Nonaktifkan jika produk belum siap ditawarkan.
-            </p>
           </div>
 
           {/* Informasi Sistem */}
@@ -511,7 +342,7 @@ export default function ProductFormView() {
 
             <div className="space-y-3">
               <div>
-                <p className="text-text-muted text-[13px]">ID produk (UUID)</p>
+                <p className="text-text-muted text-[13px]">ID produk</p>
                 <p className="font-bold text-white text-[14px] break-all mt-0.5">{uuid}</p>
               </div>
 
@@ -519,38 +350,7 @@ export default function ProductFormView() {
                 <p className="text-text-muted text-[13px]">Tanggal dibuat</p>
                 <p className="font-bold text-white text-[14px] mt-0.5">{createdAt}</p>
               </div>
-
-              <div>
-                <p className="text-text-muted text-[13px]">Terakhir diperbarui</p>
-                <p className="font-bold text-white text-[14px] mt-0.5">{updatedAt}</p>
-              </div>
             </div>
-
-            <p className="text-[12px] text-text-muted leading-relaxed border-t border-border/50 pt-3">
-              {isEditMode
-                ? 'ID tidak diubah. Waktu pembaruan dikelola sistem setelah perubahan disimpan.'
-                : 'UUID dan waktu otomatis belum dibuat. Sistem mengisinya setelah produk berhasil disimpan.'}
-            </p>
-          </div>
-
-          {/* Aturan Status Stok */}
-          <div className="bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 space-y-1 shadow-md font-outfit">
-            <h4 className="font-bold text-secondary text-[14px]">Aturan status stok</h4>
-            <p className="text-text-muted text-[13px] leading-relaxed">
-              Aman: stok &gt; ambang minimum. Menipis: 0 &lt; stok ≤ ambang. Habis: stok = 0. Status ini dihitung, bukan diisi manual.
-            </p>
-          </div>
-
-          {/* Sebelum Menyimpan */}
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-2">
-            <h4 className="font-bold text-white text-[14px]">
-              {isEditMode ? 'Sebelum menyimpan perubahan' : 'Sebelum membuat produk'}
-            </h4>
-            <p className="text-text-muted text-[13px] leading-relaxed">
-              {isEditMode
-                ? 'Periksa kembali harga, stok, dan ambang minimum. Perubahan hanya diterapkan setelah Simpan perubahan.'
-                : 'Periksa data produk sebelum menyimpan. Produk belum dibuat; foto dan deskripsi boleh dikosongkan.'}
-            </p>
           </div>
         </div>
       </form>

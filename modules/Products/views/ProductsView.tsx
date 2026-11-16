@@ -2,33 +2,30 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Edit3, Package, CheckCircle2, AlertTriangle, AlertCircle, ChevronLeft, ChevronRight, X, ArrowUpRight } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  Edit3,
+  Package,
+  CheckCircle2,
+  AlertTriangle,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Trash2,
+  Boxes,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dropdown } from '@/components/ui';
-
-interface ProductItem {
-  id: string;
-  rawId: string;
-  name: string;
-  category: string;
-  price: string;
-  stock: number;
-  minStock: number;
-  stockStatus: 'Aman' | 'Menipis' | 'Habis';
-  isActive: boolean;
-}
-
-const INITIAL_PRODUCTS: ProductItem[] = [
-  { id: 'prd-1', rawId: 'pomade', name: 'Pomade Water-based', category: 'Minyak Rambut', price: 'Rp35.000', stock: 12, minStock: 5, stockStatus: 'Aman', isActive: true },
-  { id: 'prd-2', rawId: 'hair-spray', name: 'Hair Spray Ultra Hold', category: 'Hair Spray', price: 'Rp45.000', stock: 15, minStock: 5, stockStatus: 'Aman', isActive: true },
-  { id: 'prd-3', rawId: 'hair-powder', name: 'Hair Powder Volumizing', category: 'Powder', price: 'Rp50.000', stock: 0, minStock: 5, stockStatus: 'Habis', isActive: true },
-  { id: 'prd-4', rawId: 'hair-tonic', name: 'Hair Tonic Herbal Menthol', category: 'Hair Tonic', price: 'Rp65.000', stock: 10, minStock: 5, stockStatus: 'Aman', isActive: true },
-  { id: 'prd-5', rawId: 'clay', name: 'Matte Clay Strong Hold', category: 'Minyak Rambut', price: 'Rp30.000', stock: 3, minStock: 5, stockStatus: 'Menipis', isActive: true },
-  { id: 'prd-6', rawId: 'vitamin', name: 'Hair Serum Vitamin E', category: 'Serum', price: 'Rp55.000', stock: 9, minStock: 5, stockStatus: 'Aman', isActive: true },
-];
+import { useTrimStore, ProductItem } from '@/store/useTrimStore';
 
 export default function ProductsView() {
-  const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
+  const products = useTrimStore((s) => s.products);
+  const toggleProductActive = useTrimStore((s) => s.toggleProductActive);
+  const restockProduct = useTrimStore((s) => s.restockProduct);
+  const deleteProduct = useTrimStore((s) => s.deleteProduct);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua kategori');
   const [selectedStockStatus, setSelectedStockStatus] = useState('Semua status stok');
@@ -43,17 +40,17 @@ export default function ProductsView() {
   };
 
   // Toggle active status
-  const handleToggleActive = (id: string) => {
-    setProducts((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const nextActive = !item.isActive;
-          showToast(`${item.name} berhasil di-${nextActive ? 'aktifkan' : 'nonaktifkan'}`);
-          return { ...item, isActive: nextActive };
-        }
-        return item;
-      })
-    );
+  const handleToggleActive = (id: string, name: string, currentActive: boolean) => {
+    toggleProductActive(id);
+    showToast(`${name} berhasil di-${currentActive ? 'nonaktifkan' : 'aktifkan'}`);
+  };
+
+  // Delete product
+  const handleDeleteProduct = (id: string, name: string) => {
+    if (confirm(`Yakin ingin menghapus produk "${name}"?`)) {
+      deleteProduct(id);
+      showToast(`Produk "${name}" berhasil dihapus.`);
+    }
   };
 
   // Restock handler
@@ -61,22 +58,7 @@ export default function ProductsView() {
     e.preventDefault();
     if (!restockItem) return;
 
-    setProducts((prev) =>
-      prev.map((item) => {
-        if (item.id === restockItem.id) {
-          const newStock = item.stock + Number(restockAmount);
-          const newStatus: 'Aman' | 'Menipis' | 'Habis' =
-            newStock === 0 ? 'Habis' : newStock <= item.minStock ? 'Menipis' : 'Aman';
-          return {
-            ...item,
-            stock: newStock,
-            stockStatus: newStatus,
-          };
-        }
-        return item;
-      })
-    );
-
+    restockProduct(restockItem.id, restockAmount);
     showToast(`Stok ${restockItem.name} ditambah ${restockAmount} unit (Total: ${restockItem.stock + Number(restockAmount)})`);
     setRestockItem(null);
   };
@@ -90,9 +72,12 @@ export default function ProductsView() {
 
   const filteredProducts = products.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'Semua kategori' || item.category === selectedCategory;
-    const matchesStock = selectedStockStatus === 'Semua status stok' || item.stockStatus === selectedStockStatus;
-    const matchesActive = selectedActiveStatus === 'Semua status aktif' ||
+    const matchesCategory =
+      selectedCategory === 'Semua kategori' || item.category === selectedCategory;
+    const matchesStock =
+      selectedStockStatus === 'Semua status stok' || item.stockStatus === selectedStockStatus;
+    const matchesActive =
+      selectedActiveStatus === 'Semua status aktif' ||
       (selectedActiveStatus === 'Aktif' ? item.isActive : !item.isActive);
 
     return matchesSearch && matchesCategory && matchesStock && matchesActive;
@@ -125,79 +110,82 @@ export default function ProductsView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-[28px] font-extrabold text-white tracking-tight font-outfit">
-            Kelola Produk
+            Katalog Produk
           </h1>
           <p className="text-sm md:text-base text-text-muted mt-1 font-outfit">
-            Kelola katalog, harga satuan, dan pantau stok produk barbershop.
+            Kelola inventaris pomade, spray, tonic, dan perawatan rambut toko TRIM Bandung.
           </p>
         </div>
 
-        {/* Link Tambah Produk Bergaya Tombol */}
+        {/* Link Tambah Produk */}
         <Link
           href="/products/form"
-          className="bg-secondary hover:bg-secondary/90 text-white px-5 py-2.5 rounded-xl text-sm font-bold font-outfit flex items-center justify-center gap-2 shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer self-start sm:self-auto shrink-0"
+          className="bg-secondary hover:bg-secondary/90 text-white px-5 py-2.5 rounded-xl text-sm font-bold font-outfit flex items-center justify-center gap-2 shadow-lg shadow-secondary/20 transition-all active:scale-[0.98] cursor-pointer self-start sm:self-auto shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah produk</span>
         </Link>
       </div>
 
-      {/* 4 Stat Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col justify-between gap-4 h-36 transition-all hover:border-border/80">
-          <div className="flex justify-between items-center text-text-muted">
+      {/* Top 3 Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Card 1: Total & Aktif */}
+        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col justify-between gap-4 h-auto min-h-[140px] transition-all duration-200 hover:-translate-y-0.5 hover:border-border/80">
+          <div className="flex items-center justify-between text-text-muted">
             <span className="text-[15px] font-medium font-outfit">Total produk</span>
             <Package className="w-5 h-5 text-secondary" />
           </div>
           <div>
             <h3 className="text-3xl font-extrabold text-white mb-1 font-outfit">{totalCount}</h3>
-            <p className="text-text-muted text-[13px] font-medium font-outfit">{activeCount} produk aktif</p>
+            <p className="text-[13px] text-emerald-400 font-medium font-outfit">
+              {activeCount} produk aktif dijual
+            </p>
           </div>
         </div>
 
-        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col justify-between gap-4 h-36 transition-all hover:border-border/80">
-          <div className="flex justify-between items-center text-text-muted">
+        {/* Card 2: Stok Aman */}
+        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col justify-between gap-4 h-auto min-h-[140px] transition-all duration-200 hover:-translate-y-0.5 hover:border-border/80">
+          <div className="flex items-center justify-between text-text-muted">
             <span className="text-[15px] font-medium font-outfit">Stok aman</span>
-            <CheckCircle2 className="w-5 h-5 text-secondary" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
             <h3 className="text-3xl font-extrabold text-white mb-1 font-outfit">{safeCount}</h3>
-            <p className="text-emerald-400 text-[13px] font-medium font-outfit">Stok di atas ambang minimum</p>
+            <p className="text-[13px] text-text-muted font-outfit">
+              Stok berada di atas batas minimum
+            </p>
           </div>
         </div>
 
-        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col justify-between gap-4 h-36 transition-all hover:border-border/80">
-          <div className="flex justify-between items-center text-text-muted">
-            <span className="text-[15px] font-medium font-outfit">Stok menipis</span>
-            <AlertTriangle className="w-5 h-5 text-secondary" />
+        {/* Card 3: Perlu Restok */}
+        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col justify-between gap-4 h-auto min-h-[140px] transition-all duration-200 hover:-translate-y-0.5 hover:border-border/80">
+          <div className="flex items-center justify-between text-text-muted">
+            <span className="text-[15px] font-medium font-outfit">Perlu restok</span>
+            <AlertTriangle className="w-5 h-5 text-amber-400" />
           </div>
           <div>
-            <h3 className="text-3xl font-extrabold text-white mb-1 font-outfit">{lowCount}</h3>
-            <p className="text-amber-400 text-[13px] font-medium font-outfit">Perlu segera diisi kembali</p>
-          </div>
-        </div>
-
-        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col justify-between gap-4 h-36 transition-all hover:border-border/80">
-          <div className="flex justify-between items-center text-text-muted">
-            <span className="text-[15px] font-medium font-outfit">Stok habis</span>
-            <Package className="w-5 h-5 text-secondary" />
-          </div>
-          <div>
-            <h3 className="text-3xl font-extrabold text-white mb-1 font-outfit">{outCount}</h3>
-            <p className="text-rose-400 text-[13px] font-medium font-outfit">Tidak ada unit tersisa</p>
+            <h3 className="text-3xl font-extrabold text-amber-400 mb-1 font-outfit">
+              {lowCount + outCount}
+            </h3>
+            <p className="text-[13px] text-rose-400 font-outfit">
+              {outCount} habis • {lowCount} menipis
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Katalog Produk Section */}
+      {/* Main Table Section */}
       <div className="space-y-4 pt-1">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <h2 className="text-lg md:text-[20px] font-bold text-white font-outfit">Katalog produk</h2>
+        {/* Table Filter Header */}
+        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4">
+          <h2 className="text-lg md:text-[20px] font-bold text-white font-outfit">
+            Daftar inventaris
+          </h2>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Search Box */}
-            <div className="relative flex-1 sm:w-64">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+            {/* Search Bar */}
+            <div className="relative flex-1 sm:w-60 min-w-[200px]">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
               <input
                 type="text"
                 value={searchTerm}
@@ -226,12 +214,7 @@ export default function ProductsView() {
             <Dropdown
               value={selectedStockStatus}
               onChange={setSelectedStockStatus}
-              options={[
-                'Semua status stok',
-                'Aman',
-                'Menipis',
-                'Habis',
-              ]}
+              options={['Semua status stok', 'Aman', 'Menipis', 'Habis']}
               align="right"
             />
 
@@ -239,119 +222,187 @@ export default function ProductsView() {
             <Dropdown
               value={selectedActiveStatus}
               onChange={setSelectedActiveStatus}
-              options={[
-                'Semua status aktif',
-                'Aktif',
-                'Nonaktif',
-              ]}
+              options={['Semua status aktif', 'Aktif', 'Nonaktif']}
               align="right"
             />
           </div>
         </div>
 
-        {/* Tabel Data Katalog Produk */}
-        <div className="rounded-2xl border border-border bg-surface overflow-hidden shadow-md">
+        {/* Data Table Container */}
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-md">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead className="bg-[#222225] border-b border-border">
                 <tr>
-                  <th className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Nama produk</th>
-                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Kategori</th>
-                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Harga unit</th>
-                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Stok (unit)</th>
-                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Minimum</th>
-                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Status stok</th>
-                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Status aktif</th>
-                  <th className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit text-right">Aksi</th>
+                  <th className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">
+                    Nama produk
+                  </th>
+                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">
+                    Kategori
+                  </th>
+                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">
+                    Harga
+                  </th>
+                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">
+                    Stok
+                  </th>
+                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">
+                    Status stok
+                  </th>
+                  <th className="py-4 px-5 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">
+                    Status aktif
+                  </th>
+                  <th className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit text-right">
+                    Aksi
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50 text-text-main">
-                {filteredProducts.map((item) => (
-                  <tr key={item.id} className="hover:bg-raised/40 transition-colors">
-                    <td className="py-4 px-6">
-                      <div className="font-bold text-white text-[15px] font-outfit">{item.name}</div>
-                      <div className="text-[13px] text-text-muted font-outfit mt-0.5">Kategori: {item.category}</div>
-                    </td>
-                    <td className="py-4 px-5 font-bold text-white text-[14px] font-outfit">{item.category}</td>
-                    <td className="py-4 px-5 font-bold text-white text-[14px] font-outfit">{item.price}</td>
-                    <td className={`py-4 px-5 font-bold font-outfit text-[14px] ${item.stock === 0 ? 'text-rose-400' : item.stock <= item.minStock ? 'text-amber-400' : 'text-white'}`}>
-                      <div className="flex items-center gap-2">
-                        <span>{item.stock}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRestockItem(item);
-                            setRestockAmount(10);
-                          }}
-                          className="px-2 py-0.5 rounded-md bg-raised border border-border text-[11px] font-bold text-secondary hover:bg-border transition-colors cursor-pointer"
-                          title="Restok cepat produk ini"
-                        >
-                          + Restok
-                        </button>
-                      </div>
-                    </td>
-                    <td className="py-4 px-5 text-text-muted font-medium text-[14px] font-outfit">{item.minStock}</td>
-                    <td className="py-4 px-5">
-                      <div className={`px-2.5 py-1 text-[13px] rounded-md font-medium font-outfit flex items-center gap-1.5 w-fit ${item.stockStatus === 'Aman' ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20' :
-                        item.stockStatus === 'Menipis' ? 'bg-amber-950/40 text-amber-400 border border-amber-500/20' :
-                          'bg-rose-950/40 text-rose-400 border border-rose-500/20'
-                        }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${item.stockStatus === 'Aman' ? 'bg-emerald-400' :
-                          item.stockStatus === 'Menipis' ? 'bg-amber-400' : 'bg-rose-400'
-                          }`}></div>
-                        <span>{item.stockStatus}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-5">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleActive(item.id)}
-                        className={`px-2.5 py-1 text-[13px] rounded-md font-medium font-outfit flex items-center gap-1.5 w-fit cursor-pointer active:scale-95 transition-all hover:opacity-90 ${item.isActive
-                            ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-zinc-500/10 text-zinc-400 border border-border'
-                          }`}
-                        title="Klik untuk ubah status aktif/nonaktif"
-                      >
-                        <div className={`w-1.5 h-1.5 rounded-full ${item.isActive ? 'bg-emerald-400' : 'bg-zinc-400'}`}></div>
-                        <span>{item.isActive ? 'Aktif' : 'Nonaktif'}</span>
-                      </button>
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex items-center justify-end gap-4">
-                        {/* Link Edit Produk */}
-                        <Link
-                          href={`/products/form?id=${item.rawId}`}
-                          className="text-secondary font-bold text-[14px] hover:text-white transition-colors flex items-center gap-1 font-outfit cursor-pointer"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                          <span>Edit</span>
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => handleToggleActive(item.id)}
-                          className={`text-[14px] font-outfit font-medium cursor-pointer transition-colors ${item.isActive ? 'text-text-muted hover:text-rose-400' : 'text-emerald-400 hover:text-emerald-300'}`}
-                        >
-                          {item.isActive ? 'Nonaktifkan' : 'Aktifkan'}
-                        </button>
-                      </div>
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-text-muted font-outfit text-sm">
+                      Tidak ada produk yang sesuai dengan pencarian atau filter.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredProducts.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-raised/40 transition-colors duration-150"
+                    >
+                      <td className="py-4 px-6">
+                        <div className="font-bold text-white text-[15px] font-outfit">
+                          {item.name}
+                        </div>
+                        <div className="text-[13px] text-text-muted font-outfit mt-0.5">
+                          ID: {item.id}
+                        </div>
+                      </td>
+                      <td className="py-4 px-5 text-text-muted font-medium text-[14px] font-outfit">
+                        {item.category}
+                      </td>
+                      <td className="py-4 px-5 font-bold text-white text-[14px] font-outfit">
+                        {item.price}
+                      </td>
+                      <td className="py-4 px-5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white text-[14px] font-outfit">
+                            {item.stock} unit
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRestockItem(item);
+                              setRestockAmount(10);
+                            }}
+                            className="p-1 px-1.5 rounded-lg bg-surface border border-border text-[11px] font-bold text-secondary hover:bg-secondary hover:text-white transition-colors cursor-pointer"
+                            title="Tambah stok produk"
+                          >
+                            + Restok
+                          </button>
+                        </div>
+                        <span className="text-[11px] text-text-muted block mt-0.5">
+                          Min: {item.minStock} unit
+                        </span>
+                      </td>
+                      <td className="py-4 px-5">
+                        <div
+                          className={`px-2.5 py-1 text-[13px] rounded-md font-medium font-outfit flex items-center gap-1.5 w-fit ${
+                            item.stockStatus === 'Aman'
+                              ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20'
+                              : item.stockStatus === 'Menipis'
+                              ? 'bg-amber-950/40 text-amber-400 border border-amber-500/20'
+                              : 'bg-rose-950/40 text-rose-400 border border-rose-500/20'
+                          }`}
+                        >
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              item.stockStatus === 'Aman'
+                                ? 'bg-emerald-400'
+                                : item.stockStatus === 'Menipis'
+                                ? 'bg-amber-400'
+                                : 'bg-rose-400'
+                            }`}
+                          />
+                          <span>{item.stockStatus}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-5">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleActive(item.id, item.name, item.isActive)}
+                          className={`px-2.5 py-1 text-[13px] rounded-md font-medium font-outfit flex items-center gap-1.5 w-fit cursor-pointer active:scale-95 transition-all hover:opacity-90 ${
+                            item.isActive
+                              ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20'
+                              : 'bg-zinc-500/10 text-zinc-400 border border-border'
+                          }`}
+                          title="Klik untuk ubah status aktif/nonaktif"
+                        >
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              item.isActive ? 'bg-emerald-400' : 'bg-zinc-400'
+                            }`}
+                          />
+                          <span>{item.isActive ? 'Aktif' : 'Nonaktif'}</span>
+                        </button>
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex items-center justify-end gap-3 font-outfit">
+                          {/* Link Edit Produk */}
+                          <Link
+                            href={`/products/form?id=${item.rawId || item.id}`}
+                            className="text-secondary font-bold text-[14px] hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                            <span>Edit</span>
+                          </Link>
+
+                          {/* Toggle Active Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleToggleActive(item.id, item.name, item.isActive)}
+                            className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-border bg-surface text-text-muted hover:text-white hover:bg-raised transition-colors cursor-pointer"
+                          >
+                            {item.isActive ? 'Nonaktifkan' : 'Aktifkan'}
+                          </button>
+
+                          {/* Delete Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProduct(item.id, item.name)}
+                            className="p-1 text-text-muted hover:text-red-400 transition-colors cursor-pointer"
+                            title="Hapus produk"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Table Footer / Pagination */}
           <div className="p-4 md:px-6 border-t border-border flex items-center justify-between text-[13px] text-text-muted font-outfit">
-            <span>Menampilkan 1–{filteredProducts.length} dari {products.length} produk</span>
+            <span>
+              Menampilkan 1–{filteredProducts.length} dari {products.length} produk
+            </span>
             <div className="flex items-center gap-3">
-              <button className="p-1 rounded text-text-muted hover:text-white disabled:opacity-40 transition-colors" disabled>
+              <button
+                className="p-1 rounded text-text-muted hover:text-white disabled:opacity-40 transition-colors"
+                disabled
+              >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <span className="w-7 h-7 rounded-md bg-secondary text-white font-bold flex items-center justify-center text-[13px]">
                 1
               </span>
-              <button className="p-1 rounded text-text-muted hover:text-white disabled:opacity-40 transition-colors" disabled>
+              <button
+                className="p-1 rounded text-text-muted hover:text-white disabled:opacity-40 transition-colors"
+                disabled
+              >
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -398,17 +449,23 @@ export default function ProductsView() {
               <form onSubmit={handleRestockSubmit} className="space-y-4">
                 <div className="p-3 rounded-xl bg-surface border border-border flex justify-between items-center text-sm">
                   <span className="text-text-muted">Stok Saat Ini:</span>
-                  <span className="font-bold text-white">{restockItem.stock} unit (Min: {restockItem.minStock})</span>
+                  <span className="font-bold text-white">
+                    {restockItem.stock} unit (Min: {restockItem.minStock})
+                  </span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs text-text-muted font-medium">Jumlah Tambahan Unit</label>
+                  <label className="text-xs text-text-muted font-medium">
+                    Jumlah Tambahan Unit
+                  </label>
                   <input
                     type="number"
                     min="1"
                     max="1000"
                     value={restockAmount}
-                    onChange={(e) => setRestockAmount(Math.max(1, parseInt(e.target.value) || 0))}
+                    onChange={(e) =>
+                      setRestockAmount(Math.max(1, parseInt(e.target.value) || 0))
+                    }
                     className="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-white font-bold focus:outline-none focus:border-secondary"
                   />
                   <div className="flex gap-2 pt-1">
@@ -426,7 +483,10 @@ export default function ProductsView() {
                 </div>
 
                 <div className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/20 text-xs text-emerald-400">
-                  Total setelah restock: <span className="font-bold">{restockItem.stock + Number(restockAmount)} unit</span>
+                  Total setelah restock:{' '}
+                  <span className="font-bold">
+                    {restockItem.stock + Number(restockAmount)} unit
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
@@ -458,7 +518,7 @@ export default function ProductsView() {
             Status aktif berbeda dari status stok
           </h4>
           <p className="text-[13px] text-text-muted leading-relaxed font-outfit">
-            Aman: stok &gt; minimum. Menipis: 0 &lt; stok ≤ minimum. Habis: stok = 0. Klik tombol status atau restok untuk mengelola ketersediaan secara langsung.
+            Aman: stok &gt; minimum. Menipis: 0 &lt; stok ≤ minimum. Habis: stok = 0. Seluruh penyesuaian stok dan produk langsung disimpan secara otomatis.
           </p>
         </div>
       </div>

@@ -2,32 +2,16 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Star, Users, Scissors, ChevronLeft, ChevronRight, ArrowRight, Info, X, Phone, CheckCircle, Clock } from 'lucide-react';
+import { Plus, Search, Star, Users, Scissors, ChevronLeft, ChevronRight, ArrowRight, Info, X, Phone, CheckCircle, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TableRow, TableHead, TableCell, DataTable, Dropdown } from '@/components/ui';
-
-interface KapsterItem {
-  phone: string;
-  name: string;
-  initials: string;
-  specialty: string;
-  finished: number;
-  rating: string;
-  statusText: 'Aktif' | 'Nonaktif';
-  badgeType: 'success' | 'muted';
-}
-
-const INITIAL_KAPSTERS: KapsterItem[] = [
-  { phone: '0812 3456 7890', name: 'Gus Farhan', initials: 'GF', specialty: 'Fade & taper', finished: 8, rating: '4,9', statusText: 'Aktif', badgeType: 'success' },
-  { phone: '0813 7788 9900', name: 'Lefi Dian', initials: 'LD', specialty: 'Classic & pompadour', finished: 6, rating: '4,9', statusText: 'Aktif', badgeType: 'success' },
-  { phone: '0821 4455 6677', name: 'Zidan Alex', initials: 'ZA', specialty: 'Texture & crop', finished: 4, rating: '4,8', statusText: 'Aktif', badgeType: 'success' },
-  { phone: '0857 2211 3344', name: 'Ridho Arman', initials: 'RA', specialty: 'Buzz cut & beard', finished: 0, rating: '5,0', statusText: 'Aktif', badgeType: 'success' },
-  { phone: '0819 6677 8899', name: 'Yoga Prasetyo', initials: 'YP', specialty: 'Mullet & wolf cut', finished: 0, rating: '4,7', statusText: 'Nonaktif', badgeType: 'muted' },
-  { phone: '0878 1122 5566', name: 'Reza Firmansyah', initials: 'RF', specialty: 'Hair tattoo & color', finished: 0, rating: '4,6', statusText: 'Nonaktif', badgeType: 'muted' },
-];
+import { useTrimStore, KapsterItem } from '@/store/useTrimStore';
 
 export function BarbersView() {
-  const [kapsters, setKapsters] = useState<KapsterItem[]>(INITIAL_KAPSTERS);
+  const kapsters = useTrimStore((s) => s.kapsters);
+  const toggleKapsterStatus = useTrimStore((s) => s.toggleKapsterStatus);
+  const deleteKapster = useTrimStore((s) => s.deleteKapster);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<'Semua' | 'Aktif' | 'Nonaktif'>('Semua');
   const [detailKapster, setDetailKapster] = useState<KapsterItem | null>(null);
@@ -40,27 +24,15 @@ export function BarbersView() {
 
   // Toggle status kapster
   const handleToggleStatus = (phone: string) => {
-    setKapsters((prev) =>
-      prev.map((k) => {
-        if (k.phone === phone) {
-          const nextStatus = k.statusText === 'Aktif' ? 'Nonaktif' : 'Aktif';
-          const nextBadge = nextStatus === 'Aktif' ? 'success' : 'muted';
-          showToast(`Status ${k.name} diubah menjadi ${nextStatus}`);
-          return {
-            ...k,
-            statusText: nextStatus,
-            badgeType: nextBadge,
-          };
-        }
-        return k;
-      })
-    );
+    toggleKapsterStatus(phone);
+    const target = kapsters.find((k) => k.phone === phone);
+    const nextStatus = target?.statusText === 'Aktif' ? 'Nonaktif' : 'Aktif';
+    showToast(`Status ${target?.name || 'Kapster'} diubah menjadi ${nextStatus}`);
 
     // If modal is open for this kapster, update it too
     if (detailKapster && detailKapster.phone === phone) {
       setDetailKapster((prev) => {
         if (!prev) return null;
-        const nextStatus = prev.statusText === 'Aktif' ? 'Nonaktif' : 'Aktif';
         return {
           ...prev,
           statusText: nextStatus,
@@ -68,6 +40,12 @@ export function BarbersView() {
         };
       });
     }
+  };
+
+  const handleDeleteKapster = (phone: string, name: string) => {
+    deleteKapster(phone);
+    setDetailKapster(null);
+    showToast(`Kapster ${name} berhasil dihapus.`);
   };
 
   // Menghitung statistik dinamis
@@ -426,12 +404,20 @@ export function BarbersView() {
               <div className="flex items-center justify-between gap-3 pt-2 border-t border-border">
                 <button
                   type="button"
-                  onClick={() => handleToggleStatus(detailKapster.phone)}
-                  className="px-4 py-2.5 rounded-xl bg-surface border border-border text-xs font-bold text-white hover:bg-raised transition-colors cursor-pointer active:scale-95"
+                  onClick={() => handleDeleteKapster(detailKapster.phone, detailKapster.name)}
+                  className="px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-colors cursor-pointer active:scale-95 flex items-center gap-1.5"
                 >
-                  {detailKapster.statusText === 'Aktif' ? 'Nonaktifkan Kapster' : 'Aktifkan Kapster'}
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Hapus
                 </button>
                 <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleStatus(detailKapster.phone)}
+                    className="px-4 py-2.5 rounded-xl bg-surface border border-border text-xs font-bold text-white hover:bg-raised transition-colors cursor-pointer active:scale-95"
+                  >
+                    {detailKapster.statusText === 'Aktif' ? 'Nonaktifkan' : 'Aktifkan'}
+                  </button>
                   <Link
                     href={`/barbers/form?id=${detailKapster.phone.replace(/\s+/g, '')}`}
                     className="px-4 py-2.5 rounded-xl bg-secondary text-white text-xs font-bold hover:bg-secondary/90 transition-colors cursor-pointer active:scale-95"

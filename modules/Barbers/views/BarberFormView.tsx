@@ -2,58 +2,119 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { ArrowLeft, Upload, Info, ChevronDown, ArrowUpRight, User, Lock, Star } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft, Upload, Info, Lock, Star, User } from 'lucide-react';
 import { Card, Button, Dropdown } from '@/components/ui';
-
-// Data Mockup untuk Auto-Fill Mode Edit
-const DUMMY_KAPSTER_MAP: Record<string, { name: string; phone: string; specialty: string; email: string; status: 'aktif' | 'nonaktif'; rating: string; finished: number }> = {
-  '081234567890': { name: 'Gus Farhan', phone: '0812 3456 7890', specialty: 'Fade & taper', email: 'farhan@trim.id', status: 'aktif', rating: '4,9', finished: 8 },
-  '081377889900': { name: 'Lefi Dian', phone: '0813 7788 9900', specialty: 'Classic & pompadour', email: 'lefi@trim.id', status: 'aktif', rating: '4,9', finished: 6 },
-  '082144556677': { name: 'Zidan Alex', phone: '0821 4455 6677', specialty: 'Texture & crop', email: 'zidan@trim.id', status: 'aktif', rating: '4,8', finished: 4 },
-  '085722113344': { name: 'Ridho Arman', phone: '0857 2211 3344', specialty: 'Buzz cut & beard', email: 'ridho@trim.id', status: 'aktif', rating: '5,0', finished: 0 },
-  '081966778899': { name: 'Yoga Prasetyo', phone: '0819 6677 8899', specialty: 'Mullet & wolf cut', email: 'yoga@trim.id', status: 'nonaktif', rating: '4,7', finished: 0 },
-  '087811225566': { name: 'Reza Firmansyah', phone: '0878 1122 5566', specialty: 'Hair tattoo & color', email: 'reza@trim.id', status: 'nonaktif', rating: '4,6', finished: 0 },
-};
+import { useTrimStore } from '@/store/useTrimStore';
 
 export function BarberFormView() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const editId = searchParams.get('id'); // Mengambil query ?id=...
+  const editId = searchParams.get('id'); // e.g. phone with or without spaces
   const isEditMode = Boolean(editId);
+
+  const kapsters = useTrimStore((s) => s.kapsters);
+  const accounts = useTrimStore((s) => s.accounts);
+  const addKapster = useTrimStore((s) => s.addKapster);
+  const updateKapster = useTrimStore((s) => s.updateKapster);
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [specialty, setSpecialty] = useState('');
   const [selectedEmail, setSelectedEmail] = useState('');
   const [status, setStatus] = useState<'aktif' | 'nonaktif'>('aktif');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [rating, setRating] = useState('4,9');
+  const [rating, setRating] = useState('5,0');
   const [finished, setFinished] = useState(0);
+  const [origPhone, setOrigPhone] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Auto-fill form jika dalam mode edit
   useEffect(() => {
-    if (isEditMode && editId && DUMMY_KAPSTER_MAP[editId]) {
-      const data = DUMMY_KAPSTER_MAP[editId];
-      setName(data.name);
-      setPhone(data.phone);
-      setSpecialty(data.specialty);
-      setSelectedEmail(data.email);
-      setStatus(data.status);
-      setRating(data.rating);
-      setFinished(data.finished);
+    if (isEditMode && editId) {
+      const cleanEditId = editId.replace(/\s+/g, '');
+      const found = kapsters.find((k) => k.phone.replace(/\s+/g, '') === cleanEditId);
+      if (found) {
+        setName(found.name);
+        setPhone(found.phone);
+        setOrigPhone(found.phone);
+        setSpecialty(found.specialty);
+        setStatus(found.statusText === 'Aktif' ? 'aktif' : 'nonaktif');
+        setRating(found.rating);
+        setFinished(found.finished);
+        setSelectedEmail(found.name.toLowerCase().replace(/\s+/g, '') + '@trim.id');
+      }
     }
-  }, [isEditMode, editId]);
+  }, [isEditMode, editId, kapsters]);
 
   const initials = name
     ? name
         .split(' ')
         .map((n) => n[0])
         .join('')
+        .slice(0, 2)
         .toUpperCase()
     : '';
 
+  // Get barber accounts for dropdown
+  const barberEmails = accounts
+    .filter((a) => a.role === 'barber' || a.roleBadge === 'Barber')
+    .map((a) => a.email);
+
+  const fallbackEmails = barberEmails.length > 0 
+    ? barberEmails 
+    : ['farhan@trim.id', 'lefi@trim.id', 'zidan@trim.id', 'ridho@trim.id', 'yoga@trim.id'];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+
+    if (!name.trim()) {
+      setErrorMessage('Nama lengkap kapster wajib diisi.');
+      return;
+    }
+    if (!phone.trim()) {
+      setErrorMessage('Nomor telepon kapster wajib diisi.');
+      return;
+    }
+    if (!specialty.trim()) {
+      setErrorMessage('Spesialisasi kapster wajib diisi.');
+      return;
+    }
+
+    if (isEditMode) {
+      updateKapster(origPhone || phone, {
+        name: name.trim(),
+        phone: phone.trim(),
+        specialty: specialty.trim(),
+        statusText: status === 'aktif' ? 'Aktif' : 'Nonaktif',
+        badgeType: status === 'aktif' ? 'success' : 'muted',
+        initials: initials || 'KP',
+      });
+    } else {
+      // Check phone uniqueness
+      const exists = kapsters.some((k) => k.phone.replace(/\s+/g, '') === phone.replace(/\s+/g, ''));
+      if (exists) {
+        setErrorMessage('Nomor telepon sudah terdaftar pada kapster lain.');
+        return;
+      }
+
+      addKapster({
+        name: name.trim(),
+        phone: phone.trim(),
+        specialty: specialty.trim(),
+        statusText: status === 'aktif' ? 'Aktif' : 'Nonaktif',
+        badgeType: status === 'aktif' ? 'success' : 'muted',
+        rating: '5,0',
+        finished: 0,
+        initials: initials || 'KP',
+      });
+    }
+
+    router.push('/barbers');
+  };
+
   return (
-    <div className="pb-12 font-space-grotesk relative min-h-screen">
+    <form onSubmit={handleSubmit} className="pb-12 font-space-grotesk relative min-h-screen">
       {/* Breadcrumb & Header Dinamis */}
       <div className="space-y-1 font-outfit mb-8">
         <div className="flex items-center gap-2 text-xs md:text-[13px] text-text-muted">
@@ -79,6 +140,7 @@ export function BarberFormView() {
           </header>
           <Link href="/barbers">
             <Button
+              type="button"
               variant="secondary"
               className="gap-2 shrink-0 bg-transparent border border-border text-text-main hover:bg-raised cursor-pointer"
             >
@@ -88,6 +150,12 @@ export function BarberFormView() {
           </Link>
         </div>
       </div>
+
+      {errorMessage && (
+        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 font-outfit text-sm">
+          {errorMessage}
+        </div>
+      )}
 
       {/* Main Layout Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -156,10 +224,10 @@ export function BarberFormView() {
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Contoh: 081234567890"
+                  placeholder="Contoh: 0812 3456 7890"
                   className="w-full bg-transparent border border-border rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-text-muted focus:outline-none focus:border-secondary transition-colors font-outfit"
                 />
-                <p className="text-[13px] text-text-muted">Nomor aktif, hanya angka; tanpa spasi.</p>
+                <p className="text-[13px] text-text-muted">Nomor kontak kapster untuk jadwal & pelanggan.</p>
               </div>
             </div>
 
@@ -182,7 +250,7 @@ export function BarberFormView() {
             <div className="flex items-start gap-3 pt-2">
               <Info className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
               <p className="text-[13px] text-text-muted leading-relaxed font-outfit">
-                Nomor telepon harus unik. Saat disimpan, nomor akan diperiksa agar tidak digunakan profil kapster lain.
+                Nomor telepon harus unik. Data tersimpan secara otomatis dan dapat diedit sewaktu-waktu.
               </p>
             </div>
           </Card>
@@ -206,7 +274,7 @@ export function BarberFormView() {
                   <Lock className="w-4 h-4 text-text-muted shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-white font-outfit">{selectedEmail || 'farhan@trim.id'}</p>
-                    <p className="text-[11px] text-text-muted font-outfit mt-0.5">Role: barber</p>
+                    <p className="text-[11px] text-text-muted font-outfit mt-0.5">Role: Barber</p>
                   </div>
                 </div>
                 <span className="text-[11px] font-medium text-text-muted font-outfit bg-surface px-2.5 py-1 rounded-lg border border-border">
@@ -223,34 +291,13 @@ export function BarberFormView() {
                   onChange={setSelectedEmail}
                   placeholder="Pilih akun berdasarkan email"
                   variant="form"
-                  options={[
-                    'farhan@trim.id',
-                    'lefi@trim.id',
-                    'zidan@trim.id',
-                    'ridho@trim.id',
-                    'yoga@trim.id',
-                  ]}
+                  options={fallbackEmails}
                 />
                 <p className="text-[13px] text-text-muted">
-                  Cari email, misalnya nama@trim.id. Hanya akun dengan role barber yang belum tertaut dapat dipilih.
+                  Cari email, misalnya nama@trim.id. Hanya akun dengan role barber yang dapat dipilih.
                 </p>
               </div>
             )}
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-              <p className="text-[13px] text-text-muted">
-                {isEditMode
-                  ? 'Tautan akun tidak dapat diubah di halaman ini.'
-                  : 'Satu akun hanya dapat terhubung ke satu profil kapster.'}
-              </p>
-              <Button
-                variant="secondary"
-                className="gap-2 shrink-0 bg-transparent border border-border text-text-main hover:bg-raised h-10 cursor-pointer"
-              >
-                <ArrowUpRight className="w-4 h-4" />
-                <span>Kelola akun</span>
-              </Button>
-            </div>
           </Card>
         </div>
 
@@ -310,7 +357,7 @@ export function BarberFormView() {
             </div>
 
             <p className="text-[13px] text-text-muted leading-relaxed font-outfit">
-              Mengatur keaktifan profil, bukan ketersediaan di antrean. Status sedang melayani dihitung dari booking.
+              Mengatur keaktifan profil di antrean booking kapster.
             </p>
           </Card>
 
@@ -319,14 +366,14 @@ export function BarberFormView() {
             <Card className="p-6 space-y-6 bg-surface border-border font-outfit">
               <div className="space-y-1">
                 <h2 className="text-[20px] font-bold text-white">Ringkasan performa</h2>
-                <p className="text-[13px] text-text-muted">Data terhitung • hanya baca</p>
+                <p className="text-[13px] text-text-muted">Data terhitung • real-time</p>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <p className="text-[13px] text-text-muted">Rata-rata rating</p>
                   <div className="flex items-center gap-1 text-2xl font-extrabold text-white mt-1">
-                    <Star className="w-5 h-5 text-secondary fill-secondary" /> {rating} / 5
+                    <Star className="w-5 h-5 text-secondary fill-secondary" /> {rating} / 5.0
                   </div>
                 </div>
 
@@ -339,10 +386,6 @@ export function BarberFormView() {
                   </p>
                 </div>
               </div>
-
-              <p className="text-[12px] text-text-muted leading-relaxed pt-2">
-                Rating berasal dari ulasan; jumlah selesai dihitung dari booking hari ini.
-              </p>
             </Card>
           ) : (
             <Card className="p-6 space-y-8 bg-surface border-border font-outfit">
@@ -353,32 +396,16 @@ export function BarberFormView() {
 
               <div className="space-y-6">
                 <div className="space-y-1.5">
-                  <p className="text-[13px] text-text-muted">ID profil (UUID)</p>
-                  <p className="text-[14px] text-white font-medium">Dibuat setelah disimpan</p>
+                  <p className="text-[13px] text-text-muted">ID profil</p>
+                  <p className="text-[14px] text-white font-medium">Dibuat otomatis setelah disimpan</p>
                 </div>
                 <div className="space-y-1.5">
-                  <p className="text-[13px] text-text-muted">Tanggal dibuat</p>
-                  <p className="text-[14px] text-white font-medium">Dicatat otomatis oleh sistem</p>
-                </div>
-                <div className="space-y-1.5">
-                  <p className="text-[13px] text-text-muted">Rata-rata rating</p>
-                  <p className="text-[14px] text-white font-medium">Belum ada ulasan</p>
+                  <p className="text-[13px] text-text-muted">Rata-rata rating awal</p>
+                  <p className="text-[14px] text-white font-medium">5,0 (Bintang penuh)</p>
                 </div>
               </div>
             </Card>
           )}
-
-          {/* Alert Sebelum menyimpan */}
-          <div className="bg-[#24130A] border-l-4 border-secondary rounded-lg p-5 space-y-2 font-outfit">
-            <h4 className="text-secondary font-bold text-[14px]">
-              {isEditMode ? 'Perubahan profil' : 'Sebelum menyimpan'}
-            </h4>
-            <p className="text-text-muted text-[13px] leading-relaxed">
-              {isEditMode
-                ? 'Perubahan baru diterapkan setelah disimpan. Rating dan riwayat booking tidak dapat diedit di form ini.'
-                : 'Pastikan nama, nomor telepon, spesialisasi, dan akun barber sudah terisi. Profil belum dibuat sebelum disimpan.'}
-            </p>
-          </div>
         </div>
       </div>
 
@@ -390,17 +417,22 @@ export function BarberFormView() {
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <Link href="/barbers" className="flex-1 sm:flex-none">
             <Button
+              type="button"
               variant="secondary"
               className="w-full sm:w-auto bg-transparent hover:bg-raised border border-border text-white font-bold px-8 h-11 cursor-pointer"
             >
               Batal
             </Button>
           </Link>
-          <Button variant="primary" className="flex-1 sm:flex-none px-8 font-bold h-11 cursor-pointer">
+          <Button
+            type="submit"
+            variant="primary"
+            className="flex-1 sm:flex-none px-8 font-bold h-11 cursor-pointer"
+          >
             {isEditMode ? 'Simpan perubahan' : 'Simpan kapster'}
           </Button>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

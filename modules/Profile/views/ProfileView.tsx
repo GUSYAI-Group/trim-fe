@@ -508,10 +508,10 @@ export default function ProfileView() {
                     <button
                       type="button"
                       onClick={() => {
-                      const next = !soundNotification;
-                      setSoundNotification(next);
-                      if (typeof window !== 'undefined') localStorage.setItem('trim_pref_sound', String(next));
-                    }}
+                        const next = !soundNotification;
+                        setSoundNotification(next);
+                        if (typeof window !== 'undefined') localStorage.setItem('trim_pref_sound', String(next));
+                      }}
                       className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer ${soundNotification ? 'bg-secondary' : 'bg-raised'
                         }`}
                     >
@@ -532,10 +532,10 @@ export default function ProfileView() {
                     <button
                       type="button"
                       onClick={() => {
-                      const next = !whatsappAlert;
-                      setWhatsappAlert(next);
-                      if (typeof window !== 'undefined') localStorage.setItem('trim_pref_wa', String(next));
-                    }}
+                        const next = !whatsappAlert;
+                        setWhatsappAlert(next);
+                        if (typeof window !== 'undefined') localStorage.setItem('trim_pref_wa', String(next));
+                      }}
                       className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer ${whatsappAlert ? 'bg-secondary' : 'bg-raised'
                         }`}
                     >
@@ -556,10 +556,10 @@ export default function ProfileView() {
                     <button
                       type="button"
                       onClick={() => {
-                      const next = !dailyReportEmail;
-                      setDailyReportEmail(next);
-                      if (typeof window !== 'undefined') localStorage.setItem('trim_pref_daily', String(next));
-                    }}
+                        const next = !dailyReportEmail;
+                        setDailyReportEmail(next);
+                        if (typeof window !== 'undefined') localStorage.setItem('trim_pref_daily', String(next));
+                      }}
                       className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer ${dailyReportEmail ? 'bg-secondary' : 'bg-raised'
                         }`}
                     >

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useTrimStore, AppNotification } from '@/store/useTrimStore';
 import { useRouter } from 'next/navigation';
 import {
   Bell,
@@ -41,81 +42,25 @@ export function Navbar({ onMenuClick }: NavbarProps) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  interface NotificationItem {
-    id: string;
-    title: string;
-    description: string;
-    time: string;
-    type: 'payment' | 'queue' | 'inventory' | 'booking' | 'system';
-    isRead: boolean;
-    link?: string;
-  }
-
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: 'n-1',
-      title: 'Pembayaran QRIS Berhasil',
-      description: 'Rp75.000 dari Gus Ridho telah diverifikasi oleh Pakkasir.',
-      time: '5 menit lalu',
-      type: 'payment',
-      isRead: false,
-      link: '/payments',
-    },
-    {
-      id: 'n-2',
-      title: 'Peringatan Antrean',
-      description: 'Rizky Maulana (A-024) belum check-in setelah 15 menit.',
-      time: '18 menit lalu',
-      type: 'queue',
-      isRead: false,
-      link: '/queue',
-    },
-    {
-      id: 'n-3',
-      title: 'Stok Produk Menipis',
-      description: 'Clay tersisa 3 unit. Segera lakukan restock inventaris.',
-      time: '45 menit lalu',
-      type: 'inventory',
-      isRead: false,
-      link: '/products',
-    },
-    {
-      id: 'n-4',
-      title: 'Booking Selesai',
-      description: 'Kapster Gus Farhan menyelesaikan cukuran ke-42 hari ini.',
-      time: '2 jam lalu',
-      type: 'booking',
-      isRead: true,
-      link: '/barbers',
-    },
-    {
-      id: 'n-5',
-      title: 'Sistem TRIM v1.0 Aktif',
-      description: 'Semua terminal kasir terhubung stabil dan sinkron.',
-      time: '1 hari lalu',
-      type: 'system',
-      isRead: true,
-      link: '/help',
-    },
-  ]);
+  const notifications = useTrimStore((s) => s.notifications);
+  const markNotificationAsRead = useTrimStore((s) => s.markNotificationAsRead);
+  const markAllNotificationsAsRead = useTrimStore((s) => s.markAllNotificationsAsRead);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    markAllNotificationsAsRead();
   };
 
-  const handleNotificationClick = (item: NotificationItem) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
-    );
+  const handleNotificationClick = (item: AppNotification) => {
+    markNotificationAsRead(item.id);
     if (item.link) {
       setIsNotifOpen(false);
       router.push(item.link);
     }
   };
 
-  const getNotifIcon = (type: NotificationItem['type']) => {
+  const getNotifIcon = (type: AppNotification['type']) => {
     switch (type) {
       case 'payment':
         return <Wallet className="w-4 h-4 text-emerald-400" />;
@@ -130,7 +75,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
     }
   };
 
-  const getNotifIconStyle = (type: NotificationItem['type']) => {
+  const getNotifIconStyle = (type: AppNotification['type']) => {
     switch (type) {
       case 'payment':
         return 'bg-emerald-950/40 border border-emerald-500/30';

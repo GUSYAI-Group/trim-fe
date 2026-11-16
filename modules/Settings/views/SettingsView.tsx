@@ -3,65 +3,37 @@
 import React, { useState } from 'react';
 import { Plus, Check, X, Calendar, Edit2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  useTrimStore,
+  DaySchedule,
+  DayStatus,
+  HolidayEntry,
+  StoreSetting,
+} from '@/store/useTrimStore';
 
-type DayStatus = 'buka' | 'tutup';
-
-interface DaySchedule {
-  day: string;
-  subtitle?: string;
+function StatusBadge({
+  status,
+  disabled,
+  onClick,
+}: {
   status: DayStatus;
-  open: string;
-  close: string;
-  locked?: boolean;
-}
-
-interface HolidayEntry {
-  id: number;
-  date: string;
-  dateLabel: string;
-  type: 'tanggal-libur' | 'rentang-libur';
-  typeLabel: string;
-  description: string;
-}
-
-interface StoreSetting {
-  id: number;
-  key: string;
-  value: string;
-  description: string;
-}
-
-const INITIAL_SCHEDULE: DaySchedule[] = [
-  { day: 'Senin',  status: 'buka', open: '08:00', close: '18:00' },
-  { day: 'Selasa', status: 'buka', open: '08:00', close: '18:00' },
-  { day: 'Rabu',   status: 'buka', open: '08:00', close: '18:00' },
-  { day: 'Kamis',  status: 'buka', open: '08:00', close: '18:00' },
-  { day: 'Jumat',  status: 'buka', open: '08:00', close: '19:00' },
-  { day: 'Sabtu',  status: 'buka', open: '09:00', close: '20:00' },
-  { day: 'Minggu', subtitle: 'Tutup rutin', status: 'tutup', open: '—', close: '—', locked: true },
-];
-
-const INITIAL_HOLIDAYS: HolidayEntry[] = [
-  { id: 1, date: '25 Desember 2026', dateLabel: 'Hari Raya Natal',   type: 'tanggal-libur', typeLabel: 'Tanggal libur', description: 'Libur Nasional — Hari Raya Natal' },
-  { id: 2, date: '1 Januari 2027',   dateLabel: 'Tahun Baru Masehi', type: 'tanggal-libur', typeLabel: 'Tanggal libur', description: 'Libur Nasional — Tahun Baru Masehi' },
-  { id: 3, date: '1–3 Januari 2027', dateLabel: 'Libur tahun baru',  type: 'rentang-libur', typeLabel: 'Rentang libur', description: 'Libur tahun baru — slot pelanggan ditutup selama rentang ini' },
-];
-
-const INITIAL_SETTINGS: StoreSetting[] = [
-  { id: 1, key: 'is_store_closed', value: 'false',      description: 'Toko buka hari ini' },
-  { id: 2, key: 'holiday_date',    value: '2026-12-25', description: 'Libur Nasional — Hari Raya Natal' },
-];
-
-function StatusBadge({ status, disabled, onClick }: { status: DayStatus; disabled?: boolean; onClick?: () => void }) {
+  disabled?: boolean;
+  onClick?: () => void;
+}) {
   const isBuka = status === 'buka';
-  const interactiveClasses = !disabled && onClick ? 'cursor-pointer hover:opacity-80 active:scale-95 transition-all' : '';
-  
+  const interactiveClasses =
+    !disabled && onClick ? 'cursor-pointer hover:opacity-80 active:scale-95 transition-all' : '';
+
   return (
-    <button 
+    <button
       type="button"
       onClick={!disabled ? onClick : undefined}
       disabled={disabled}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium font-outfit ${interactiveClasses} ${isBuka ? 'bg-emerald-950/40 border border-emerald-500/20 text-emerald-400' : 'bg-rose-950/40 border border-rose-500/20 text-rose-400'}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium font-outfit ${interactiveClasses} ${
+        isBuka
+          ? 'bg-emerald-950/40 border border-emerald-500/20 text-emerald-400'
+          : 'bg-rose-950/40 border border-rose-500/20 text-rose-400'
+      }`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${isBuka ? 'bg-emerald-400' : 'bg-rose-400'}`} />
       {isBuka ? 'Buka' : 'Tutup'}
@@ -72,14 +44,28 @@ function StatusBadge({ status, disabled, onClick }: { status: DayStatus; disable
 function HolidayTypeBadge({ type, label }: { type: string; label: string }) {
   const isRange = type === 'rentang-libur';
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium font-outfit ${isRange ? 'bg-amber-950/40 border border-amber-500/20 text-amber-400' : 'bg-rose-950/40 border border-rose-500/20 text-rose-400'}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium font-outfit ${
+        isRange
+          ? 'bg-amber-950/40 border border-amber-500/20 text-amber-400'
+          : 'bg-rose-950/40 border border-rose-500/20 text-rose-400'
+      }`}
+    >
       <span className={`w-1.5 h-1.5 rounded-full ${isRange ? 'bg-amber-400' : 'bg-rose-400'}`} />
       {label}
     </span>
   );
 }
 
-function TimeInput({ value, disabled, onChange }: { value: string; disabled?: boolean; onChange?: (v: string) => void }) {
+function TimeInput({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: string;
+  disabled?: boolean;
+  onChange?: (v: string) => void;
+}) {
   return (
     <input
       type="text"
@@ -94,25 +80,39 @@ function TimeInput({ value, disabled, onChange }: { value: string; disabled?: bo
 }
 
 function JadwalOperasional({ onNotify }: { onNotify: (msg: string) => void }) {
-  const [schedule, setSchedule] = useState<DaySchedule[]>(INITIAL_SCHEDULE);
+  const schedule = useTrimStore((s) => s.schedule);
+  const updateSchedule = useTrimStore((s) => s.updateSchedule);
+
+  const [localSchedule, setLocalSchedule] = useState<DaySchedule[]>(schedule);
   const [editing, setEditing] = useState(false);
 
+  // Sync if store changes and not editing
+  React.useEffect(() => {
+    if (!editing) {
+      setLocalSchedule(schedule);
+    }
+  }, [schedule, editing]);
+
   function handleTimeChange(idx: number, field: 'open' | 'close', val: string) {
-    setSchedule((prev) => prev.map((row, i) => (i === idx ? { ...row, [field]: val } : row)));
+    setLocalSchedule((prev) =>
+      prev.map((row, i) => (i === idx ? { ...row, [field]: val } : row))
+    );
   }
 
   function handleStatusToggle(idx: number) {
-    setSchedule((prev) => prev.map((row, i) => {
-      if (i === idx) {
-        return { ...row, status: row.status === 'buka' ? 'tutup' : 'buka' };
-      }
-      return row;
-    }));
+    setLocalSchedule((prev) =>
+      prev.map((row, i) => {
+        if (i === idx) {
+          return { ...row, status: row.status === 'buka' ? 'tutup' : 'buka' };
+        }
+        return row;
+      })
+    );
   }
 
   function handleToggleEdit() {
     if (editing) {
-      // Save
+      updateSchedule(localSchedule);
       setEditing(false);
       onNotify('Jadwal operasional mingguan berhasil disimpan ke sistem TRIM!');
     } else {
@@ -124,9 +124,17 @@ function JadwalOperasional({ onNotify }: { onNotify: (msg: string) => void }) {
     <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-md">
       <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border">
         <div>
-          <h2 className="text-lg md:text-[20px] font-bold text-white font-outfit">Jadwal Operasional</h2>
+          <h2 className="text-lg md:text-[20px] font-bold text-white font-outfit">
+            Jadwal Operasional
+          </h2>
           <p className="text-sm text-text-muted mt-1 font-outfit">
-            Jam buka–tutup per hari. Minggu = tutup rutin.{editing && <span className="text-amber-400 font-semibold"> (Mode Pengeditan Aktif — klik Buka/Tutup atau sesuaikan jam)</span>}
+            Jam buka–tutup per hari. Minggu = tutup rutin.
+            {editing && (
+              <span className="text-amber-400 font-semibold">
+                {' '}
+                (Mode Pengeditan Aktif — klik Buka/Tutup atau sesuaikan jam)
+              </span>
+            )}
           </p>
         </div>
         <button
@@ -136,7 +144,7 @@ function JadwalOperasional({ onNotify }: { onNotify: (msg: string) => void }) {
           {editing ? 'Simpan jadwal' : 'Ubah jadwal'}
         </button>
       </div>
-      
+
       <div className="p-6">
         {/* Header */}
         <div className="hidden sm:grid grid-cols-[120px_120px_1fr_1fr] gap-4 mb-4 px-4 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">
@@ -148,27 +156,45 @@ function JadwalOperasional({ onNotify }: { onNotify: (msg: string) => void }) {
 
         {/* Rows */}
         <div className="space-y-3">
-          {schedule.map((row, idx) => (
-            <div 
-              key={row.day} 
-              className={`border border-border rounded-xl p-4 flex flex-col sm:grid sm:grid-cols-[120px_120px_1fr_1fr] gap-4 items-center transition-all bg-raised/10 ${row.locked ? 'opacity-50' : 'hover:border-border/80'}`}
+          {localSchedule.map((row, idx) => (
+            <div
+              key={row.day}
+              className={`border border-border rounded-xl p-4 flex flex-col sm:grid sm:grid-cols-[120px_120px_1fr_1fr] gap-4 items-center transition-all bg-raised/10 ${
+                row.locked ? 'opacity-50' : 'hover:border-border/80'
+              }`}
             >
               <div className="w-full sm:w-auto">
-                <p className={`text-[15px] font-bold font-outfit ${row.locked ? 'text-text-muted' : 'text-white'}`}>{row.day}</p>
-                {row.subtitle && <p className="text-[12px] text-text-muted mt-0.5 font-outfit">{row.subtitle}</p>}
+                <p
+                  className={`text-[15px] font-bold font-outfit ${
+                    row.locked ? 'text-text-muted' : 'text-white'
+                  }`}
+                >
+                  {row.day}
+                </p>
+                {row.subtitle && (
+                  <p className="text-[12px] text-text-muted mt-0.5 font-outfit">{row.subtitle}</p>
+                )}
               </div>
               <div className="w-full sm:w-auto">
-                <StatusBadge 
-                  status={row.status} 
-                  disabled={row.locked || !editing} 
-                  onClick={() => handleStatusToggle(idx)} 
+                <StatusBadge
+                  status={row.status}
+                  disabled={row.locked || !editing}
+                  onClick={() => handleStatusToggle(idx)}
                 />
               </div>
               <div className="w-full sm:w-auto">
-                <TimeInput value={row.open} disabled={row.locked || !editing} onChange={(v) => handleTimeChange(idx, 'open', v)} />
+                <TimeInput
+                  value={row.open}
+                  disabled={row.locked || !editing}
+                  onChange={(v) => handleTimeChange(idx, 'open', v)}
+                />
               </div>
               <div className="w-full sm:w-auto">
-                <TimeInput value={row.close} disabled={row.locked || !editing} onChange={(v) => handleTimeChange(idx, 'close', v)} />
+                <TimeInput
+                  value={row.close}
+                  disabled={row.locked || !editing}
+                  onChange={(v) => handleTimeChange(idx, 'close', v)}
+                />
               </div>
             </div>
           ))}
@@ -179,7 +205,11 @@ function JadwalOperasional({ onNotify }: { onNotify: (msg: string) => void }) {
 }
 
 function HariLiburKhusus({ onNotify }: { onNotify: (msg: string) => void }) {
-  const [holidays, setHolidays] = useState<HolidayEntry[]>(INITIAL_HOLIDAYS);
+  const holidays = useTrimStore((s) => s.holidays);
+  const addHoliday = useTrimStore((s) => s.addHoliday);
+  const updateHoliday = useTrimStore((s) => s.updateHoliday);
+  const deleteHoliday = useTrimStore((s) => s.deleteHoliday);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<HolidayEntry | null>(null);
 
@@ -212,31 +242,22 @@ function HariLiburKhusus({ onNotify }: { onNotify: (msg: string) => void }) {
     if (!formDate.trim() || !formLabel.trim()) return;
 
     if (editingItem) {
-      setHolidays((prev) =>
-        prev.map((h) =>
-          h.id === editingItem.id
-            ? {
-                ...h,
-                date: formDate,
-                dateLabel: formLabel,
-                type: formType,
-                typeLabel: formType === 'rentang-libur' ? 'Rentang libur' : 'Tanggal libur',
-                description: formDesc || formLabel,
-              }
-            : h
-        )
-      );
-      onNotify(`Hari libur "${formLabel}" berhasil diperbarui!`);
-    } else {
-      const newEntry: HolidayEntry = {
-        id: Date.now(),
-        date: formDate,
-        dateLabel: formLabel,
+      updateHoliday(editingItem.id, {
+        date: formDate.trim(),
+        dateLabel: formLabel.trim(),
         type: formType,
         typeLabel: formType === 'rentang-libur' ? 'Rentang libur' : 'Tanggal libur',
-        description: formDesc || formLabel,
-      };
-      setHolidays((prev) => [newEntry, ...prev]);
+        description: formDesc.trim() || formLabel.trim(),
+      });
+      onNotify(`Hari libur "${formLabel}" berhasil diperbarui!`);
+    } else {
+      addHoliday({
+        date: formDate.trim(),
+        dateLabel: formLabel.trim(),
+        type: formType,
+        typeLabel: formType === 'rentang-libur' ? 'Rentang libur' : 'Tanggal libur',
+        description: formDesc.trim() || formLabel.trim(),
+      });
       onNotify(`Hari libur baru "${formLabel}" berhasil ditambahkan!`);
     }
 
@@ -244,7 +265,7 @@ function HariLiburKhusus({ onNotify }: { onNotify: (msg: string) => void }) {
   };
 
   const handleDelete = (id: number, label: string) => {
-    setHolidays((prev) => prev.filter((x) => x.id !== id));
+    deleteHoliday(id);
     onNotify(`Hari libur "${label}" berhasil dihapus.`);
   };
 
@@ -252,8 +273,12 @@ function HariLiburKhusus({ onNotify }: { onNotify: (msg: string) => void }) {
     <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-md">
       <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border">
         <div>
-          <h2 className="text-lg md:text-[20px] font-bold text-white font-outfit">Hari Libur Khusus</h2>
-          <p className="text-sm text-text-muted mt-1 font-outfit">Tanggal libur mengesampingkan jadwal mingguan. Slot pelanggan ditutup otomatis.</p>
+          <h2 className="text-lg md:text-[20px] font-bold text-white font-outfit">
+            Hari Libur Khusus
+          </h2>
+          <p className="text-sm text-text-muted mt-1 font-outfit">
+            Tanggal libur mengesampingkan jadwal mingguan. Slot pelanggan ditutup otomatis.
+          </p>
         </div>
         <button
           type="button"
@@ -277,8 +302,8 @@ function HariLiburKhusus({ onNotify }: { onNotify: (msg: string) => void }) {
         {/* Rows */}
         <div className="space-y-3">
           {holidays.map((h) => (
-            <div 
-              key={h.id} 
+            <div
+              key={h.id}
               className="border border-border rounded-xl p-4 flex flex-col sm:grid sm:grid-cols-[1fr_120px_1.5fr_auto] gap-4 sm:items-center hover:border-border/80 transition-all bg-raised/10"
             >
               <div className="w-full sm:w-auto">
@@ -316,9 +341,11 @@ function HariLiburKhusus({ onNotify }: { onNotify: (msg: string) => void }) {
           )}
         </div>
       </div>
-      
+
       <div className="p-4 md:px-6 border-t border-border">
-        <p className="text-[13px] text-text-muted font-outfit">Data hari libur langsung tersimpan di STORE_SETTINGS dan disinkronkan ke kalender pemesanan.</p>
+        <p className="text-[13px] text-text-muted font-outfit">
+          Data hari libur langsung tersimpan di STORE_SETTINGS dan disinkronkan ke kalender pemesanan.
+        </p>
       </div>
 
       {/* Add / Edit Holiday Modal */}
@@ -361,7 +388,9 @@ function HariLiburKhusus({ onNotify }: { onNotify: (msg: string) => void }) {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs text-text-muted font-medium">Tanggal / Rentang Tanggal</label>
+                  <label className="text-xs text-text-muted font-medium">
+                    Tanggal / Rentang Tanggal
+                  </label>
                   <input
                     type="text"
                     required
@@ -448,18 +477,32 @@ function HariLiburKhusus({ onNotify }: { onNotify: (msg: string) => void }) {
 }
 
 function KonfigurasiLanjutan({ onNotify }: { onNotify: (msg: string) => void }) {
-  const [settings, setSettings] = useState<StoreSetting[]>(INITIAL_SETTINGS);
-  const [selected, setSelected] = useState<StoreSetting>({ ...INITIAL_SETTINGS[1] });
-  const [lastSaved, setLastSaved] = useState('6 Okt 2026 14:28 WIB');
+  const settings = useTrimStore((s) => s.settings);
+  const updateStoreSetting = useTrimStore((s) => s.updateStoreSetting);
+
+  const [selected, setSelected] = useState<StoreSetting>(settings[0] || {
+    id: 1,
+    key: 'is_store_closed',
+    value: 'false',
+    description: 'Toko buka hari ini',
+  });
+  const [lastSaved, setLastSaved] = useState('Hari ini 14:28 WIB');
 
   function handleFieldChange(field: keyof Omit<StoreSetting, 'id'>, value: string) {
     setSelected((prev) => ({ ...prev, [field]: value }));
   }
 
   function handleSave() {
-    setSettings((prev) => prev.map((s) => (s.id === selected.id ? { ...selected } : s)));
+    updateStoreSetting(selected.id, {
+      key: selected.key,
+      value: selected.value,
+      description: selected.description,
+    });
     const now = new Date();
-    const timeFormatted = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} WIB`;
+    const timeFormatted = `${now.getHours().toString().padStart(2, '0')}:${now
+      .getMinutes()
+      .toString()
+      .padStart(2, '0')} WIB`;
     setLastSaved(`Hari ini ${timeFormatted}`);
     onNotify(`Konfigurasi key "${selected.key}" berhasil diperbarui!`);
   }
@@ -468,8 +511,12 @@ function KonfigurasiLanjutan({ onNotify }: { onNotify: (msg: string) => void }) 
     <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-md">
       <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border">
         <div>
-          <h2 className="text-lg md:text-[20px] font-bold text-white font-outfit">Konfigurasi Lanjutan</h2>
-          <p className="text-sm text-text-muted mt-1 font-outfit">Nilai aktif di STORE_SETTINGS. Terakhir disimpan: {lastSaved}.</p>
+          <h2 className="text-lg md:text-[20px] font-bold text-white font-outfit">
+            Konfigurasi Lanjutan
+          </h2>
+          <p className="text-sm text-text-muted mt-1 font-outfit">
+            Nilai aktif di STORE_SETTINGS. Terakhir disimpan: {lastSaved}.
+          </p>
         </div>
         <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-3 py-1.5 rounded-xl self-start sm:self-auto font-outfit">
           <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -481,23 +528,55 @@ function KonfigurasiLanjutan({ onNotify }: { onNotify: (msg: string) => void }) 
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#222225] border-b border-border">
-                <th className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit w-14">ID</th>
-                <th className="py-4 px-4 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Setting Key</th>
-                <th className="py-4 px-4 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Value</th>
-                <th className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">Description</th>
+                <th className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit w-14">
+                  ID
+                </th>
+                <th className="py-4 px-4 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">
+                  Setting Key
+                </th>
+                <th className="py-4 px-4 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">
+                  Value
+                </th>
+                <th className="py-4 px-6 text-[12px] font-medium text-text-muted uppercase tracking-wider font-outfit">
+                  Description
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50 text-text-main">
               {settings.map((s) => {
                 const isActive = selected.id === s.id;
                 return (
-                  <tr key={s.id} onClick={() => setSelected({ ...s })} className={`hover:bg-raised/40 cursor-pointer transition-colors ${isActive ? 'bg-secondary/10' : ''}`}>
-                    <td className={`py-4 px-6 text-[13px] font-outfit text-text-muted ${isActive ? 'border-l-2 border-l-secondary' : ''}`}>{s.id}</td>
-                    <td className="py-4 px-4 text-[14px] font-medium text-white font-outfit">{s.key}</td>
-                    <td className="py-4 px-4">
-                      <span className={`px-2.5 py-1 rounded-md text-[12px] font-medium font-outfit ${s.value === 'false' || s.value === 'true' ? 'bg-emerald-950/40 border border-emerald-500/20 text-emerald-400' : 'bg-raised border border-border text-white'}`}>{s.value}</span>
+                  <tr
+                    key={s.id}
+                    onClick={() => setSelected({ ...s })}
+                    className={`hover:bg-raised/40 cursor-pointer transition-colors ${
+                      isActive ? 'bg-secondary/10' : ''
+                    }`}
+                  >
+                    <td
+                      className={`py-4 px-6 text-[13px] font-outfit text-text-muted ${
+                        isActive ? 'border-l-2 border-l-secondary' : ''
+                      }`}
+                    >
+                      {s.id}
                     </td>
-                    <td className="py-4 px-6 text-[13px] text-text-muted font-outfit">{s.description}</td>
+                    <td className="py-4 px-4 text-[14px] font-medium text-white font-outfit">
+                      {s.key}
+                    </td>
+                    <td className="py-4 px-4">
+                      <span
+                        className={`px-2.5 py-1 rounded-md text-[12px] font-medium font-outfit ${
+                          s.value === 'false' || s.value === 'true'
+                            ? 'bg-emerald-950/40 border border-emerald-500/20 text-emerald-400'
+                            : 'bg-raised border border-border text-white'
+                        }`}
+                      >
+                        {s.value}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-[13px] text-text-muted font-outfit">
+                      {s.description}
+                    </td>
                   </tr>
                 );
               })}
@@ -508,15 +587,30 @@ function KonfigurasiLanjutan({ onNotify }: { onNotify: (msg: string) => void }) 
           <h3 className="text-[16px] font-bold text-white font-outfit">Edit entri</h3>
           <div className="space-y-1.5">
             <label className="text-[12px] text-text-muted font-outfit">setting_key</label>
-            <input type="text" value={selected.key} readOnly className="w-full bg-raised border border-border rounded-xl px-4 py-2.5 text-[13px] text-text-muted focus:outline-none font-outfit cursor-not-allowed" />
+            <input
+              type="text"
+              value={selected.key}
+              readOnly
+              className="w-full bg-raised border border-border rounded-xl px-4 py-2.5 text-[13px] text-text-muted focus:outline-none font-outfit cursor-not-allowed"
+            />
           </div>
           <div className="space-y-1.5">
             <label className="text-[12px] text-text-muted font-outfit">setting_value</label>
-            <input type="text" value={selected.value} onChange={(e) => handleFieldChange('value', e.target.value)} className="w-full bg-raised border border-border rounded-xl px-4 py-2.5 text-[14px] text-white focus:outline-none focus:border-secondary transition-colors font-outfit" />
+            <input
+              type="text"
+              value={selected.value}
+              onChange={(e) => handleFieldChange('value', e.target.value)}
+              className="w-full bg-raised border border-border rounded-xl px-4 py-2.5 text-[14px] text-white focus:outline-none focus:border-secondary transition-colors font-outfit"
+            />
           </div>
           <div className="space-y-1.5">
             <label className="text-[12px] text-text-muted font-outfit">description</label>
-            <input type="text" value={selected.description} onChange={(e) => handleFieldChange('description', e.target.value)} className="w-full bg-raised border border-border rounded-xl px-4 py-2.5 text-[14px] text-white focus:outline-none focus:border-secondary transition-colors font-outfit" />
+            <input
+              type="text"
+              value={selected.description}
+              onChange={(e) => handleFieldChange('description', e.target.value)}
+              className="w-full bg-raised border border-border rounded-xl px-4 py-2.5 text-[14px] text-white focus:outline-none focus:border-secondary transition-colors font-outfit"
+            />
           </div>
           <div className="space-y-1.5">
             <label className="text-[12px] text-text-muted font-outfit">updated_at (sistem)</label>
@@ -528,7 +622,9 @@ function KonfigurasiLanjutan({ onNotify }: { onNotify: (msg: string) => void }) 
           >
             Simpan perubahan
           </button>
-          <p className="text-[11px] text-text-muted font-outfit">Konvensi nilai: holiday_date memakai format YYYY-MM-DD.</p>
+          <p className="text-[11px] text-text-muted font-outfit">
+            Konvensi nilai: holiday_date memakai format YYYY-MM-DD.
+          </p>
         </div>
       </div>
     </div>
@@ -568,7 +664,9 @@ export function SettingsView() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-[28px] font-extrabold text-white tracking-tight font-outfit">Pengaturan Toko</h1>
+          <h1 className="text-2xl md:text-[28px] font-extrabold text-white tracking-tight font-outfit">
+            Pengaturan Toko
+          </h1>
           <p className="text-sm md:text-base text-text-muted mt-1 font-outfit">
             Kelola jam operasional, hari libur, dan konfigurasi TRIM Bandung.
           </p>

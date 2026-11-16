@@ -2,84 +2,107 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { ArrowLeft, Info, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
-
-// Mockup Data untuk Auto-fill Mode Edit (Matching Figma Gambar 1)
-const DUMMY_ACCOUNTS: Record<
-  string,
-  {
-    email: string;
-    role: 'admin' | 'barber' | 'customer';
-    uuid: string;
-    createdAt: string;
-    updatedAt: string;
-  }
-> = {
-  'dimas': {
-    email: 'dimas@trim.id',
-    role: 'admin',
-    uuid: '9b1a...c7f2',
-    createdAt: '12 Sep 2026',
-    updatedAt: '6 Okt 2026',
-  },
-  'arief': {
-    email: 'arief@trim.id',
-    role: 'barber',
-    uuid: '4f88...a11c',
-    createdAt: '15 Aug 2026',
-    updatedAt: '5 Okt 2026',
-  },
-};
+import { useSearchParams, useRouter } from 'next/navigation';
+import { ArrowLeft, Info, Eye, EyeOff, CheckCircle2, User, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTrimStore, Role } from '@/store/useTrimStore';
 
 export default function AccountFormView() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('id');
   const isEditMode = Boolean(editId);
+
+  const accounts = useTrimStore((s) => s.accounts);
+  const addAccount = useTrimStore((s) => s.addAccount);
+  const updateAccount = useTrimStore((s) => s.updateAccount);
 
   // Form States
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<'admin' | 'barber' | 'customer'>('admin');
+  const [role, setRole] = useState<Role>('admin');
+  const [targetId, setTargetId] = useState<number | null>(null);
 
   // System Info States
-  const [uuid, setUuid] = useState('Belum dibuat');
-  const [createdAt, setCreatedAt] = useState('Belum dibuat');
-  const [updatedAt, setUpdatedAt] = useState('Belum dibuat');
+  const [uuid, setUuid] = useState('Dikelola sistem');
+  const [createdAt, setCreatedAt] = useState('Otomatis saat disimpan');
+  const [updatedAt, setUpdatedAt] = useState('Otomatis saat disimpan');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Auto-fill saat Edit Mode
   useEffect(() => {
-    if (isEditMode && editId && DUMMY_ACCOUNTS[editId]) {
-      const data = DUMMY_ACCOUNTS[editId];
-      setEmail(data.email);
-      setRole(data.role);
-      setUuid(data.uuid);
-      setCreatedAt(data.createdAt);
-      setUpdatedAt(data.updatedAt);
-      setPassword('');
+    if (isEditMode && editId) {
+      const found = accounts.find(
+        (a) => a.slug.toLowerCase() === editId.toLowerCase() || String(a.id) === editId || a.email.toLowerCase().includes(editId.toLowerCase())
+      );
+      if (found) {
+        setTargetId(found.id);
+        setEmail(found.email);
+        setRole(found.role);
+        setUuid(found.uuid);
+        setCreatedAt(found.createdAt);
+        setUpdatedAt(found.updatedAt);
+        setPassword('');
+      }
     } else {
       // Reset jika Tambah Baru
+      setTargetId(null);
       setEmail('');
       setPassword('');
       setRole('admin');
-      setUuid('Belum dibuat');
-      setCreatedAt('Belum dibuat');
-      setUpdatedAt('Belum dibuat');
+      setUuid('Dikelola sistem');
+      setCreatedAt('Otomatis saat disimpan');
+      setUpdatedAt('Otomatis saat disimpan');
     }
-  }, [isEditMode, editId]);
+  }, [isEditMode, editId, accounts]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(
-      isEditMode
-        ? `Akun "${email}" berhasil diperbarui!`
-        : `Akun "${email}" berhasil dibuat!`
-    );
+    if (!email.trim()) return;
+
+    if (isEditMode && targetId) {
+      updateAccount(targetId, {
+        email: email.trim(),
+        role,
+        displayName: email.split('@')[0],
+      });
+      setToastMessage(`Akun "${email}" berhasil diperbarui!`);
+    } else {
+      addAccount({
+        email: email.trim(),
+        role,
+        displayName: email.split('@')[0],
+        password: password || undefined,
+      });
+      setToastMessage(`Akun baru "${email}" berhasil dibuat!`);
+    }
+
+    setTimeout(() => {
+      router.push('/accounts');
+    }, 800);
   };
 
   return (
     <div className="space-y-6 pb-20 font-space-grotesk no-scrollbar selection:bg-secondary selection:text-white">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#1E1E22] border border-secondary/40 shadow-2xl shadow-secondary/20 font-outfit text-[14px] text-white"
+          >
+            <div className="w-2 h-2 rounded-full bg-secondary animate-ping" />
+            <span className="font-semibold">{toastMessage}</span>
+            <button onClick={() => setToastMessage(null)} className="ml-2 text-text-muted hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Breadcrumb & Header Dinamis */}
       <div className="space-y-1 font-outfit">
         <div className="flex items-center gap-2 text-xs md:text-[13px] text-text-muted">
@@ -120,38 +143,23 @@ export default function AccountFormView() {
         <div className="space-y-0.5 text-xs">
           <h4 className="font-bold text-secondary">Akses sesuai peran, bisnis tetap aman</h4>
           <p className="text-text-muted leading-relaxed">
-            Role: customer, barber, admin, owner. Admin biasa tidak dapat menghapus akun Owner; pembatasan diterapkan oleh aplikasi.
+            Role: customer, barber, admin, owner. Akun yang dibuat akan langsung tersimpan dan dapat digunakan untuk masuk ke TRIM.
           </p>
         </div>
       </div>
 
       {/* Form Main Layout */}
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start font-outfit">
         {/* Kolom Kiri Utama */}
         <div className="lg:col-span-2 space-y-6">
           {/* Card 1: Informasi Akun Login */}
-          <div className="p-6 md:p-8 rounded-2xl bg-surface border border-border space-y-6 shadow-md font-outfit">
+          <div className="p-6 md:p-8 rounded-2xl bg-surface border border-border space-y-6 shadow-md">
             <div>
               <h2 className="text-lg font-bold text-white">Informasi akun login</h2>
               <p className="text-xs text-text-muted mt-0.5">
                 Akun pengguna untuk masuk ke TRIM. Tanda * wajib diisi.
               </p>
             </div>
-
-            {/* Avatar & Sub-badge (Hanya Tampil pada Mode Edit - Match Figma 1) */}
-            {isEditMode && (
-              <div className="p-4 rounded-2xl bg-raised/50 border border-border/80 flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-raised border border-border flex items-center justify-center font-bold text-secondary text-xs">
-                  DS
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white">{email}</h4>
-                  <p className="text-[11px] text-text-muted mt-0.5">
-                    Peran saat ini: {role.charAt(0).toUpperCase() + role.slice(1)} • role: {role}
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Input Email */}
             <div className="space-y-1.5">
@@ -160,7 +168,7 @@ export default function AccountFormView() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={isEditMode ? '' : 'Masukkan email, contoh: niko@trim.id'}
+                placeholder="Masukkan email, contoh: staf@trim.id"
                 required
                 className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-text-muted outline-none transition-colors"
               />
@@ -180,195 +188,97 @@ export default function AccountFormView() {
                   placeholder={
                     isEditMode
                       ? 'Masukkan kata sandi baru jika ingin mengubah'
-                      : 'Masukkan kata sandi'
+                      : 'Masukkan kata sandi login'
                   }
                   required={!isEditMode}
-                  className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl pl-4 pr-11 py-2.5 text-xs text-white placeholder:text-text-muted outline-none transition-colors"
+                  className="w-full bg-raised/60 border border-border/80 focus:border-secondary rounded-xl pl-4 pr-10 py-2.5 text-xs text-white placeholder:text-text-muted outline-none transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 text-text-muted hover:text-white transition-colors cursor-pointer"
+                  className="absolute right-3 text-text-muted hover:text-white transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               <p className="text-[11px] text-text-muted">
                 {isEditMode
-                  ? 'Biarkan kosong untuk mempertahankan kata sandi saat ini. Jika diisi, minimal 8 karakter dengan huruf dan angka.'
-                  : 'Minimal 8 karakter, kombinasi huruf dan angka.'}
+                  ? 'Kosongkan bila tidak ingin mengubah kata sandi akun pengguna.'
+                  : 'Minimal 6 karakter kombinasi huruf dan angka.'}
               </p>
             </div>
-          </div>
 
-          {/* Card 2: Hak Akses Akun */}
-          <div className="p-6 md:p-8 rounded-2xl bg-surface border border-border space-y-6 shadow-md font-outfit">
-            <div>
-              <h2 className="text-lg font-bold text-white">Hak akses akun</h2>
-              <p className="text-xs text-text-muted mt-0.5">Pilih satu peran sesuai kebutuhan pengguna.</p>
-            </div>
-
-            <div className="space-y-3">
-              <label className="block text-xs font-bold text-white">Peran akun *</label>
-
-              {/* Grid Option Roles */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Admin */}
-                <div
-                  onClick={() => setRole('admin')}
-                  className={`p-4 rounded-xl border transition-all cursor-pointer flex justify-between items-start ${
-                    role === 'admin'
-                      ? 'bg-[#1c120c] border-secondary'
-                      : 'bg-raised/40 border-border hover:border-border/80'
-                  }`}
-                >
-                  <div>
-                    <h4 className="text-xs font-bold text-white">Admin</h4>
-                    <p className="text-[11px] text-text-muted mt-1">Kelola operasional dan staf.</p>
-                  </div>
-                  <div
-                    className={`w-4 h-4 rounded-full border flex items-center justify-center mt-0.5 ${
-                      role === 'admin' ? 'border-secondary bg-secondary' : 'border-border'
+            {/* Pilihan Peran (Role) */}
+            <div className="space-y-3 pt-2">
+              <label className="block text-xs font-bold text-white">Peran (Role) *</label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { r: 'admin', label: 'Admin', desc: 'Kelola operasional & transaksi' },
+                  { r: 'barber', label: 'Barber', desc: 'Kelola antrean & potong rambut' },
+                  { r: 'customer', label: 'Customer', desc: 'Pelanggan & reservasi online' },
+                ].map((item) => (
+                  <button
+                    key={item.r}
+                    type="button"
+                    onClick={() => setRole(item.r as Role)}
+                    className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                      role === item.r
+                        ? 'bg-secondary/15 border-secondary text-white shadow-sm shadow-secondary/10'
+                        : 'bg-raised/40 border-border text-text-muted hover:text-white hover:bg-raised'
                     }`}
                   >
-                    {role === 'admin' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                  </div>
-                </div>
-
-                {/* Barber */}
-                <div
-                  onClick={() => setRole('barber')}
-                  className={`p-4 rounded-xl border transition-all cursor-pointer flex justify-between items-start ${
-                    role === 'barber'
-                      ? 'bg-[#1c120c] border-secondary'
-                      : 'bg-raised/40 border-border hover:border-border/80'
-                  }`}
-                >
-                  <div>
-                    <h4 className="text-xs font-bold text-white">Barber</h4>
-                    <p className="text-[11px] text-text-muted mt-1">Layanan potong rambut dan jadwal.</p>
-                  </div>
-                  <div
-                    className={`w-4 h-4 rounded-full border flex items-center justify-center mt-0.5 ${
-                      role === 'barber' ? 'border-secondary bg-secondary' : 'border-border'
-                    }`}
-                  >
-                    {role === 'barber' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                  </div>
-                </div>
-
-                {/* Customer */}
-                <div
-                  onClick={() => setRole('customer')}
-                  className={`p-4 rounded-xl border transition-all cursor-pointer flex justify-between items-start sm:col-span-2 ${
-                    role === 'customer'
-                      ? 'bg-[#1c120c] border-secondary'
-                      : 'bg-raised/40 border-border hover:border-border/80'
-                  }`}
-                >
-                  <div>
-                    <h4 className="text-xs font-bold text-white">Customer</h4>
-                    <p className="text-[11px] text-text-muted mt-1">Booking, profil, dan riwayat layanan.</p>
-                  </div>
-                  <div
-                    className={`w-4 h-4 rounded-full border flex items-center justify-center mt-0.5 ${
-                      role === 'customer' ? 'border-secondary bg-secondary' : 'border-border'
-                    }`}
-                  >
-                    {role === 'customer' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                  </div>
-                </div>
+                    <p className={`text-sm font-bold ${role === item.r ? 'text-secondary' : 'text-white'}`}>
+                      {item.label}
+                    </p>
+                    <p className="text-[11px] text-text-muted mt-1 leading-snug">{item.desc}</p>
+                  </button>
+                ))}
               </div>
-
-              <p className="text-[11px] text-text-muted pt-1">
-                Role valid: customer, barber, admin, owner. Owner tidak dipilih untuk akun staf.
-              </p>
             </div>
           </div>
         </div>
 
-        {/* Kolom Kanan Sidebar */}
-        <div className="space-y-6 font-outfit">
-          {/* Card Informasi Sistem */}
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-4 text-xs">
-            <div>
-              <h4 className="font-bold text-white">Informasi sistem</h4>
-              <p className="text-text-muted text-[11px] mt-0.5">Otomatis oleh sistem • hanya baca</p>
-            </div>
+        {/* Kolom Kanan: Metadata Sistem & Action */}
+        <div className="space-y-6">
+          <div className="p-6 rounded-2xl bg-surface border border-border space-y-4 shadow-md font-outfit">
+            <h3 className="text-sm font-bold text-white border-b border-border/60 pb-3">
+              Informasi Metadata
+            </h3>
 
-            <div className="space-y-3">
+            <div className="space-y-3 text-xs">
               <div>
-                <p className="text-text-muted text-[11px]">
-                  {isEditMode ? 'ID akun (UUID singkat)' : 'ID akun (UUID)'}
-                </p>
-                <p className="font-bold text-white break-all mt-0.5">{uuid}</p>
+                <span className="text-text-muted block">UUID Akun</span>
+                <span className="font-mono text-white text-[11px] mt-0.5 block">{uuid}</span>
               </div>
-
               <div>
-                <p className="text-text-muted text-[11px]">Tanggal dibuat</p>
-                <p className="font-bold text-white mt-0.5">{createdAt}</p>
+                <span className="text-text-muted block">Tanggal Dibuat</span>
+                <span className="text-white mt-0.5 block">{createdAt}</span>
               </div>
-
               <div>
-                <p className="text-text-muted text-[11px]">Terakhir diupdate</p>
-                <p className="font-bold text-white mt-0.5">{updatedAt}</p>
+                <span className="text-text-muted block">Terakhir Diperbarui</span>
+                <span className="text-white mt-0.5 block">{updatedAt}</span>
               </div>
             </div>
 
-            <p className="text-[10px] text-text-muted leading-relaxed border-t border-border/50 pt-3">
-              {isEditMode
-                ? 'ID dan tanggal dibuat tidak berubah. Waktu update diperbarui sistem setelah Simpan perubahan.'
-                : 'ID (UUID), tanggal dibuat, dan waktu update dibuat otomatis setelah akun disimpan.'}
-            </p>
-          </div>
+            <div className="pt-4 border-t border-border/60 space-y-2">
+              <button
+                type="submit"
+                className="w-full py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-white font-bold text-xs shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>{isEditMode ? 'Simpan Perubahan' : 'Buat Akun Sekarang'}</span>
+              </button>
 
-          {/* Card Penyimpanan Akun Pengguna */}
-          <div className="p-4 rounded-2xl bg-[#1c120c] border border-secondary/20 space-y-1 shadow-md text-xs">
-            <div className="flex items-center gap-1.5 text-secondary font-bold">
-              <Info className="w-4 h-4 shrink-0" />
-              <span>Penyimpanan akun pengguna</span>
+              <Link
+                href="/accounts"
+                className="w-full py-2.5 rounded-xl bg-raised border border-border hover:bg-border text-text-muted hover:text-white font-medium text-xs transition-colors block text-center cursor-pointer"
+              >
+                Batal
+              </Link>
             </div>
-            <p className="text-text-muted text-[11px] leading-relaxed pt-1">
-              Kata sandi disimpan sebagai hash dan tidak ditampilkan. Form ini hanya menyimpan akun login. Profil CUSTOMERS/BARBERS ditautkan melalui user_id dan tidak otomatis dibuat.
-            </p>
-          </div>
-
-          {/* Card Sebelum Membuat / Perubahan Akun */}
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-2 text-xs">
-            <h4 className="font-bold text-white">
-              {isEditMode ? 'Perubahan akun' : 'Sebelum membuat akun'}
-            </h4>
-            <p className="text-text-muted leading-relaxed text-[11px]">
-              {isEditMode
-                ? 'Perubahan email, peran, dan kata sandi baru diterapkan setelah disimpan. Kata sandi lama tidak ditampilkan.'
-                : 'Pastikan email, kata sandi, dan peran sudah sesuai. Akun belum dibuat sebelum disimpan.'}
-            </p>
           </div>
         </div>
       </form>
-
-      {/* Sticky Bottom Bar */}
-      <div className="p-4 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row items-center justify-between gap-4 font-outfit shadow-xl">
-        <span className="text-xs text-text-muted">
-          {isEditMode
-            ? 'Periksa kembali perubahan akun sebelum menyimpan.'
-            : 'Lengkapi email, kata sandi, dan peran sebelum membuat akun.'}
-        </span>
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <Link
-            href="/accounts"
-            className="px-5 py-2.5 rounded-xl bg-raised border border-border text-xs font-bold text-white hover:bg-border transition-colors cursor-pointer text-center"
-          >
-            Batal
-          </Link>
-          <button
-            onClick={handleSubmit}
-            className="px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-xs font-bold text-white shadow-lg shadow-secondary/20 transition-all active:scale-95 cursor-pointer text-center"
-          >
-            {isEditMode ? 'Simpan perubahan' : 'Buat akun'}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

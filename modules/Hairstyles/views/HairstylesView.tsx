@@ -2,97 +2,73 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Search, MoreHorizontal, ArrowRight, ScanFace } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, ArrowRight, ScanFace, X, Trash2, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Dropdown } from '@/components/ui';
-
-interface HairstyleItem {
-  id: string;
-  name: string;
-  faceShapes: string[];
-  description: string;
-  hairType: string;
-  maintenanceLevel: number;
-  image: string;
-  isAiActive: boolean;
-}
-
-const HAIRSTYLES_DATA: HairstyleItem[] = [
-  {
-    id: 'skin-fade',
-    name: 'Skin fade',
-    faceShapes: ['Oval', 'Persegi', 'Berlian'],
-    description: 'Deskripsi: Potongan rapi dengan transisi halus dari kulit ke rambut bagian atas.',
-    hairType: 'Lurus',
-    maintenanceLevel: 2,
-    image: '/hairstyles/skin-fade.jpg.png',
-    isAiActive: true,
-  },
-  {
-    id: 'textured-crop',
-    name: 'Textured crop',
-    faceShapes: ['Oval', 'Lonjong'],
-    description: 'Deskripsi: Potongan pendek dengan tekstur yang lebih ekspresif dan volume di bagian atas.',
-    hairType: 'Bergelombang',
-    maintenanceLevel: 3,
-    image: '/hairstyles/textured-crop.jpg.png',
-    isAiActive: true,
-  },
-  {
-    id: 'french-crop',
-    name: 'French crop',
-    faceShapes: ['Bulat', 'Persegi'],
-    description: 'Deskripsi: Versi modern dengan poni pendek dan rambut samping yang lebih rapi.',
-    hairType: 'Lurus',
-    maintenanceLevel: 2,
-    image: '/hairstyles/french-crop.jpg.png',
-    isAiActive: true,
-  },
-  {
-    id: 'classic-pompadour',
-    name: 'Classic pompadour',
-    faceShapes: ['Bulat', 'Oval'],
-    description: 'Deskripsi: Gaya klasik dengan volume tinggi di bagian atas dan samping yang rapi.',
-    hairType: 'Lurus',
-    maintenanceLevel: 4,
-    image: '/hairstyles/classic-pompadour.jpg.png',
-    isAiActive: true,
-  },
-  {
-    id: 'modern-mullet',
-    name: 'Modern mullet',
-    faceShapes: ['Oval', 'Berlian'],
-    description: 'Deskripsi: Versi modern dengan bagian belakang yang lebih panjang dan ekspresif.',
-    hairType: 'Bergelombang',
-    maintenanceLevel: 5,
-    image: '/hairstyles/modern-mullet.jpg.png',
-    isAiActive: true,
-  },
-  {
-    id: 'buzz-cut',
-    name: 'Buzz cut',
-    faceShapes: ['Oval', 'Persegi'],
-    description: 'Deskripsi: Potongan sangat pendek untuk tampilan bersih dan minimal.',
-    hairType: 'Keriting',
-    maintenanceLevel: 1,
-    image: '/hairstyles/buzz-cut.jpg.png',
-    isAiActive: true,
-  },
-];
+import { useTrimStore, HairstyleItem } from '@/store/useTrimStore';
 
 export default function HairstylesView() {
+  const hairstyles = useTrimStore((s) => s.hairstyles);
+  const toggleHairstyleAi = useTrimStore((s) => s.toggleHairstyleAi);
+  const deleteHairstyle = useTrimStore((s) => s.deleteHairstyle);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedShape, setSelectedShape] = useState('Semua bentuk wajah');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-  const filteredHairstyles = HAIRSTYLES_DATA.filter((item) => {
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleToggleAi = (id: string, name: string, current: boolean) => {
+    toggleHairstyleAi(id);
+    setActiveMenuId(null);
+    showToast(`Model "${name}" ${current ? 'dinonaktifkan dari' : 'diaktifkan untuk'} rekomendasi AI.`);
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    if (confirm(`Yakin ingin menghapus model rambut "${name}"?`)) {
+      deleteHairstyle(id);
+      setActiveMenuId(null);
+      showToast(`Model rambut "${name}" berhasil dihapus.`);
+    }
+  };
+
+  const filteredHairstyles = hairstyles.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesShape =
       selectedShape === 'Semua bentuk wajah' || item.faceShapes.includes(selectedShape);
     return matchesSearch && matchesShape;
   });
 
+  const activeAiCount = hairstyles.filter((h) => h.isAiActive).length;
+
   return (
     <div className="space-y-6 text-white font-space-grotesk no-scrollbar selection:bg-secondary selection:text-white pb-16">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#1E1E22] border border-secondary/40 shadow-2xl shadow-secondary/20 font-outfit text-[14px] text-white"
+          >
+            <div className="w-2 h-2 rounded-full bg-secondary animate-ping" />
+            <span className="font-semibold">{toastMessage}</span>
+            <button
+              onClick={() => setToastMessage(null)}
+              className="ml-2 text-text-muted hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -122,17 +98,13 @@ export default function HairstylesView() {
           </div>
           <div>
             <div className="text-[14px] font-bold text-secondary">
-              6 model aktif • Pemetaan wajah masih rancangan
+              {activeAiCount} model aktif untuk rekomendasi AI TRIM
             </div>
             <p className="text-[13px] text-text-muted mt-0.5 font-outfit leading-relaxed">
-              Relasi HAIRSTYLES–FACE_SHAPES belum memiliki tabel penghubung. Chips merupakan contoh pemetaan, bukan data tersimpan.
+              Model yang aktif akan muncul pada fitur AI Face Shape Scanner bagi pelanggan untuk mencocokkan gaya rambut terbaik.
             </p>
           </div>
         </div>
-        <button className="text-[13px] font-bold text-secondary hover:underline font-outfit flex items-center gap-1 shrink-0 self-end sm:self-center cursor-pointer transition-all">
-          <span>Tinjau pemetaan</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
       </div>
 
       {/* Main Catalog Section */}
@@ -167,6 +139,7 @@ export default function HairstylesView() {
                 'Bulat',
                 'Lonjong',
                 'Berlian',
+                'Segitiga',
               ]}
               align="right"
             />
@@ -174,83 +147,149 @@ export default function HairstylesView() {
         </div>
 
         {/* Grid Catalog Model Rambut */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredHairstyles.map((item) => (
-            <div
-              key={item.id}
-              className="bg-surface border border-border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-border/80 transition-all group shadow-sm"
-            >
-              {/* Card Body */}
-              <div>
-                {/* Gambar Model Rambut */}
-                <div className="relative w-full h-48 bg-neutral-900 overflow-hidden">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    className="object-cover object-center grayscale contrast-125 brightness-90 group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-
-                {/* Detail Content */}
-                <div className="p-5 md:p-6 space-y-3.5 font-outfit">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-[16px] font-bold text-white tracking-tight">
-                      {item.name}
-                    </h3>
-                    <button className="text-text-muted hover:text-white p-1 rounded-lg hover:bg-raised transition-colors">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
+        {filteredHairstyles.length === 0 ? (
+          <div className="p-12 text-center rounded-2xl bg-surface border border-border text-text-muted font-outfit">
+            Tidak ada model rambut yang cocok dengan filter atau kata kunci.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredHairstyles.map((item) => (
+              <div
+                key={item.id}
+                className="bg-surface border border-border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-border/80 transition-all group shadow-sm relative"
+              >
+                {/* Card Body */}
+                <div>
+                  {/* Gambar Model Rambut */}
+                  <div className="relative w-full h-48 bg-neutral-900 overflow-hidden">
+                    {item.image.startsWith('/') ? (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover object-center grayscale contrast-125 brightness-90 group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover object-center grayscale contrast-125 brightness-90 group-hover:scale-105 transition-transform duration-500"
+                      />
+                    )}
                   </div>
 
-                  {/* Tag / Chips Bentuk Wajah */}
-                  <div className="space-y-1.5">
-                    <p className="text-[13px] text-text-muted font-normal">Contoh bentuk wajah</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {item.faceShapes.map((shape, idx) => (
-                        <span
-                          key={idx}
-                          className="px-3 py-1.5 rounded-lg bg-raised border border-border text-[13px] text-white font-normal"
-                        >
-                          {shape}
-                        </span>
-                      ))}
+                  {/* Detail Content */}
+                  <div className="p-5 md:p-6 space-y-3.5 font-outfit">
+                    <div className="flex items-center justify-between relative">
+                      <h3 className="text-[16px] font-bold text-white tracking-tight">
+                        {item.name}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => setActiveMenuId(activeMenuId === item.id ? null : item.id)}
+                        className="text-text-muted hover:text-white p-1 rounded-lg hover:bg-raised transition-colors cursor-pointer"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+
+                      {/* Dropdown Menu */}
+                      <AnimatePresence>
+                        {activeMenuId === item.id && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                            className="absolute right-0 top-8 z-20 w-44 rounded-xl bg-[#1E1E22] border border-border shadow-2xl p-1.5 space-y-1 font-outfit text-xs"
+                          >
+                            <Link
+                              href={`/hairstyles/form?id=${item.id}`}
+                              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-white hover:bg-raised transition-colors"
+                            >
+                              Edit Model
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleAi(item.id, item.name, item.isAiActive)}
+                              className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-white hover:bg-raised transition-colors"
+                            >
+                              {item.isAiActive ? 'Matikan AI' : 'Aktifkan AI'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(item.id, item.name)}
+                              className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+                            >
+                              Hapus Model
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
+
+                    {/* Tag / Chips Bentuk Wajah */}
+                    <div className="space-y-1.5">
+                      <p className="text-[13px] text-text-muted font-normal">Contoh bentuk wajah</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.faceShapes.map((shape, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 rounded-lg bg-raised border border-border text-[12px] text-white font-normal"
+                          >
+                            {shape}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Deskripsi Singkat */}
+                    <p className="text-[13px] text-text-muted leading-relaxed font-normal pt-0.5">
+                      {item.description}
+                    </p>
+
+                    {/* Informasi Tipe & Perawatan */}
+                    <p className="text-[13px] text-text-muted font-outfit font-normal pt-1">
+                      Tipe rambut: <span className="font-bold text-white tracking-wide">{item.hairType}</span>
+                      <span className="mx-1.5 text-text-muted">•</span>
+                      Level perawatan: <span className="font-bold text-white tracking-wide">{item.maintenanceLevel}/5</span>
+                    </p>
                   </div>
-
-                  {/* Deskripsi Singkat */}
-                  <p className="text-[13px] text-text-muted leading-relaxed font-normal pt-0.5">
-                    {item.description}
-                  </p>
-
-                  {/* Informasi Tipe & Perawatan Ukuran Presisi */}
-                  <p className="text-[13px] text-text-muted font-outfit font-normal pt-1">
-                    Tipe rambut: <span className="font-bold text-white tracking-wide">{item.hairType}</span>
-                    <span className="mx-1.5 text-text-muted">•</span>
-                    Level perawatan: <span className="font-bold text-white tracking-wide">{item.maintenanceLevel}</span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Card Footer */}
-              <div className="px-5 py-3.5 border-t border-border/60 bg-surface flex items-center justify-between text-[13px] font-outfit">
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-emerald-400 font-semibold text-[12px]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span>Aktif untuk AI</span>
                 </div>
 
-                {/* Link Edit */}
-                <Link
-                  href={`/hairstyles/form?id=${item.id}`}
-                  className="text-secondary font-bold hover:underline flex items-center gap-1.5 cursor-pointer text-[13px]"
-                >
-                  <span>Edit</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+                {/* Card Footer */}
+                <div className="px-5 py-3.5 border-t border-border/60 bg-surface flex items-center justify-between text-[13px] font-outfit">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleAi(item.id, item.name, item.isAiActive)}
+                    className="cursor-pointer active:scale-95 transition-transform"
+                    title="Klik untuk ubah status AI"
+                  >
+                    {item.isAiActive ? (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-emerald-400 font-semibold text-[12px] hover:bg-emerald-900/40 transition-colors">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span>Aktif untuk AI</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-500/10 border border-border text-zinc-400 font-semibold text-[12px] hover:bg-zinc-500/20 transition-colors">
+                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+                        <span>Nonaktif AI</span>
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Link Edit */}
+                  <Link
+                    href={`/hairstyles/form?id=${item.id}`}
+                    className="text-secondary font-bold hover:underline flex items-center gap-1.5 cursor-pointer text-[13px]"
+                  >
+                    <span>Edit</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
