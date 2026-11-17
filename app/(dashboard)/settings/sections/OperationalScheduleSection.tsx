@@ -102,7 +102,7 @@ export function OperationalScheduleSection({ onNotify }: OperationalScheduleSect
                   value={row.open}
                   disabled={row.locked || !editing}
                   onChange={(e) => handleTimeChange(idx, 'open', e.target.value)}
-                  className={`w-full h-11 bg-raised/60 border border-border rounded-xl px-4 text-[14px] font-mono focus:outline-none focus:border-secondary transition-colors ${
+                  className={`w-full h-12 bg-raised/60 border border-border rounded-xl px-4 text-[14px] font-mono focus:outline-none focus:border-secondary transition-colors ${
                     row.locked || !editing
                       ? 'text-text-muted cursor-not-allowed'
                       : 'text-white'
@@ -116,7 +116,7 @@ export function OperationalScheduleSection({ onNotify }: OperationalScheduleSect
                   value={row.close}
                   disabled={row.locked || !editing}
                   onChange={(e) => handleTimeChange(idx, 'close', e.target.value)}
-                  className={`w-full h-11 bg-raised/60 border border-border rounded-xl px-4 text-[14px] font-mono focus:outline-none focus:border-secondary transition-colors ${
+                  className={`w-full h-12 bg-raised/60 border border-border rounded-xl px-4 text-[14px] font-mono focus:outline-none focus:border-secondary transition-colors ${
                     row.locked || !editing
                       ? 'text-text-muted cursor-not-allowed'
                       : 'text-white'

@@ -44,8 +44,8 @@ export const TextField: React.FC<TextFieldProps> = ({
           id={inputId}
           required={required}
           className={`
-            w-full h-[48px] px-4 text-[14px] font-medium font-outfit
-            bg-transparent border rounded-lg
+            w-full h-12 px-4 text-[14px] font-medium font-outfit
+            bg-raised/60 border rounded-xl
             text-text-main placeholder:text-text-muted
             outline-none transition-all duration-200
             ${leftAddon ? 'pl-11' : ''}

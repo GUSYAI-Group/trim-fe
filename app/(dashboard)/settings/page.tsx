@@ -10,7 +10,7 @@ export default function SettingsPage() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   return (
-    <div className="space-y-8 pb-24 relative min-h-screen">
+    <div className="space-y-8 relative">
       <header className="space-y-1">
         <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">
           Pengaturan Toko

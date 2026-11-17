@@ -124,7 +124,7 @@ export const Modal: React.FC<ModalProps> = ({
                 <button
                   type="button"
                   onClick={onSecondary || onClose}
-                  className="flex-1 h-12 px-6 rounded-lg border border-border text-text-main font-semibold text-[14px] hover:bg-surface-hover active:scale-[0.98] transition-all duration-150 cursor-pointer motion-reduce:transform-none"
+                  className="flex-1 h-12 px-6 rounded-xl border border-border text-text-main font-semibold text-[14px] hover:bg-surface-hover active:scale-[0.98] transition-all duration-150 cursor-pointer motion-reduce:transform-none"
                 >
                   {resolvedSecondaryLabel}
                 </button>
@@ -132,7 +132,7 @@ export const Modal: React.FC<ModalProps> = ({
               <button
                 type="button"
                 onClick={resolvedOnPrimary}
-                className={`flex-1 h-12 px-6 rounded-lg font-semibold text-[14px] active:scale-[0.98] transition-all duration-150 cursor-pointer motion-reduce:transform-none ${config.primaryBtnClass}`}
+                className={`flex-1 h-12 px-6 rounded-xl font-semibold text-[14px] active:scale-[0.98] transition-all duration-150 cursor-pointer motion-reduce:transform-none ${config.primaryBtnClass}`}
               >
                 {resolvedPrimaryLabel}
               </button>

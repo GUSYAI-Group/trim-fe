@@ -36,7 +36,7 @@ export default function PaymentsPage() {
   };
 
   return (
-    <div className="space-y-8 pb-24 relative min-h-screen">
+    <div className="space-y-8 relative">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <header className="space-y-1">
           <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">

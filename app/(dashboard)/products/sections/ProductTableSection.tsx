@@ -182,24 +182,24 @@ export function ProductTableSection({
           </DataTable>
         )}
 
-        <div className="py-3.5 px-6 border-t border-border flex items-center justify-between text-text-muted text-[12px]">
-          <span>
+        <div className="p-4 md:px-6 border-t border-border flex items-center justify-between text-[13px]">
+          <span className="text-text-muted font-outfit">
             Menampilkan {products.length > 0 ? 1 : 0}–{products.length} dari {totalCount} produk
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <button
               type="button"
-              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-white disabled:opacity-40 cursor-pointer"
+              className="p-1 text-text-muted hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-all active:scale-90 cursor-pointer"
               disabled
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="w-7 h-7 rounded-lg bg-secondary/20 border border-secondary/30 text-secondary font-bold font-mono flex items-center justify-center text-[12px]">
+            <div className="w-7 h-7 rounded-md bg-[#612c12] flex items-center justify-center text-secondary font-medium font-outfit select-none">
               1
-            </span>
+            </div>
             <button
               type="button"
-              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-white disabled:opacity-40 cursor-pointer"
+              className="p-1 text-text-muted hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-all active:scale-90 cursor-pointer"
               disabled
             >
               <ChevronRight className="w-4 h-4" />

@@ -3,7 +3,7 @@ import { HelpFaqSection } from './sections/HelpFaqSection';
 
 export default function HelpPage() {
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-8">
       <div>
         <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">
           Pusat Bantuan

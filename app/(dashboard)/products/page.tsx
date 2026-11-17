@@ -48,7 +48,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="space-y-6 pb-12 selection:bg-secondary selection:text-white">
+    <div className="space-y-8 selection:bg-secondary selection:text-white">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">

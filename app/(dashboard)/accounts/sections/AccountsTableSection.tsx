@@ -153,23 +153,23 @@ export function AccountsTableSection({
           </DataTable>
         )}
 
-        <div className="px-6 py-4 border-t border-border flex items-center justify-between text-[12px]">
-          <span className="text-text-muted">
+        <div className="p-4 md:px-6 border-t border-border flex items-center justify-between text-[13px]">
+          <span className="text-text-muted font-outfit">
             Menampilkan {accounts.length > 0 ? 1 : 0}–{accounts.length} dari {accounts.length} akun • UUID ditampilkan singkat
           </span>
           <div className="flex items-center gap-4">
             <button
               type="button"
-              className="p-1 text-text-muted hover:text-white transition-colors cursor-pointer"
+              className="p-1 text-text-muted hover:text-white transition-all active:scale-90 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <div className="w-7 h-7 rounded-lg bg-secondary/20 border border-secondary/30 flex items-center justify-center text-secondary font-bold font-mono text-[12px]">
+            <div className="w-7 h-7 rounded-md bg-[#612c12] flex items-center justify-center text-secondary font-medium font-outfit select-none">
               1
             </div>
             <button
               type="button"
-              className="p-1 text-text-muted hover:text-white transition-colors cursor-pointer"
+              className="p-1 text-text-muted hover:text-white transition-all active:scale-90 cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

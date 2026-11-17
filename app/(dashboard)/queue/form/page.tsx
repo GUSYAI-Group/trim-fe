@@ -49,7 +49,7 @@ export default function QueueFormPage() {
   };
 
   return (
-    <div className="space-y-6 pb-20 selection:bg-secondary selection:text-white">
+    <div className="space-y-8 selection:bg-secondary selection:text-white">
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-[12px] text-text-muted">
           <Link href="/queue" className="hover:text-white transition-colors">
