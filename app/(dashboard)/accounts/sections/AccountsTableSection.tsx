@@ -108,7 +108,7 @@ export function AccountsTableSection({
                         size="md"
                       />
                       <div>
-                        <p className="text-[14px] font-bold text-white">{acc.email}</p>
+                        <p className="text-[14px] font-bold text-text-main">{acc.email}</p>
                         <p className="text-[12px] text-text-muted mt-0.5 font-mono">
                           uuid: {acc.uuid}
                         </p>
@@ -121,11 +121,11 @@ export function AccountsTableSection({
                   <TableCell>
                     <Badge variant={acc.role}>{ROLE_LABELS[acc.role]}</Badge>
                   </TableCell>
-                  <TableCell className="text-[14px] text-text-main">{acc.createdAt}</TableCell>
-                  <TableCell className="text-[14px] text-text-main">{acc.updatedAt}</TableCell>
+                  <TableCell className="text-[12px] font-mono text-text-muted">{acc.createdAt}</TableCell>
+                  <TableCell className="text-[12px] font-mono text-text-muted">{acc.updatedAt}</TableCell>
                   <TableCell>
                     {acc.isOwner ? (
-                      <div className="flex items-center gap-2 text-[13px] text-text-muted">
+                      <div className="flex items-center gap-2 text-[12px] text-text-muted">
                         <Shield className="w-3.5 h-3.5 shrink-0" />
                         <span>Akun utama • Dilindungi</span>
                       </div>
@@ -133,14 +133,14 @@ export function AccountsTableSection({
                       <div className="flex items-center gap-4">
                         <Link
                           href={`/accounts/form?id=${acc.slug}`}
-                          className="text-[13px] font-bold text-secondary hover:brightness-125 transition-all cursor-pointer"
+                          className="text-[12px] font-semibold text-secondary hover:brightness-125 transition-all cursor-pointer"
                         >
                           Edit
                         </Link>
                         <button
                           type="button"
                           onClick={() => onDeleteRequest(acc)}
-                          className="text-[13px] font-bold text-danger hover:brightness-125 transition-all cursor-pointer"
+                          className="text-[12px] font-semibold text-danger hover:brightness-125 transition-all cursor-pointer"
                         >
                           Hapus
                         </button>
@@ -153,7 +153,7 @@ export function AccountsTableSection({
           </DataTable>
         )}
 
-        <div className="px-6 py-4 border-t border-border flex items-center justify-between text-[13px]">
+        <div className="px-6 py-4 border-t border-border flex items-center justify-between text-[12px]">
           <span className="text-text-muted">
             Menampilkan {accounts.length > 0 ? 1 : 0}–{accounts.length} dari {accounts.length} akun • UUID ditampilkan singkat
           </span>
@@ -164,7 +164,7 @@ export function AccountsTableSection({
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <div className="w-7 h-7 rounded-md bg-secondary/20 flex items-center justify-center text-secondary font-medium text-[13px]">
+            <div className="w-7 h-7 rounded-lg bg-secondary/20 border border-secondary/30 flex items-center justify-center text-secondary font-bold font-mono text-[12px]">
               1
             </div>
             <button

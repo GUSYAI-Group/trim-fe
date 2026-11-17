@@ -19,9 +19,9 @@ export function DashboardRevenueQueueSection() {
       <Card className="lg:col-span-2 p-6 md:p-8 flex flex-col justify-between">
         <div>
           <h2 className="text-[20px] font-bold text-text-main mb-1">Pendapatan mingguan</h2>
-          <p className="text-[13px] text-text-muted mb-6">30 Sep–6 Okt 2026 • PAYMENTS.status = paid</p>
+          <p className="text-[12px] text-text-muted mb-6">30 Sep–6 Okt 2026 • PAYMENTS.status = paid</p>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-6">
-            <h3 className="text-4xl font-extrabold text-text-main">Rp10.250.000</h3>
+            <h3 className="text-[28px] font-extrabold text-text-main font-mono">Rp10.250.000</h3>
             <Badge variant="success" label="↑ 18,4% minggu lalu" showDot />
           </div>
         </div>
@@ -47,14 +47,14 @@ export function DashboardRevenueQueueSection() {
                     style={{ height: bar.height }}
                   >
                     <span
-                      className={`absolute -top-6 text-[12px] font-medium whitespace-nowrap ${
+                      className={`absolute -top-6 text-[12px] font-medium font-mono whitespace-nowrap ${
                         bar.active ? 'text-secondary font-bold' : 'text-text-muted'
                       }`}
                     >
                       {bar.val}
                     </span>
                   </div>
-                  <span className="text-[12px] text-text-muted absolute -bottom-6 whitespace-nowrap">
+                  <span className="text-[12px] font-mono text-text-muted absolute -bottom-6 whitespace-nowrap">
                     {bar.label}
                   </span>
                 </div>
@@ -68,20 +68,20 @@ export function DashboardRevenueQueueSection() {
       <Card className="p-6 md:p-8 flex flex-col justify-between">
         <div>
           <h2 className="text-[20px] font-bold text-text-main mb-1">Lantai toko, sekarang</h2>
-          <p className="text-[13px] text-text-muted mb-8">Selasa, 6 Oktober • 14:30 WIB</p>
+          <p className="text-[12px] text-text-muted mb-8">Selasa, 6 Oktober • 14:30 WIB</p>
 
           <div className="space-y-6 mb-8">
             <div className="flex justify-between items-center">
               <span className="text-text-muted text-[14px]">Menunggu</span>
-              <span className="text-warning text-3xl font-bold">5</span>
+              <span className="text-warning text-[28px] font-extrabold font-mono">5</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-text-muted text-[14px]">Sedang cukur</span>
-              <span className="text-secondary text-3xl font-bold">3</span>
+              <span className="text-secondary text-[28px] font-extrabold font-mono">3</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-text-muted text-[14px]">Selesai</span>
-              <span className="text-success text-3xl font-bold">18</span>
+              <span className="text-success text-[28px] font-extrabold font-mono">18</span>
             </div>
           </div>
 

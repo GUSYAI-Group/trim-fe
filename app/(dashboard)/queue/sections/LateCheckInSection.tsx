@@ -21,11 +21,11 @@ export function LateCheckInSection({ items, onSkip }: LateCheckInSectionProps) {
   return (
     <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 space-y-3 shadow-md">
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2 text-secondary font-bold text-xs md:text-sm">
+        <div className="flex items-center gap-2 text-secondary font-bold text-[14px]">
           <AlertTriangle className="w-4 h-4 text-secondary shrink-0" />
           <span>Belum check-in setelah jadwal • Perlu tindakan Admin</span>
         </div>
-        <span className="text-[11px] text-text-muted font-mono">Admin: dimas@trim.id</span>
+        <span className="text-[12px] text-text-muted font-mono">Admin: dimas@trim.id</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -35,12 +35,12 @@ export function LateCheckInSection({ items, onSkip }: LateCheckInSectionProps) {
             className="p-3.5 rounded-xl bg-surface border border-border flex justify-between items-center"
           >
             <div>
-              <p className="font-bold text-white text-xs">{item.customerName}</p>
-              <p className="text-[11px] text-text-muted mt-0.5">
-                {item.queueNo} • Jadwal {item.scheduledTime} • Belum check-in
+              <p className="font-bold text-text-main text-[14px]">{item.customerName}</p>
+              <p className="text-[12px] text-text-muted mt-0.5">
+                <span className="font-mono text-secondary font-bold">{item.queueNo}</span> • Jadwal <span className="font-mono">{item.scheduledTime}</span> • Belum check-in
               </p>
-              <p className="text-[11px] text-rose-400 font-semibold mt-1">
-                confirmed • terlambat {item.lateMinutes} menit
+              <p className="text-[12px] text-danger font-semibold mt-1">
+                confirmed • terlambat <span className="font-mono">{item.lateMinutes}</span> menit
               </p>
             </div>
             <Button
@@ -55,7 +55,7 @@ export function LateCheckInSection({ items, onSkip }: LateCheckInSectionProps) {
         ))}
       </div>
 
-      <p className="text-[11px] text-text-muted">
+      <p className="text-[12px] text-text-muted">
         Record QUEUES sudah ditautkan 1:1 ke booking. Belum check-in tidak masuk papan aktif. Skip → queue skipped + booking no_show.
       </p>
     </div>

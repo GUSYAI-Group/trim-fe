@@ -21,10 +21,10 @@ export function PaymentSummarySection({
           <Wallet className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <p className="text-[28px] font-extrabold text-white font-mono leading-none mb-2">
+          <p className="text-[28px] font-extrabold text-text-main font-mono leading-none mb-2">
             Rp10.250.000
           </p>
-          <p className="text-[13px] text-success">{totalLunas} pembayaran paid • 30 Sep–6 Okt</p>
+          <p className="text-[12px] text-success">{totalLunas} pembayaran paid • 30 Sep–6 Okt</p>
         </div>
       </Card>
 
@@ -34,10 +34,10 @@ export function PaymentSummarySection({
           <Clock className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <p className="text-[28px] font-extrabold text-white leading-none mb-2">
+          <p className="text-[28px] font-extrabold text-text-main font-mono leading-none mb-2">
             {totalMenunggu} transaksi
           </p>
-          <p className="text-[13px] text-warning">Tanpa filter paid_at</p>
+          <p className="text-[12px] text-warning">Tanpa filter paid_at</p>
         </div>
       </Card>
 
@@ -47,10 +47,10 @@ export function PaymentSummarySection({
           <XCircle className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <p className="text-[28px] font-extrabold text-white leading-none mb-2">
+          <p className="text-[28px] font-extrabold text-text-main font-mono leading-none mb-2">
             {totalGagal} transaksi
           </p>
-          <p className="text-[13px] text-text-muted">{totalGagal} failed • tanpa filter paid_at</p>
+          <p className="text-[12px] text-text-muted">{totalGagal} failed • tanpa filter paid_at</p>
         </div>
       </Card>
     </div>

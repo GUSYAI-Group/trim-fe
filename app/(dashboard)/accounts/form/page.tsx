@@ -38,7 +38,7 @@ function AccountFormInner({ editId }: { editId: string | null }) {
   return (
     <div className="space-y-6 pb-20 selection:bg-secondary selection:text-white">
       <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs text-text-muted">
+        <div className="flex items-center gap-2 text-[12px] text-text-muted">
           <Link href="/accounts" className="hover:text-white transition-colors">
             Manajemen Akun
           </Link>
@@ -50,10 +50,10 @@ function AccountFormInner({ editId }: { editId: string | null }) {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
           <div>
-            <h1 className="text-2xl md:text-[28px] font-extrabold text-white tracking-tight">
+            <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">
               {isEditMode ? 'Edit Akun Pengguna' : 'Tambah Akun Pengguna'}
             </h1>
-            <p className="text-text-muted text-xs md:text-sm mt-0.5">
+            <p className="text-text-muted text-[14px] mt-0.5">
               {isEditMode
                 ? `Perbarui email dan hak akses ${email || 'pengguna'}. Kamu masuk sebagai Owner.`
                 : 'Buat akun login dengan email, kata sandi, dan peran. Kamu masuk sebagai Owner.'}
@@ -62,10 +62,9 @@ function AccountFormInner({ editId }: { editId: string | null }) {
 
           <Button
             href="/accounts"
-            variant="ghost"
-            size="sm"
-            leftIcon={<ArrowLeft className="w-4 h-4" />}
-            className="w-fit"
+            variant="outline"
+            size="md"
+            icon={<ArrowLeft className="w-4 h-4" />}
           >
             Kembali ke daftar
           </Button>
@@ -78,47 +77,46 @@ function AccountFormInner({ editId }: { editId: string | null }) {
         description="Role: customer, barber, admin, owner. Admin biasa tidak dapat menghapus akun Owner; pembatasan diterapkan oleh aplikasi."
       />
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-2">
-          <AccountMainFormSection
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <div className="lg:col-span-2">
+            <AccountMainFormSection
+              isEditMode={isEditMode}
+              initials={initials}
+              email={email}
+              onEmailChange={setEmail}
+              password={password}
+              onPasswordChange={setPassword}
+              role={role}
+              onRoleChange={setRole}
+            />
+          </div>
+
+          <AccountSidebarSection
             isEditMode={isEditMode}
-            initials={initials}
-            email={email}
-            onEmailChange={setEmail}
-            password={password}
-            onPasswordChange={setPassword}
-            role={role}
-            onRoleChange={setRole}
+            uuid={uuid}
+            createdAt={createdAt}
+            updatedAt={updatedAt}
           />
         </div>
 
-        <AccountSidebarSection
-          isEditMode={isEditMode}
-          uuid={uuid}
-          createdAt={createdAt}
-          updatedAt={updatedAt}
-        />
-      </form>
-
-      <Card
-        variant="surface"
-        padding="sm"
-        className="flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl"
-      >
-        <span className="text-xs text-text-muted">
-          {isEditMode
-            ? 'Periksa kembali perubahan akun sebelum menyimpan.'
-            : 'Lengkapi email, kata sandi, dan peran sebelum membuat akun.'}
-        </span>
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <Button href="/accounts" variant="ghost" size="sm">
-            Batal
-          </Button>
-          <Button onClick={handleSubmit} variant="primary" size="sm">
-            {isEditMode ? 'Simpan perubahan' : 'Buat akun'}
-          </Button>
+        {/* Bottom Action Footer */}
+        <div className="p-5 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-[12px] text-text-muted">
+            {isEditMode
+              ? 'Periksa kembali perubahan akun sebelum menyimpan.'
+              : 'Lengkapi email, kata sandi, dan peran sebelum membuat akun.'}
+          </p>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <Button href="/accounts" variant="outline" size="md">
+              Batal
+            </Button>
+            <Button type="submit" variant="primary" size="md">
+              {isEditMode ? 'Simpan perubahan' : 'Buat akun'}
+            </Button>
+          </div>
         </div>
-      </Card>
+      </form>
 
       {toastMsg && (
         <div className="fixed bottom-6 right-6 z-50">

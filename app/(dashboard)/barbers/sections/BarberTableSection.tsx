@@ -52,7 +52,7 @@ export function BarberTableSection({
               key={tab.key}
               type="button"
               onClick={() => onStatusChange(tab.key)}
-              className={`px-4 py-2 rounded-xl font-semibold text-[13px] transition-colors cursor-pointer ${
+              className={`px-4 py-2 rounded-xl font-semibold text-[12px] transition-colors cursor-pointer ${
                 selectedStatus === tab.key
                   ? 'bg-raised border border-border text-text-main'
                   : 'text-text-muted hover:text-text-main'
@@ -117,24 +117,24 @@ export function BarberTableSection({
               <TableCell>
                 <Badge variant={kapster.status === 'aktif' ? 'aktif' : 'nonaktif'} />
               </TableCell>
-              <TableCell className="font-bold">
+              <TableCell className="font-bold font-mono">
                 <span className="inline-flex items-center gap-1.5">
                   <Star className="w-3.5 h-3.5 fill-secondary text-secondary" />
                   {kapster.rating}
                 </span>
               </TableCell>
-              <TableCell className="font-bold">{kapster.finished}</TableCell>
+              <TableCell className="font-bold font-mono">{kapster.finished}</TableCell>
               <TableCell className="pr-6">
                 <div className="flex items-center gap-5">
                   <Link
                     href={`/barbers/form?id=${kapster.rawPhone}`}
-                    className="text-secondary font-bold hover:underline transition-colors text-[13px] cursor-pointer"
+                    className="text-secondary font-semibold hover:underline transition-colors text-[12px] cursor-pointer"
                   >
                     Edit
                   </Link>
                   <Link
                     href={`/barbers/form?id=${kapster.rawPhone}`}
-                    className="text-text-muted hover:text-text-main transition-colors flex items-center gap-1.5 font-bold text-[13px] cursor-pointer"
+                    className="text-text-muted hover:text-text-main transition-colors flex items-center gap-1.5 font-semibold text-[12px] cursor-pointer"
                   >
                     <span>Detail</span>
                     <ArrowRight className="w-4 h-4" />

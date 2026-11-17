@@ -48,10 +48,10 @@ export function PaidPaymentsTableSection({
         <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
-            className="flex items-center gap-2 bg-raised border border-border rounded-xl px-4 py-2 text-white hover:bg-border transition-colors text-xs font-medium cursor-pointer"
+            className="flex items-center gap-2 bg-raised border border-border rounded-xl px-4 py-2 text-white hover:bg-border transition-colors text-[12px] font-medium cursor-pointer"
           >
             <CalendarDays className="w-4 h-4 text-text-muted" />
-            <span>30 Sep 2026 – 6 Okt 2026</span>
+            <span className="font-mono">30 Sep 2026 – 6 Okt 2026</span>
           </button>
 
           <SelectField
@@ -113,15 +113,15 @@ export function PaidPaymentsTableSection({
               {payments.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>
-                    <p className="text-[13px] font-bold text-white font-mono">{p.qrisRef}</p>
+                    <p className="text-[14px] font-bold text-text-main font-mono">{p.qrisRef}</p>
                     <p className="text-[12px] text-text-muted mt-0.5 font-mono">{p.qrisId}</p>
                   </TableCell>
-                  <TableCell className="text-[13px] text-text-muted font-mono">
+                  <TableCell className="text-[12px] text-text-muted font-mono">
                     {p.bookingUuid}
                   </TableCell>
-                  <TableCell className="text-[14px] font-bold text-white">{p.customer}</TableCell>
-                  <TableCell className="text-[13px] text-text-main">{p.paidAt}</TableCell>
-                  <TableCell className="text-[14px] font-medium text-white font-mono">
+                  <TableCell className="text-[14px] font-bold text-text-main">{p.customer}</TableCell>
+                  <TableCell className="text-[12px] font-mono text-text-muted">{p.paidAt}</TableCell>
+                  <TableCell className="text-[14px] font-bold text-text-main font-mono">
                     {p.nominal}
                   </TableCell>
                   <TableCell>
@@ -131,7 +131,7 @@ export function PaidPaymentsTableSection({
                     <button
                       type="button"
                       onClick={() => onDetailClick(p)}
-                      className="flex items-center gap-1 text-[13px] font-bold text-secondary hover:brightness-125 transition-all cursor-pointer"
+                      className="flex items-center gap-1 text-[12px] font-semibold text-secondary hover:brightness-125 transition-all cursor-pointer"
                     >
                       Detail <ArrowRight className="w-3.5 h-3.5" />
                     </button>
@@ -142,9 +142,9 @@ export function PaidPaymentsTableSection({
           </DataTable>
         )}
 
-        <div className="px-6 py-4 border-t border-border flex items-center justify-between text-[13px]">
+        <div className="px-6 py-4 border-t border-border flex items-center justify-between text-[12px]">
           <span className="text-text-muted">
-            148 paid • 1 refunded • UUID ditampilkan singkat
+            <span className="font-mono">148</span> paid • <span className="font-mono">1</span> refunded • UUID ditampilkan singkat
           </span>
           <div className="flex items-center gap-4">
             <button
@@ -153,7 +153,7 @@ export function PaidPaymentsTableSection({
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <div className="w-7 h-7 rounded-md bg-secondary/20 flex items-center justify-center text-secondary font-medium text-[13px]">
+            <div className="w-7 h-7 rounded-md bg-secondary/20 flex items-center justify-center text-secondary font-bold font-mono text-[12px]">
               1
             </div>
             <button

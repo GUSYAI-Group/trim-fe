@@ -15,7 +15,7 @@ export function ServiceStatsSection({ activeCount }: ServiceStatsSectionProps) {
           <ListFilter className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <span className="text-3xl font-extrabold text-text-main block mb-1">
+          <span className="text-[28px] font-extrabold font-mono text-text-main block mb-1">
             {activeCount}
           </span>
           <p className="text-[12px] text-success font-medium">
@@ -30,7 +30,7 @@ export function ServiceStatsSection({ activeCount }: ServiceStatsSectionProps) {
           <Scissors className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <span className="text-2xl font-extrabold text-text-main block mb-1">
+          <span className="text-[24px] font-extrabold text-text-main block mb-1">
             Potong reguler
           </span>
           <p className="text-[12px] text-text-muted">12 booking hari ini</p>
@@ -43,7 +43,7 @@ export function ServiceStatsSection({ activeCount }: ServiceStatsSectionProps) {
           <Clock className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <span className="text-3xl font-extrabold text-text-main block mb-1">41 menit</span>
+          <span className="text-[28px] font-extrabold font-mono text-text-main block mb-1">41 menit</span>
           <p className="text-[12px] text-text-muted">
             Rata-rata duration_minutes layanan aktif
           </p>

@@ -26,15 +26,15 @@ export function SpecialHolidaysSection({ onNotify }: SpecialHolidaysSectionProps
       <Card variant="surface" padding="none" className="overflow-hidden">
         <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border">
           <div className="space-y-1">
-            <h2 className="text-[20px] font-bold text-white">Hari Libur Khusus</h2>
-            <p className="text-[13px] text-text-muted">
+            <h2 className="text-[20px] font-bold text-text-main">Hari Libur Khusus</h2>
+            <p className="text-[12px] text-text-muted">
               Tanggal libur mengesampingkan jadwal mingguan. Slot pelanggan ditutup otomatis.
             </p>
           </div>
           <Button
             variant="primary"
-            size="sm"
-            leftIcon={<Plus className="w-3.5 h-3.5" />}
+            size="md"
+            icon={<Plus className="w-4 h-4" />}
             onClick={() => onNotify('Form tambah hari libur khusus siap diisi.')}
             className="shrink-0"
           >
@@ -57,7 +57,7 @@ export function SpecialHolidaysSection({ onNotify }: SpecialHolidaysSectionProps
                 className="border border-border rounded-xl p-4 flex flex-col sm:grid sm:grid-cols-[1fr_140px_1.5fr_auto] gap-4 sm:items-center hover:border-border/80 transition-all"
               >
                 <div className="w-full sm:w-auto">
-                  <p className="text-[14px] font-bold text-white">{h.date}</p>
+                  <p className="text-[14px] font-bold text-text-main font-mono">{h.date}</p>
                   <p className="text-[12px] text-text-muted mt-0.5">{h.dateLabel}</p>
                 </div>
                 <div className="w-full sm:w-auto">

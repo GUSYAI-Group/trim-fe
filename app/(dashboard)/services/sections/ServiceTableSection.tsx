@@ -84,8 +84,8 @@ export function ServiceTableSection({
                 <div className="font-bold text-text-main text-[14px]">{item.name}</div>
                 <div className="text-[12px] text-text-muted">Kategori: {item.category}</div>
               </TableCell>
-              <TableCell className="font-bold text-text-main">{item.duration} menit</TableCell>
-              <TableCell className="font-bold text-text-main">
+              <TableCell className="font-bold text-text-main font-mono">{item.duration} menit</TableCell>
+              <TableCell className="font-bold text-text-main font-mono">
                 Rp{item.price.toLocaleString('id-ID')}
               </TableCell>
               <TableCell className="text-text-muted">{item.category}</TableCell>
@@ -96,12 +96,12 @@ export function ServiceTableSection({
                 <div className="flex items-center justify-end gap-4">
                   <Link
                     href={`/services/form?id=${item.id}`}
-                    className="text-secondary font-bold text-[13px] hover:underline inline-flex items-center gap-1.5 cursor-pointer"
+                    className="text-secondary font-semibold text-[12px] hover:underline inline-flex items-center gap-1.5 cursor-pointer"
                   >
                     <Edit className="w-3.5 h-3.5" />
                     <span>Edit</span>
                   </Link>
-                  <span className="text-text-muted text-[13px] select-none">
+                  <span className="text-text-muted text-[12px] select-none">
                     {item.isActive ? 'Nonaktifkan' : 'Aktifkan'}
                   </span>
                 </div>

@@ -33,11 +33,11 @@ export function LiveHeader() {
 
   return (
     <div className="flex items-center gap-2.5">
-      <Badge variant="aktif">
+      <Badge variant="aktif" className="font-mono">
         Live • {timeString || '14:30:00 WIB'}
       </Badge>
 
-      <span className="text-[11px] md:text-xs text-text-muted font-medium">
+      <span className="text-[12px] text-text-muted font-medium font-mono">
         {dateString || 'Selasa, 6 Oktober 2026'}
       </span>
     </div>

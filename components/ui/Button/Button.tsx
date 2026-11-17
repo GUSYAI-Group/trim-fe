@@ -19,26 +19,26 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-secondary text-text-main hover:brightness-110 active:brightness-90 shadow-lg shadow-secondary/20',
+    'bg-secondary text-text-main hover:brightness-110 active:brightness-95',
   secondary:
-    'bg-cyber-yellow text-primary hover:brightness-110 active:brightness-90',
+    'bg-cyber-yellow text-primary hover:brightness-110 active:brightness-95',
   outline:
     'bg-surface text-text-main border border-border hover:bg-raised active:bg-surface-hover',
   ghost:
     'bg-transparent text-text-main hover:bg-surface-hover active:bg-raised',
   danger:
-    'bg-danger text-text-main hover:brightness-110 active:brightness-90',
+    'bg-danger text-text-main hover:brightness-110 active:brightness-95',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'h-10 px-4 text-[13px] rounded-lg',
+  sm: 'h-9 px-3.5 text-[12px] rounded-lg',
   md: 'h-11 px-5 text-[14px] rounded-xl',
-  lg: 'h-12 px-6 text-[14px] rounded-lg',
+  lg: 'h-12 px-6 text-[14px] rounded-xl',
 };
 
 export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
-  size = 'lg',
+  size = 'md',
   isLoading = false,
   fullWidth = false,
   icon,
@@ -55,13 +55,13 @@ export const Button: React.FC<ButtonProps> = ({
 
   const classes = `
     inline-flex items-center justify-center gap-2
-    font-semibold
-    transition-all duration-200 ease-in-out
-    cursor-pointer shrink-0
+    font-semibold font-outfit
+    transition-all duration-180 ease-[cubic-bezier(0.16,1,0.3,1)]
+    cursor-pointer shrink-0 select-none
     ${sizeStyles[size]}
     ${variantStyles[variant]}
     ${fullWidth ? 'w-full' : ''}
-    ${isDisabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'active:scale-[0.98]'}
+    ${isDisabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'hover:scale-[1.015] active:scale-[0.97] motion-reduce:transform-none'}
     ${className}
   `.trim();
 

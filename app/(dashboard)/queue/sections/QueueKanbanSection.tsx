@@ -104,10 +104,10 @@ export function QueueKanbanSection({ selectedKapster, onCardAction }: QueueKanba
       {/* Kolom 1: Menunggu */}
       <div className="space-y-3">
         <div className="flex justify-between items-center px-1">
-          <span className="text-xs font-bold text-white flex items-center gap-2">
+          <span className="text-[14px] font-bold text-text-main flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-amber-500" /> Menunggu
           </span>
-          <span className="text-xs font-bold text-text-muted">5</span>
+          <span className="text-[12px] font-bold font-mono text-text-muted">5</span>
         </div>
 
         <div className="space-y-3">
@@ -124,10 +124,10 @@ export function QueueKanbanSection({ selectedKapster, onCardAction }: QueueKanba
       {/* Kolom 2: Sedang Cukur */}
       <div className="space-y-3">
         <div className="flex justify-between items-center px-1">
-          <span className="text-xs font-bold text-white flex items-center gap-2">
+          <span className="text-[14px] font-bold text-text-main flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-secondary" /> Sedang Cukur
           </span>
-          <span className="text-xs font-bold text-text-muted">3</span>
+          <span className="text-[12px] font-bold font-mono text-text-muted">3</span>
         </div>
 
         <div className="space-y-3">
@@ -144,10 +144,10 @@ export function QueueKanbanSection({ selectedKapster, onCardAction }: QueueKanba
       {/* Kolom 3: Selesai */}
       <div className="space-y-3">
         <div className="flex justify-between items-center px-1">
-          <span className="text-xs font-bold text-white flex items-center gap-2">
+          <span className="text-[14px] font-bold text-text-main flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500" /> Selesai
           </span>
-          <span className="text-xs font-bold text-text-muted">18</span>
+          <span className="text-[12px] font-bold font-mono text-text-muted">18</span>
         </div>
 
         <div className="space-y-3">
@@ -156,11 +156,11 @@ export function QueueKanbanSection({ selectedKapster, onCardAction }: QueueKanba
           ))}
 
           <Card variant="surface" padding="sm" className="space-y-1">
-            <p className="text-xs font-bold text-white">+15 pelanggan selesai sebelumnya</p>
+            <p className="text-[14px] font-bold text-text-main">+15 pelanggan selesai sebelumnya</p>
             <button
               type="button"
               onClick={() => onCardAction('Menampilkan seluruh riwayat selesai hari ini.')}
-              className="text-xs font-bold text-secondary hover:underline cursor-pointer"
+              className="text-[12px] font-semibold text-secondary hover:underline cursor-pointer"
             >
               Lihat seluruh riwayat →
             </button>

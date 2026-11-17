@@ -18,21 +18,21 @@ export default function DataNavigationSection() {
           <div className="h-40 bg-raised rounded-lg mb-4" />
           <h2 className="font-bold">Oversized Tee</h2>
           <small>Cotton heavyweight · 4 ukuran</small>
-          <p className="text-[18px] font-bold mt-2">Rp189.000</p>
+          <p className="text-[16px] font-bold font-mono mt-2">Rp189.000</p>
         </Card>
         <Card variant="interactive">
           <div className="h-40 bg-raised rounded-lg mb-4" />
           <h2 className="font-bold">Oversized Tee</h2>
           <small>Cotton heavyweight · 4 ukuran</small>
-          <p className="text-[18px] font-bold mt-2">Rp189.000</p>
+          <p className="text-[16px] font-bold font-mono mt-2">Rp189.000</p>
         </Card>
         <Card variant="highlighted">
           <div className="relative h-40 bg-raised rounded-lg mb-4">
-            <span className="absolute top-2 right-2 bg-secondary text-text-main text-[10px] font-bold px-2 py-0.5 rounded">BEST SELLER</span>
+            <span className="absolute top-2 right-2 bg-secondary text-text-main text-[12px] font-bold px-2 py-0.5 rounded">BEST SELLER</span>
           </div>
           <h2 className="font-bold">Oversized Tee</h2>
           <small>Cotton heavyweight · 4 ukuran</small>
-          <p className="text-[18px] font-bold mt-2">Rp189.000</p>
+          <p className="text-[16px] font-bold font-mono mt-2">Rp189.000</p>
         </Card>
       </div>
 

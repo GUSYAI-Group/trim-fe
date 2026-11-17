@@ -92,7 +92,7 @@ function BarberFormInner({ editId }: { editId: string | null }) {
 
       {/* Bottom Action Footer */}
       <div className="p-5 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <p className="text-[13px] text-text-muted">
+        <p className="text-[12px] text-text-muted">
           Periksa kembali informasi profil kapster sebelum menyimpan.
         </p>
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">

@@ -15,11 +15,11 @@ export function DashboardHeroSection() {
         <p className="text-secondary text-[12px] font-bold uppercase tracking-widest mb-2">
           TOKO BUKA / is_store_closed = false
         </p>
-        <h2 className="text-2xl md:text-3xl font-extrabold text-text-main tracking-tight mb-2 uppercase">
+        <h2 className="text-[24px] md:text-[28px] font-extrabold text-text-main tracking-tight mb-2 uppercase">
           GAYA JALANAN. BISNIS JALAN.
         </h2>
         <p className="text-text-muted text-[14px]">
-          Halo, {user.email}. {activeCount} kapster aktif hari ini.
+          Halo, {user.email}. <span className="font-mono text-text-main font-semibold">{activeCount}</span> kapster aktif hari ini.
         </p>
       </div>
       <div className="w-full md:w-96 h-36 md:h-full relative shrink-0 bg-primary overflow-hidden">

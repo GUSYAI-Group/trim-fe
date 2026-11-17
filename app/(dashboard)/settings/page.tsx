@@ -11,11 +11,11 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8 pb-24 relative min-h-screen">
-      <header className="space-y-2">
-        <h1 className="text-[28px] font-extrabold text-white tracking-tight">
+      <header className="space-y-1">
+        <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">
           Pengaturan Toko
         </h1>
-        <p className="text-text-muted">
+        <p className="text-text-muted text-[14px]">
           Kelola jam operasional, hari libur, dan konfigurasi TRIM Bandung.
         </p>
       </header>

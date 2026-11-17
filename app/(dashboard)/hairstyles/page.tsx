@@ -47,7 +47,7 @@ export default function HairstylesPage() {
         action={
           <button
             type="button"
-            className="text-[13px] font-bold text-secondary hover:underline inline-flex items-center gap-1 cursor-pointer"
+            className="text-[12px] font-semibold text-secondary hover:underline inline-flex items-center gap-1 cursor-pointer"
           >
             <span>Tinjau pemetaan</span>
             <ArrowRight className="w-3.5 h-3.5" />

@@ -24,7 +24,7 @@ export function HairstyleCard({ item }: HairstyleCardProps) {
 
         <div className="p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-[18px] font-bold text-text-main tracking-tight">
+            <h3 className="text-[16px] font-bold text-text-main tracking-tight">
               {item.name}
             </h3>
             <button
@@ -49,11 +49,11 @@ export function HairstyleCard({ item }: HairstyleCardProps) {
             </div>
           </div>
 
-          <p className="text-[13px] text-text-muted leading-relaxed font-normal pt-0.5">
+          <p className="text-[12px] text-text-muted leading-relaxed font-normal pt-0.5">
             Deskripsi: {item.description}
           </p>
 
-          <p className="text-[13px] text-text-muted font-normal pt-1">
+          <p className="text-[12px] text-text-muted font-normal pt-1">
             Tipe rambut: <span className="font-bold text-text-main">{item.hairType}</span>
             <span className="mx-1.5 text-text-muted">•</span>
             Level perawatan: <span className="font-bold text-text-main">{item.maintenanceLevel}</span>
@@ -69,7 +69,7 @@ export function HairstyleCard({ item }: HairstyleCardProps) {
 
         <Link
           href={`/hairstyles/form?id=${item.id}`}
-          className="text-secondary text-[13px] font-bold hover:underline flex items-center gap-1 cursor-pointer"
+          className="text-secondary text-[12px] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
         >
           <span>Edit</span>
           <ArrowRight className="w-3.5 h-3.5" />

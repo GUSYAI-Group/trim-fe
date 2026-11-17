@@ -30,8 +30,8 @@ export function TableRow({
   return (
     <tr
       onClick={onClick}
-      className={`border-b border-border/60 last:border-b-0 transition-colors ${
-        isSelected ? 'bg-secondary/5' : 'hover:bg-raised/40'
+      className={`border-b border-border last:border-b-0 transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        isSelected ? 'bg-secondary/5' : 'hover:bg-raised/70'
       } ${className}`}
     >
       {children}
@@ -52,7 +52,7 @@ export function TableHead({ children, className = '' }: { children: React.ReactN
   }
 
   return (
-    <th className={`py-3.5 px-4 text-[12px] font-semibold text-text-muted uppercase tracking-wider whitespace-nowrap ${className}`}>
+    <th className={`py-4 px-4 text-[12px] font-medium text-text-muted whitespace-nowrap font-outfit ${className}`}>
       {children}
     </th>
   );
@@ -73,7 +73,7 @@ export function TableCell({
     return (
       <th
         colSpan={colSpan}
-        className={`py-3.5 px-4 text-[12px] font-semibold text-text-muted uppercase tracking-wider whitespace-nowrap ${className}`}
+        className={`py-4 px-4 text-[12px] font-medium text-text-muted whitespace-nowrap font-outfit ${className}`}
       >
         {children}
       </th>
@@ -81,7 +81,7 @@ export function TableCell({
   }
 
   return (
-    <td colSpan={colSpan} className={`py-4 px-4 text-[14px] text-text-main ${className}`}>
+    <td colSpan={colSpan} className={`py-4 px-4 text-[14px] text-text-main font-outfit ${className}`}>
       {children}
     </td>
   );
@@ -127,25 +127,25 @@ export function DataTable({ columns, children, pagination, className = '' }: Dat
         </table>
       </div>
       {pagination && (
-        <div className="px-6 py-4 border-t border-border flex items-center justify-between text-[13px]">
-          <span className="text-text-muted">{pagination.text}</span>
-          <div className="flex items-center gap-3">
+        <div className="p-4 md:px-6 border-t border-border flex items-center justify-between text-[13px]">
+          <span className="text-text-muted font-outfit">{pagination.text}</span>
+          <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={pagination.onPrev}
               disabled={!pagination.onPrev}
-              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-main hover:bg-raised disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
+              className="p-1 text-text-muted hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-all active:scale-90 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <div className="w-7 h-7 rounded-lg bg-secondary/20 border border-secondary/30 flex items-center justify-center text-secondary font-bold text-[13px]">
+            <div className="w-7 h-7 rounded-md bg-[#612c12] flex items-center justify-center text-secondary font-medium font-outfit select-none">
               {pagination.currentPage}
             </div>
             <button
               type="button"
               onClick={pagination.onNext}
               disabled={!pagination.onNext}
-              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-main hover:bg-raised disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
+              className="p-1 text-text-muted hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-all active:scale-90 cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

@@ -38,18 +38,18 @@ export default function PaymentsPage() {
   return (
     <div className="space-y-8 pb-24 relative min-h-screen">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <header className="space-y-2">
-          <h1 className="text-[28px] font-extrabold text-white tracking-tight">
+        <header className="space-y-1">
+          <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">
             Riwayat Pembayaran
           </h1>
-          <p className="text-text-muted">
+          <p className="text-text-muted text-[14px]">
             Riwayat pembayaran QRIS Pakkasir, ditautkan ke booking dan pelanggan. Semua nominal dalam Rupiah.
           </p>
         </header>
         <Button
-          variant="ghost"
-          size="sm"
-          leftIcon={<Download className="w-4 h-4" />}
+          variant="outline"
+          size="md"
+          icon={<Download className="w-4 h-4" />}
           onClick={() => setToastMsg('Laporan transaksi sedang diekspor ke CSV...')}
           className="shrink-0"
         >

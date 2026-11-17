@@ -18,7 +18,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   size = 'md',
   className = '',
 }) => {
-  const heightClass = size === 'sm' ? 'h-10 pl-10 pr-9 text-[13px]' : 'h-12 pl-11 pr-10 text-[14px]';
+  const heightClass = size === 'sm' ? 'h-10 pl-10 pr-9 text-[12px]' : 'h-12 pl-11 pr-10 text-[14px]';
   const iconLeftClass = size === 'sm' ? 'left-3.5 w-4 h-4' : 'left-4 w-5 h-5';
 
   return (

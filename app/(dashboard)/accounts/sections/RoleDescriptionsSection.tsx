@@ -42,9 +42,9 @@ export function RoleDescriptionsSection() {
         <Card key={role} variant="surface" padding="md" className="space-y-3">
           <div className="flex items-center gap-2.5">
             <Icon className="w-5 h-5 text-secondary" />
-            <h3 className="text-[15px] font-bold text-white">{label}</h3>
+            <h3 className="text-[16px] font-bold text-text-main">{label}</h3>
           </div>
-          <p className="text-[13px] text-text-muted leading-relaxed">{description}</p>
+          <p className="text-[12px] text-text-muted leading-relaxed">{description}</p>
         </Card>
       ))}
     </div>

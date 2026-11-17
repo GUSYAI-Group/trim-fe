@@ -20,8 +20,8 @@ export function HairstyleSidebarSection({
     <div className="space-y-6">
       <Card className="p-6 space-y-5">
         <div className="space-y-1">
-          <h3 className="text-[18px] font-bold text-text-main">Status model</h3>
-          <p className="text-[13px] text-text-muted">
+          <h3 className="text-[16px] font-bold text-text-main">Status model</h3>
+          <p className="text-[12px] text-text-muted">
             {isEditMode ? `${name || 'Model'} saat ini ${status}.` : 'Pilih status awal model rambut.'}
           </p>
         </div>
@@ -30,7 +30,7 @@ export function HairstyleSidebarSection({
           <button
             type="button"
             onClick={() => onStatusChange('aktif')}
-            className={`p-3.5 rounded-xl border text-[13px] font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+            className={`p-3.5 rounded-xl border text-[12px] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all ${
               status === 'aktif'
                 ? 'bg-secondary/15 border-secondary text-secondary shadow-sm'
                 : 'bg-raised/40 border-border text-text-muted hover:text-text-main'
@@ -49,7 +49,7 @@ export function HairstyleSidebarSection({
           <button
             type="button"
             onClick={() => onStatusChange('nonaktif')}
-            className={`p-3.5 rounded-xl border text-[13px] font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+            className={`p-3.5 rounded-xl border text-[12px] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all ${
               status === 'nonaktif'
                 ? 'bg-danger/15 border-danger text-danger shadow-sm'
                 : 'bg-raised/40 border-border text-text-muted hover:text-text-main'
@@ -73,15 +73,15 @@ export function HairstyleSidebarSection({
 
       <Card className="p-6 space-y-4">
         <div className="space-y-1">
-          <h3 className="text-[18px] font-bold text-text-main">Informasi sistem</h3>
-          <p className="text-[13px] text-text-muted">
+          <h3 className="text-[16px] font-bold text-text-main">Informasi sistem</h3>
+          <p className="text-[12px] text-text-muted">
             {isEditMode ? 'Identitas model • hanya baca' : 'Diisi otomatis, bukan bagian dari form.'}
           </p>
         </div>
 
         <div className="space-y-1.5">
           <p className="text-[12px] text-text-muted">ID model (UUID)</p>
-          <p className="text-[13px] font-bold text-text-main break-all font-mono">
+          <p className="text-[12px] font-bold text-text-main break-all font-mono">
             {isEditMode ? uuid : 'Dibuat setelah disimpan'}
           </p>
           {isEditMode && <p className="text-[12px] text-text-muted">Contoh ID model • tidak dapat diedit.</p>}

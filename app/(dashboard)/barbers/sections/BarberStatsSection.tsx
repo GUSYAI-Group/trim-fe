@@ -16,7 +16,7 @@ export function BarberStatsSection({ totalCount, activeCount }: BarberStatsSecti
           <Users className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <h3 className="text-3xl font-extrabold text-text-main mb-1">{totalCount}</h3>
+          <h3 className="text-[28px] font-extrabold font-mono text-text-main mb-1">{totalCount}</h3>
           <p className="text-[12px] text-success font-medium">{activeCount} profil kapster aktif</p>
         </div>
       </Card>
@@ -27,7 +27,7 @@ export function BarberStatsSection({ totalCount, activeCount }: BarberStatsSecti
           <Scissors className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <h3 className="text-3xl font-extrabold text-text-main mb-1">3</h3>
+          <h3 className="text-[28px] font-extrabold font-mono text-text-main mb-1">3</h3>
           <p className="text-[12px] text-text-muted">3 kursi sedang terisi</p>
         </div>
       </Card>
@@ -38,7 +38,7 @@ export function BarberStatsSection({ totalCount, activeCount }: BarberStatsSecti
           <Star className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <h3 className="text-3xl font-extrabold text-text-main mb-1">4,9 / 5</h3>
+          <h3 className="text-[28px] font-extrabold font-mono text-text-main mb-1">4,9 / 5</h3>
           <p className="text-[12px] text-success font-medium">126 ulasan pelanggan bulan ini</p>
         </div>
       </Card>

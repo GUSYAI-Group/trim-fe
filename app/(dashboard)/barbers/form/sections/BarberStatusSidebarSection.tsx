@@ -59,7 +59,7 @@ export function BarberStatusSidebarSection({
           })}
         </div>
 
-        <p className="text-[13px] text-text-muted leading-relaxed">
+        <p className="text-[12px] text-text-muted leading-relaxed">
           Mengatur keaktifan profil, bukan ketersediaan di antrean. Status sedang melayani dihitung dari booking.
         </p>
       </Card>
@@ -69,13 +69,13 @@ export function BarberStatusSidebarSection({
         <Card className="p-6 space-y-5">
           <div className="space-y-1">
             <h2 className="text-[20px] font-bold text-text-main">Ringkasan performa</h2>
-            <p className="text-[13px] text-text-muted">Data terhitung • hanya baca</p>
+            <p className="text-[12px] text-text-muted">Data terhitung • hanya baca</p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <p className="text-[13px] text-text-muted">Rata-rata rating</p>
-              <div className="flex items-center gap-1.5 text-2xl font-extrabold text-text-main mt-1">
+              <p className="text-[12px] text-text-muted">Rata-rata rating</p>
+              <div className="flex items-center gap-1.5 text-[28px] font-extrabold font-mono text-text-main mt-1">
                 <Star className="w-5 h-5 text-secondary fill-secondary" />
                 <span>{rating} / 5</span>
               </div>
@@ -84,9 +84,9 @@ export function BarberStatusSidebarSection({
             <hr className="border-border/60" />
 
             <div>
-              <p className="text-[13px] text-text-muted">Selesai hari ini</p>
-              <p className="text-2xl font-extrabold text-text-main mt-1">
-                {finished} <span className="text-[13px] font-normal text-text-muted">booking selesai</span>
+              <p className="text-[12px] text-text-muted">Selesai hari ini</p>
+              <p className="text-[28px] font-extrabold font-mono text-text-main mt-1">
+                {finished} <span className="text-[12px] font-sans font-normal text-text-muted">booking selesai</span>
               </p>
             </div>
           </div>
@@ -99,7 +99,7 @@ export function BarberStatusSidebarSection({
         <Card className="p-6 space-y-5">
           <div className="space-y-1">
             <h2 className="text-[20px] font-bold text-text-main">Informasi sistem</h2>
-            <p className="text-[13px] text-text-muted">Diisi otomatis, bukan bagian dari form.</p>
+            <p className="text-[12px] text-text-muted">Diisi otomatis, bukan bagian dari form.</p>
           </div>
 
           <div className="space-y-4">

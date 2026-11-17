@@ -82,7 +82,7 @@ export function HairstyleMainFormSection({
                 <p className="text-[14px] font-bold text-text-main">{imageName}</p>
                 <label className="cursor-pointer inline-block">
                   <input type="file" className="hidden" />
-                  <div className="h-10 px-4 bg-raised hover:bg-surface-hover border border-border rounded-xl text-[13px] font-bold text-text-main flex items-center gap-2 transition-colors w-fit">
+                  <div className="h-11 px-5 bg-raised hover:bg-surface-hover border border-border rounded-xl text-[14px] font-semibold text-text-main flex items-center gap-2 transition-colors w-fit">
                     <Upload className="w-4 h-4" />
                     <span>Ganti gambar</span>
                   </div>
@@ -101,7 +101,7 @@ export function HairstyleMainFormSection({
                 <p className="text-[14px] font-bold text-text-main">Unggah referensi model rambut</p>
                 <label className="cursor-pointer inline-block">
                   <input type="file" className="hidden" />
-                  <div className="h-10 px-4 bg-raised hover:bg-surface-hover border border-border rounded-xl text-[13px] font-bold text-text-main flex items-center gap-2 transition-colors w-fit">
+                  <div className="h-11 px-5 bg-raised hover:bg-surface-hover border border-border rounded-xl text-[14px] font-semibold text-text-main flex items-center gap-2 transition-colors w-fit">
                     <Upload className="w-4 h-4" />
                     <span>Unggah gambar</span>
                   </div>
@@ -169,7 +169,7 @@ export function HairstyleMainFormSection({
       <Card className="p-6 md:p-8 space-y-5">
         <div className="space-y-1">
           <h2 className="text-[20px] font-bold text-text-main">Pemetaan bentuk wajah</h2>
-          <p className="text-[13px] text-text-muted">Rancangan saja • tidak wajib dan tidak disimpan</p>
+          <p className="text-[12px] text-text-muted">Rancangan saja • tidak wajib dan tidak disimpan</p>
         </div>
 
         <div className="flex flex-wrap gap-3">

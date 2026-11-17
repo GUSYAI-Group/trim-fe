@@ -30,33 +30,33 @@ export function QueueContextSidebarSection({
     <div className="space-y-6">
       <Card variant="surface" padding="md" className="space-y-4">
         <div>
-          <h3 className="text-base font-bold text-white">Ringkasan booking</h3>
-          <p className="text-[11px] text-text-muted mt-0.5">
+          <h3 className="text-[16px] font-bold text-text-main">Ringkasan booking</h3>
+          <p className="text-[12px] text-text-muted mt-0.5">
             Total harga • total_price
           </p>
         </div>
 
         <div>
-          <h2 className="text-3xl font-extrabold text-white font-mono">
+          <h2 className="text-[28px] font-extrabold text-text-main font-mono">
             Rp{totalPrice.toLocaleString('id-ID')}
           </h2>
-          <p className="text-xs text-text-muted mt-1">
-            {selectedServicesCount} layanan • {totalDuration} menit • Tanpa perubahan tersimpan
+          <p className="text-[12px] text-text-muted mt-1">
+            <span className="font-mono">{selectedServicesCount}</span> layanan • <span className="font-mono">{totalDuration}</span> menit • Tanpa perubahan tersimpan
           </p>
         </div>
 
-        <div className="pt-3 border-t border-border/60 text-xs space-y-1">
-          <p className="font-bold text-white">{bookingDate}</p>
+        <div className="pt-3 border-t border-border/60 text-[12px] space-y-1">
+          <p className="font-bold text-text-main">{bookingDate}</p>
           <p className="text-text-muted">
-            {startTime}–10:50 WIB • {barber}
+            <span className="font-mono">{startTime}–10:50 WIB</span> • {barber}
           </p>
         </div>
       </Card>
 
       <Card variant="surface" padding="md" className="space-y-4">
         <div>
-          <h3 className="text-base font-bold text-white">Konteks antrean</h3>
-          <p className="text-[11px] text-text-muted uppercase tracking-wider mt-0.5">
+          <h3 className="text-[16px] font-bold text-text-main">Konteks antrean</h3>
+          <p className="text-[12px] text-text-muted uppercase tracking-wider mt-0.5">
             QUEUES • Terhubung 1:1 ke booking
           </p>
         </div>
@@ -65,8 +65,9 @@ export function QueueContextSidebarSection({
           label="Nomor antrean • queue_number"
           disabled
           value="A-029 • Pratinjau"
+          className="font-mono"
           rightAddon={
-            <span className="text-[10px] uppercase bg-surface px-1.5 py-0.5 rounded border border-border text-text-muted">
+            <span className="text-[12px] uppercase bg-surface px-1.5 py-0.5 rounded border border-border text-text-muted font-mono">
               OTOMATIS
             </span>
           }
@@ -88,32 +89,32 @@ export function QueueContextSidebarSection({
         <TextField
           label="Estimasi tunggu (menit)"
           type="number"
+          className="font-mono"
           value={estimatedWaitTime}
           onChange={(e) => onEstimatedWaitTimeChange(e.target.value)}
           helperText="estimated_wait_time_mins • Bilangan bulat ≥ 0. Dapat disesuaikan oleh operator."
         />
 
-        <div className="space-y-1 text-xs pt-2 border-t border-border/60">
-          <h4 className="font-bold text-white">Waktu masuk • joined_at</h4>
-          <p className="text-[11px] text-text-muted leading-relaxed">
+        <div className="space-y-1 text-[12px] pt-2 border-t border-border/60">
+          <h4 className="font-bold text-text-main text-[14px]">Waktu masuk • joined_at</h4>
+          <p className="text-[12px] text-text-muted leading-relaxed">
             Diisi otomatis saat pelanggan benar-benar bergabung ke antrean, bukan waktu booking mendatang.
           </p>
-          <p className="text-[10px] text-text-muted leading-relaxed pt-1">
+          <p className="text-[12px] text-text-muted leading-relaxed pt-1">
             booking_id ditautkan otomatis ke booking yang dibuat bersama antrean ini.
           </p>
         </div>
       </Card>
 
-      <Card variant="surface" padding="md" className="space-y-2 text-xs">
-        <h4 className="font-bold text-white">Pembayaran dikelola terpisah</h4>
-        <p className="text-text-muted leading-relaxed text-[11px]">
+      <Card variant="surface" padding="md" className="space-y-2">
+        <h4 className="font-bold text-text-main text-[14px]">Pembayaran dikelola terpisah</h4>
+        <p className="text-text-muted leading-relaxed text-[12px]">
           PAYMENTS adalah record terpisah 1:1 dengan booking. Tidak ada input pembayaran pada form ini.
         </p>
-        <p className="text-text-muted leading-relaxed text-[10px] pt-1 border-t border-border/50">
+        <p className="text-text-muted leading-relaxed text-[12px] pt-1 border-t border-border/50">
           UUID dan created_at dibuat otomatis. Pilihan awal dan aturan validasi adalah aturan aplikasi, bukan default atau CHECK pada schema.
         </p>
       </Card>
     </div>
   );
 }
-

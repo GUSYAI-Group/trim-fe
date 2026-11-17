@@ -40,11 +40,11 @@ export default function AccountsPage() {
   return (
     <div className="space-y-8 pb-24 relative min-h-screen">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <header className="space-y-2">
-          <h1 className="text-[28px] font-extrabold text-white tracking-tight">
+        <header className="space-y-1">
+          <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">
             Manajemen Akun
           </h1>
-          <p className="text-text-muted">
+          <p className="text-text-muted text-[14px]">
             Atur akun login dan hak akses tim. Kamu masuk sebagai Owner.
           </p>
         </header>

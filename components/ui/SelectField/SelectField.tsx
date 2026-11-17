@@ -33,7 +33,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   ...props
 }) => {
   const selectId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]+/g, '-') : undefined);
-  const sizeClass = size === 'sm' ? 'h-10 pl-3.5 pr-9 text-[13px]' : 'h-12 pl-4 pr-10 text-[14px]';
+  const sizeClass = size === 'sm' ? 'h-10 pl-3.5 pr-9 text-[12px]' : 'h-12 pl-4 pr-10 text-[14px]';
 
   return (
     <div className={`flex flex-col gap-1.5 ${containerClassName}`}>

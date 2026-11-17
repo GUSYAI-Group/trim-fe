@@ -54,7 +54,7 @@ export function ProductTableSection({
   return (
     <div className="space-y-4 pt-1">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h2 className="text-base font-bold text-white">Katalog produk</h2>
+        <h2 className="text-[20px] font-bold text-text-main">Katalog produk</h2>
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="w-full sm:w-56">
@@ -131,23 +131,23 @@ export function ProductTableSection({
               {products.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <div className="font-bold text-white text-xs">{item.name}</div>
-                    <div className="text-[11px] text-text-muted">Kategori: {item.category}</div>
+                    <div className="font-bold text-text-main text-[14px]">{item.name}</div>
+                    <div className="text-[12px] text-text-muted">Kategori: {item.category}</div>
                   </TableCell>
-                  <TableCell className="font-bold text-white text-xs">{item.category}</TableCell>
-                  <TableCell className="font-bold text-white text-xs font-mono">{item.priceFormatted}</TableCell>
+                  <TableCell className="font-medium text-text-muted">{item.category}</TableCell>
+                  <TableCell className="font-bold text-text-main text-[14px] font-mono">{item.priceFormatted}</TableCell>
                   <TableCell
-                    className={`font-bold text-xs font-mono ${
+                    className={`font-bold text-[14px] font-mono ${
                       item.stock === 0
-                        ? 'text-rose-400'
+                        ? 'text-danger'
                         : item.stock <= item.minStock
-                        ? 'text-amber-400'
-                        : 'text-white'
+                        ? 'text-warning'
+                        : 'text-text-main'
                     }`}
                   >
                     {item.stock}
                   </TableCell>
-                  <TableCell className="text-text-muted text-xs font-mono">{item.minStock}</TableCell>
+                  <TableCell className="text-text-muted text-[14px] font-mono">{item.minStock}</TableCell>
                   <TableCell>
                     <Badge variant={getStockBadgeVariant(item.stockStatus)}>
                       {item.stockStatus}
@@ -162,7 +162,7 @@ export function ProductTableSection({
                     <div className="flex items-center justify-end gap-3">
                       <Link
                         href={`/products/form?id=${item.rawId}`}
-                        className="text-secondary font-bold text-xs hover:underline flex items-center gap-1 cursor-pointer"
+                        className="text-secondary font-semibold text-[12px] hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                         <span>Edit</span>
@@ -170,7 +170,7 @@ export function ProductTableSection({
                       <button
                         type="button"
                         onClick={() => onToggleActive(item.id)}
-                        className="text-text-muted text-xs hover:text-white transition-colors cursor-pointer"
+                        className="text-text-muted text-[12px] hover:text-white transition-colors cursor-pointer"
                       >
                         {item.isActive ? 'Nonaktifkan' : 'Aktifkan'}
                       </button>
@@ -182,24 +182,24 @@ export function ProductTableSection({
           </DataTable>
         )}
 
-        <div className="py-3.5 px-6 border-t border-border flex items-center justify-between text-text-muted text-xs">
+        <div className="py-3.5 px-6 border-t border-border flex items-center justify-between text-text-muted text-[12px]">
           <span>
             Menampilkan {products.length > 0 ? 1 : 0}–{products.length} dari {totalCount} produk
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="p-1 rounded border border-border text-text-muted hover:text-white disabled:opacity-40"
+              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-white disabled:opacity-40 cursor-pointer"
               disabled
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="w-6 h-6 rounded bg-secondary text-white font-bold flex items-center justify-center text-xs">
+            <span className="w-7 h-7 rounded-lg bg-secondary/20 border border-secondary/30 text-secondary font-bold font-mono flex items-center justify-center text-[12px]">
               1
             </span>
             <button
               type="button"
-              className="p-1 rounded border border-border text-text-muted hover:text-white disabled:opacity-40"
+              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-white disabled:opacity-40 cursor-pointer"
               disabled
             >
               <ChevronRight className="w-4 h-4" />

@@ -40,7 +40,7 @@ function ProductFormInner({ editId }: { editId: string | null }) {
   return (
     <div className="space-y-6 pb-20 selection:bg-secondary selection:text-white">
       <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs text-text-muted">
+        <div className="flex items-center gap-2 text-[12px] text-text-muted">
           <Link href="/products" className="hover:text-white transition-colors">
             Produk
           </Link>
@@ -52,10 +52,10 @@ function ProductFormInner({ editId }: { editId: string | null }) {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
           <div>
-            <h1 className="text-2xl md:text-[28px] font-extrabold text-white tracking-tight">
+            <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">
               {isEditMode ? 'Edit Produk' : 'Tambah Produk'}
             </h1>
-            <p className="text-text-muted text-xs md:text-sm mt-0.5">
+            <p className="text-text-muted text-[14px] mt-0.5">
               {isEditMode
                 ? `Perbarui informasi, harga, dan persediaan ${name || 'produk'}.`
                 : 'Tambahkan produk ke katalog toko. Tanda * wajib diisi.'}
@@ -64,10 +64,9 @@ function ProductFormInner({ editId }: { editId: string | null }) {
 
           <Button
             href="/products"
-            variant="ghost"
-            size="sm"
-            leftIcon={<ArrowLeft className="w-4 h-4" />}
-            className="w-fit"
+            variant="outline"
+            size="md"
+            icon={<ArrowLeft className="w-4 h-4" />}
           >
             Kembali ke daftar
           </Button>
@@ -88,33 +87,50 @@ function ProductFormInner({ editId }: { editId: string | null }) {
         }
       />
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-2 space-y-6">
-          <ProductMainFormSection
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <div className="lg:col-span-2 space-y-6">
+            <ProductMainFormSection
+              isEditMode={isEditMode}
+              name={name}
+              onNameChange={setName}
+              category={category}
+              onCategoryChange={setCategory}
+              price={price}
+              onPriceChange={setPrice}
+              stock={stock}
+              onStockChange={setStock}
+              minStock={minStock}
+              onMinStockChange={setMinStock}
+              isActive={isActive}
+              onActiveChange={setIsActive}
+              description={description}
+              onDescriptionChange={setDescription}
+            />
+          </div>
+
+          <ProductSidebarSection
             isEditMode={isEditMode}
-            name={name}
-            onNameChange={setName}
-            category={category}
-            onCategoryChange={setCategory}
-            price={price}
-            onPriceChange={setPrice}
-            stock={stock}
-            onStockChange={setStock}
-            minStock={minStock}
-            onMinStockChange={setMinStock}
-            isActive={isActive}
-            onActiveChange={setIsActive}
-            description={description}
-            onDescriptionChange={setDescription}
+            uuid={uuid}
+            createdAt={createdAt}
+            updatedAt={updatedAt}
           />
         </div>
 
-        <ProductSidebarSection
-          isEditMode={isEditMode}
-          uuid={uuid}
-          createdAt={createdAt}
-          updatedAt={updatedAt}
-        />
+        {/* Bottom Action Footer */}
+        <div className="p-5 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-[12px] text-text-muted">
+            Periksa kembali informasi produk sebelum menyimpan.
+          </p>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <Button href="/products" variant="outline" size="md">
+              Batal
+            </Button>
+            <Button type="submit" variant="primary" size="md">
+              {isEditMode ? 'Simpan perubahan' : 'Simpan produk'}
+            </Button>
+          </div>
+        </div>
       </form>
 
       {toastMsg && (

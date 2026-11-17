@@ -69,7 +69,7 @@ export const Alert: React.FC<AlertProps> = ({
       <div className="flex-1 min-w-0">
         <p className={`text-[14px] font-bold ${config.titleColor}`}>{title}</p>
         {description && (
-          <p className="text-[13px] text-text-muted mt-1 leading-relaxed">{description}</p>
+          <p className="text-[12px] text-text-muted mt-1 leading-relaxed">{description}</p>
         )}
         {action && <div className="mt-2.5">{action}</div>}
       </div>

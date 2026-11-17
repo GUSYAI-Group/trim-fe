@@ -4,17 +4,17 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { 
+import {
   LayoutDashboard,
-  UserRound, 
-  List, 
-  ScanFace, 
-  Package, 
-  Columns, 
-  Wallet, 
-  Users, 
-  Settings, 
-  HelpCircle 
+  UserRound,
+  List,
+  ScanFace,
+  Package,
+  Columns,
+  Wallet,
+  Users,
+  Settings,
+  HelpCircle
 } from 'lucide-react';
 
 const MENU_ITEMS = [
@@ -33,21 +33,20 @@ export function Sidebar() {
   const pathname = usePathname();
 
   const getActiveClass = (href: string) => {
-    // Exact match untuk root '/', selebihnya pakai startsWith
     const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
-    
-    return isActive 
-      ? "flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary text-text-main font-bold shadow-lg shadow-secondary/20 transition-all duration-300"
-      : "flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-secondary/15 hover:text-text-main transition-all duration-200 font-medium";
+
+    return isActive
+      ? "group flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary text-text-main font-bold shadow-lg shadow-secondary/20 transition-all duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98] motion-reduce:transform-none"
+      : "group flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-secondary/15 hover:text-text-main hover:translate-x-1 transition-all duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] font-medium active:scale-[0.98] motion-reduce:transform-none";
   };
 
   return (
-    <aside className="w-60 bg-sidebar border-r border-border h-full flex flex-col font-mono">
+    <aside className="w-60 bg-sidebar border-r border-border h-full flex flex-col font-sans">
       <div className="h-24 flex items-center justify-center px-4 shrink-0">
         <Image src="/logo/logo-textwhite.svg" alt="TRIM Logo" width={180} height={56} className="object-contain" priority />
       </div>
 
-      <div className="flex-1 overflow-y-auto py-4 px-4 flex flex-col">
+      <div className="flex-1 overflow-y-auto py-4 px-4 flex flex-col no-scrollbar">
         {/* Title */}
         <p className="px-4 text-[12px] font-bold text-text-muted tracking-widest uppercase mb-4">
           RUANG OPERASIONAL
@@ -59,22 +58,22 @@ export function Sidebar() {
             const Icon = item.icon;
             return (
               <Link key={item.href} href={item.href} className={getActiveClass(item.href)}>
-                <Icon className="w-5 h-5" />
+                <Icon className="w-5 h-5 transition-transform duration-180 group-hover:scale-110 motion-reduce:transform-none" />
                 <span>{item.label}</span>
               </Link>
             );
           })}
         </div>
       </div>
-      
+
       {/* Bottom Sticky Section */}
       <div className="p-4 mt-auto shrink-0">
         <Link href="/help" className={getActiveClass('/help') + " mb-4"}>
-          <HelpCircle className="w-5 h-5" />
+          <HelpCircle className="w-5 h-5 transition-transform duration-180 group-hover:scale-110 motion-reduce:transform-none" />
           <span>Pusat Bantuan</span>
         </Link>
         <div className="px-4 pb-2">
-          <p className="text-[12px] font-bold text-text-muted tracking-widest uppercase">TRIM ADMIN/v.1.0</p>
+          <p className="text-[12px] font-bold text-text-muted tracking-widest uppercase font-mono">TRIM ADMIN/v.1.0</p>
         </div>
       </div>
     </aside>

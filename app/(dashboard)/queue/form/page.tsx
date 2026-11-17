@@ -51,7 +51,7 @@ export default function QueueFormPage() {
   return (
     <div className="space-y-6 pb-20 selection:bg-secondary selection:text-white">
       <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs text-text-muted">
+        <div className="flex items-center gap-2 text-[12px] text-text-muted">
           <Link href="/queue" className="hover:text-white transition-colors">
             Monitor Antrean
           </Link>
@@ -61,79 +61,77 @@ export default function QueueFormPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
           <div>
-            <h1 className="text-2xl md:text-[28px] font-extrabold text-white tracking-tight">
+            <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">
               Tambah Antrean
             </h1>
-            <p className="text-text-muted text-xs md:text-sm mt-0.5">
+            <p className="text-text-muted text-[14px] mt-0.5">
               Buat booking beserta antreannya dalam satu penyimpanan.
             </p>
           </div>
 
           <Button
             href="/queue"
-            variant="ghost"
-            size="sm"
-            leftIcon={<ArrowLeft className="w-4 h-4" />}
-            className="w-fit"
+            variant="outline"
+            size="md"
+            icon={<ArrowLeft className="w-4 h-4" />}
           >
             Kembali ke monitor
           </Button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-2">
-          <BookingFormSection
-            customer={customer}
-            onCustomerChange={setCustomer}
-            barber={barber}
-            onBarberChange={setBarber}
-            barbers={MOCK_BARBERS}
-            bookingDate={bookingDate}
-            onBookingDateChange={setBookingDate}
-            startTime={startTime}
-            onStartTimeChange={setStartTime}
-            bookingStatus={bookingStatus}
-            onBookingStatusChange={setBookingStatus}
-            services={availableServices}
-            selectedServices={selectedServices}
-            onToggleService={toggleService}
-            selectedServiceObjects={selectedServiceObjects}
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <div className="lg:col-span-2">
+            <BookingFormSection
+              customer={customer}
+              onCustomerChange={setCustomer}
+              barber={barber}
+              onBarberChange={setBarber}
+              barbers={MOCK_BARBERS}
+              bookingDate={bookingDate}
+              onBookingDateChange={setBookingDate}
+              startTime={startTime}
+              onStartTimeChange={setStartTime}
+              bookingStatus={bookingStatus}
+              onBookingStatusChange={setBookingStatus}
+              services={availableServices}
+              selectedServices={selectedServices}
+              onToggleService={toggleService}
+              selectedServiceObjects={selectedServiceObjects}
+              totalDuration={totalDuration}
+            />
+          </div>
+
+          <QueueContextSidebarSection
+            totalPrice={totalPrice}
+            selectedServicesCount={selectedServices.length}
             totalDuration={totalDuration}
+            bookingDate={bookingDate}
+            startTime={startTime}
+            barber={barber}
+            queueStatus={queueStatus}
+            onQueueStatusChange={setQueueStatus}
+            estimatedWaitTime={estimatedWaitTime}
+            onEstimatedWaitTimeChange={setEstimatedWaitTime}
           />
         </div>
 
-        <QueueContextSidebarSection
-          totalPrice={totalPrice}
-          selectedServicesCount={selectedServices.length}
-          totalDuration={totalDuration}
-          bookingDate={bookingDate}
-          startTime={startTime}
-          barber={barber}
-          queueStatus={queueStatus}
-          onQueueStatusChange={setQueueStatus}
-          estimatedWaitTime={estimatedWaitTime}
-          onEstimatedWaitTimeChange={setEstimatedWaitTime}
-        />
-      </form>
-
-      <Card
-        variant="surface"
-        padding="sm"
-        className="flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl"
-      >
-        <span className="text-xs text-text-muted">
-          Pelanggan &amp; kapster wajib dipilih; pilih layanan aktif dan jadwal tanpa bentrok.
-        </span>
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <Button href="/queue" variant="ghost" size="sm">
-            Batal
-          </Button>
-          <Button onClick={handleSubmit} variant="primary" size="sm">
-            Simpan antrean
-          </Button>
+        {/* Bottom Action Footer */}
+        <div className="p-5 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-[12px] text-text-muted">
+            Pelanggan &amp; kapster wajib dipilih; pilih layanan aktif dan jadwal tanpa bentrok.
+          </p>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <Button href="/queue" variant="outline" size="md">
+              Batal
+            </Button>
+            <Button type="submit" variant="primary" size="md">
+              Simpan antrean
+            </Button>
+          </div>
         </div>
-      </Card>
+      </form>
 
       {toastMsg && (
         <div className="fixed bottom-6 right-6 z-50">

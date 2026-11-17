@@ -46,13 +46,13 @@ export function BookingFormSection({
     <div className="space-y-6">
       <Card variant="surface" padding="lg" className="space-y-6">
         <div>
-          <h2 className="text-lg font-bold text-white">Informasi booking</h2>
-          <p className="text-[11px] text-text-muted uppercase tracking-wider mt-0.5">
+          <h2 className="text-[20px] font-bold text-text-main">Informasi booking</h2>
+          <p className="text-[14px] text-text-muted mt-0.5">
             BOOKINGS • Pelanggan dan jadwal layanan
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <SelectField
             label="Pelanggan • customer_id"
             value={customer}
@@ -76,7 +76,7 @@ export function BookingFormSection({
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <SelectField
             label="Tanggal • booking_date"
             value={bookingDate}
@@ -102,15 +102,16 @@ export function BookingFormSection({
             label="Selesai • end_time"
             disabled
             value="10:50 WIB"
+            className="font-mono"
             rightAddon={
-              <span className="text-[10px] uppercase bg-surface px-1.5 py-0.5 rounded border border-border text-text-muted">
+              <span className="text-[12px] uppercase bg-surface px-1.5 py-0.5 rounded border border-border text-text-muted font-mono">
                 OTOMATIS
               </span>
             }
           />
         </div>
-        <p className="text-[11px] text-text-muted">
-          Waktu selesai dihitung dari waktu mulai + total durasi layanan ({totalDuration} menit).
+        <p className="text-[12px] text-text-muted">
+          Waktu selesai dihitung dari waktu mulai + total durasi layanan (<span className="font-mono text-text-main font-semibold">{totalDuration}</span> menit).
         </p>
 
         <div className="pt-2 border-t border-border/60">
@@ -130,8 +131,8 @@ export function BookingFormSection({
 
       <Card variant="surface" padding="lg" className="space-y-6">
         <div>
-          <h2 className="text-lg font-bold text-white">Pilihan layanan</h2>
-          <p className="text-[11px] text-text-muted uppercase tracking-wider mt-0.5">
+          <h2 className="text-[20px] font-bold text-text-main">Pilihan layanan</h2>
+          <p className="text-[14px] text-text-muted mt-0.5">
             SERVICES → BOOKING_SERVICES • Bisa memilih lebih dari satu layanan aktif
           </p>
         </div>
@@ -160,9 +161,9 @@ export function BookingFormSection({
                     {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white">{srv.name}</h4>
-                    <p className="text-[11px] text-text-muted mt-0.5">
-                      {srv.duration} menit • Rp{srv.price.toLocaleString('id-ID')}
+                    <h4 className="text-[14px] font-bold text-text-main">{srv.name}</h4>
+                    <p className="text-[12px] text-text-muted mt-0.5">
+                      <span className="font-mono">{srv.duration}</span> menit • <span className="font-mono font-semibold text-text-main">Rp{srv.price.toLocaleString('id-ID')}</span>
                     </p>
                   </div>
                 </div>
@@ -172,24 +173,24 @@ export function BookingFormSection({
         </div>
 
         <div className="p-4 rounded-xl bg-raised/50 border border-border/80 space-y-3">
-          <h4 className="text-xs font-bold text-white">Harga tersimpan per layanan</h4>
+          <h4 className="text-[14px] font-bold text-text-main">Harga tersimpan per layanan</h4>
           {selectedServiceObjects.map((srv) => (
-            <div key={srv.id} className="flex justify-between items-center text-xs">
+            <div key={srv.id} className="flex justify-between items-center text-[14px]">
               <div>
-                <p className="font-bold text-white">{srv.name}</p>
-                <p className="text-[11px] text-text-muted">
-                  Harga saat ini Rp{srv.price.toLocaleString('id-ID')} • {srv.duration} menit
+                <p className="font-bold text-text-main">{srv.name}</p>
+                <p className="text-[12px] text-text-muted">
+                  Harga saat ini <span className="font-mono">Rp{srv.price.toLocaleString('id-ID')}</span> • <span className="font-mono">{srv.duration}</span> menit
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-bold text-white font-mono">
+                <p className="font-bold text-text-main font-mono">
                   Rp{srv.price.toLocaleString('id-ID')}
                 </p>
-                <p className="text-[10px] text-text-muted font-mono">price_at_booking</p>
+                <p className="text-[12px] text-text-muted font-mono">price_at_booking</p>
               </div>
             </div>
           ))}
-          <p className="text-[10px] text-text-muted pt-2 border-t border-border/50">
+          <p className="text-[12px] text-text-muted pt-2 border-t border-border/50">
             Harga saat ini menjadi snapshot price_at_booking saat booking disimpan.
           </p>
         </div>
@@ -197,4 +198,3 @@ export function BookingFormSection({
     </div>
   );
 }
-

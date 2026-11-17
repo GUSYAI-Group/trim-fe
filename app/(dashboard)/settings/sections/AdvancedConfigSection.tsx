@@ -37,12 +37,12 @@ export function AdvancedConfigSection({ onNotify }: AdvancedConfigSectionProps) 
     <Card variant="surface" padding="none" className="overflow-hidden">
       <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border">
         <div className="space-y-1">
-          <h2 className="text-[20px] font-bold text-white">Konfigurasi Lanjutan</h2>
-          <p className="text-[13px] text-text-muted">
+          <h2 className="text-[20px] font-bold text-text-main">Konfigurasi Lanjutan</h2>
+          <p className="text-[12px] text-text-muted">
             Nilai aktif di STORE_SETTINGS. Perubahan tersimpan 6 Okt 2026 14:28 WIB.
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-success bg-success/10 px-3 py-1.5 rounded-lg self-start">
+        <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-success bg-success/10 px-3 py-1.5 rounded-lg self-start">
           <Check className="w-3.5 h-3.5" />
           Tersimpan
         </span>
@@ -70,13 +70,13 @@ export function AdvancedConfigSection({ onNotify }: AdvancedConfigSectionProps) 
                     className="cursor-pointer"
                   >
                     <TableCell
-                      className={`text-[13px] font-mono text-text-muted ${
+                      className={`text-[12px] font-mono text-text-muted ${
                         isActive ? 'border-l-2 border-l-secondary' : ''
                       }`}
                     >
                       {s.id}
                     </TableCell>
-                    <TableCell className="text-[13px] font-medium text-white font-mono">
+                    <TableCell className="text-[14px] font-medium text-text-main font-mono">
                       {s.key}
                     </TableCell>
                     <TableCell>
@@ -88,7 +88,7 @@ export function AdvancedConfigSection({ onNotify }: AdvancedConfigSectionProps) 
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-[13px] text-text-muted">
+                    <TableCell className="text-[14px] text-text-muted">
                       {s.description}
                     </TableCell>
                   </TableRow>
@@ -99,7 +99,7 @@ export function AdvancedConfigSection({ onNotify }: AdvancedConfigSectionProps) 
         </div>
 
         <div className="lg:w-80 xl:w-96 shrink-0 p-6 space-y-5 border border-border rounded-xl bg-raised/20">
-          <h3 className="text-[15px] font-bold text-white">Edit entri</h3>
+          <h3 className="text-[16px] font-bold text-text-main">Edit entri</h3>
 
           <TextField
             label="setting_key"
@@ -121,15 +121,15 @@ export function AdvancedConfigSection({ onNotify }: AdvancedConfigSectionProps) 
           />
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-white">updated_at (sistem)</label>
-            <p className="text-[13px] text-text-muted font-mono">6 Okt 2026 14:28 WIB</p>
+            <label className="text-[14px] font-medium text-text-main">updated_at (sistem)</label>
+            <p className="text-[12px] text-text-muted font-mono">6 Okt 2026 14:28 WIB</p>
           </div>
 
           <Button variant="primary" size="md" className="w-full" onClick={handleSave}>
             Simpan perubahan
           </Button>
 
-          <p className="text-[11px] text-text-muted">
+          <p className="text-[12px] text-text-muted">
             Konvensi nilai: holiday_date memakai format YYYY-MM-DD.
           </p>
         </div>

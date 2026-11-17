@@ -68,8 +68,8 @@ export function HelpFaqSection() {
                   </div>
                   <Badge variant="accent">{item.badge}</Badge>
                 </div>
-                <h3 className="text-base font-bold text-white">{item.title}</h3>
-                <p className="text-xs text-text-muted leading-relaxed">{item.description}</p>
+                <h3 className="text-[16px] font-bold text-text-main">{item.title}</h3>
+                <p className="text-[14px] text-text-muted leading-relaxed">{item.description}</p>
               </div>
             </Card>
           );

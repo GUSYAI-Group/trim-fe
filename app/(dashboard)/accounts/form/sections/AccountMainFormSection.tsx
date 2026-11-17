@@ -51,8 +51,8 @@ export function AccountMainFormSection({
     <div className="space-y-6">
       <Card variant="surface" padding="lg" className="space-y-6">
         <div>
-          <h2 className="text-lg font-bold text-white">Informasi akun login</h2>
-          <p className="text-xs text-text-muted mt-0.5">
+          <h2 className="text-[20px] font-bold text-text-main">Informasi akun login</h2>
+          <p className="text-[14px] text-text-muted mt-0.5">
             Akun pengguna untuk masuk ke TRIM. Tanda * wajib diisi.
           </p>
         </div>
@@ -61,8 +61,8 @@ export function AccountMainFormSection({
           <div className="p-4 rounded-2xl bg-raised/50 border border-border/80 flex items-center gap-3.5">
             <Avatar initials={initials || 'US'} shape="rounded" variant="surface" size="md" />
             <div>
-              <h4 className="text-xs font-bold text-white">{email}</h4>
-              <p className="text-[11px] text-text-muted mt-0.5">
+              <h4 className="text-[14px] font-bold text-text-main">{email}</h4>
+              <p className="text-[12px] text-text-muted mt-0.5">
                 Peran saat ini: {role.charAt(0).toUpperCase() + role.slice(1)} • role: {role}
               </p>
             </div>
@@ -109,14 +109,16 @@ export function AccountMainFormSection({
 
       <Card variant="surface" padding="lg" className="space-y-6">
         <div>
-          <h2 className="text-lg font-bold text-white">Hak akses akun</h2>
-          <p className="text-xs text-text-muted mt-0.5">
+          <h2 className="text-[20px] font-bold text-text-main">Hak akses akun</h2>
+          <p className="text-[14px] text-text-muted mt-0.5">
             Pilih satu peran sesuai kebutuhan pengguna.
           </p>
         </div>
 
         <div className="space-y-3">
-          <label className="block text-xs font-bold text-white">Peran akun *</label>
+          <label className="block text-[14px] font-medium text-text-main">
+            Peran akun <span className="text-secondary">*</span>
+          </label>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {roleOptions.map((opt) => {
@@ -134,8 +136,8 @@ export function AccountMainFormSection({
                   }`}
                 >
                   <div>
-                    <h4 className="text-xs font-bold text-white">{opt.title}</h4>
-                    <p className="text-[11px] text-text-muted mt-1">{opt.subtitle}</p>
+                    <h4 className="text-[14px] font-bold text-text-main">{opt.title}</h4>
+                    <p className="text-[12px] text-text-muted mt-1">{opt.subtitle}</p>
                   </div>
                   <div
                     className={`w-4 h-4 rounded-full border flex items-center justify-center mt-0.5 ${
@@ -149,7 +151,7 @@ export function AccountMainFormSection({
             })}
           </div>
 
-          <p className="text-[11px] text-text-muted pt-1">
+          <p className="text-[12px] text-text-muted pt-1">
             Role valid: customer, barber, admin, owner. Owner tidak dipilih untuk akun staf.
           </p>
         </div>
@@ -157,4 +159,3 @@ export function AccountMainFormSection({
     </div>
   );
 }
-

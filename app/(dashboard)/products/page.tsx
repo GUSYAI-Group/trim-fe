@@ -51,10 +51,10 @@ export default function ProductsPage() {
     <div className="space-y-6 pb-12 selection:bg-secondary selection:text-white">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-[28px] font-extrabold text-white tracking-tight">
+          <h1 className="text-[28px] font-extrabold text-text-main tracking-tight">
             Kelola Produk
           </h1>
-          <p className="text-text-muted text-xs md:text-sm mt-1">
+          <p className="text-text-muted text-[14px] mt-1">
             Kelola katalog, harga satuan, dan pantau stok produk barbershop.
           </p>
         </div>
@@ -62,8 +62,8 @@ export default function ProductsPage() {
         <Button
           href="/products/form"
           variant="primary"
-          size="sm"
-          leftIcon={<Plus className="w-4 h-4" />}
+          size="md"
+          icon={<Plus className="w-4 h-4" />}
           className="self-start sm:self-auto shrink-0"
         >
           Tambah produk

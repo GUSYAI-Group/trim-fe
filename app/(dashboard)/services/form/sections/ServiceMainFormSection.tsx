@@ -64,6 +64,7 @@ export function ServiceMainFormSection({
           label="Durasi (menit)"
           type="number"
           required
+          className="font-mono"
           value={duration}
           onChange={(e) => onDurationChange(e.target.value)}
           placeholder="Contoh: 35"
@@ -74,6 +75,7 @@ export function ServiceMainFormSection({
         <TextField
           label="Harga"
           required
+          className="font-mono"
           value={price}
           onChange={(e) => onPriceChange(e.target.value)}
           placeholder="Contoh: 60.000"
@@ -100,20 +102,6 @@ export function ServiceMainFormSection({
           </p>
         </div>
         <Switch checked={isActive} onChange={onActiveChange} />
-      </div>
-
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-5 border-t border-border/60">
-        <span className="text-[13px] text-text-muted">
-          Periksa detail sebelum menyimpan.
-        </span>
-        <div className="flex items-center gap-3 justify-end">
-          <Button href="/services" variant="outline" size="md">
-            Batal
-          </Button>
-          <Button type="submit" variant="primary" size="md">
-            {isEditMode ? 'Simpan perubahan' : 'Simpan layanan'}
-          </Button>
-        </div>
       </div>
     </Card>
   );

@@ -28,9 +28,9 @@ export const TextField: React.FC<TextFieldProps> = ({
   const inputId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]+/g, '-') : undefined);
 
   return (
-    <div className={`flex flex-col gap-1.5 ${containerClassName}`}>
+    <div className={`flex flex-col gap-1 ${containerClassName}`}>
       {label && (
-        <label htmlFor={inputId} className="text-[14px] font-medium text-text-main">
+        <label htmlFor={inputId} className="text-[14px] font-medium text-text-main font-outfit">
           {label} {required && <span className="text-secondary">*</span>}
         </label>
       )}
@@ -44,17 +44,17 @@ export const TextField: React.FC<TextFieldProps> = ({
           id={inputId}
           required={required}
           className={`
-            w-full h-12 px-4 text-[14px] font-medium
-            bg-raised/60 border rounded-xl
+            w-full h-[48px] px-4 text-[14px] font-medium font-outfit
+            bg-transparent border rounded-lg
             text-text-main placeholder:text-text-muted
             outline-none transition-all duration-200
             ${leftAddon ? 'pl-11' : ''}
             ${rightAddon || isError ? 'pr-12' : ''}
             ${isError
               ? 'border-danger focus:ring-2 focus:ring-danger/30'
-              : 'border-border focus:border-secondary focus:ring-2 focus:ring-secondary/20'
+              : 'border-border focus:border-secondary focus:ring-2 focus:ring-secondary/30'
             }
-            ${disabled ? 'opacity-50 cursor-not-allowed bg-raised/30' : ''}
+            ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
             ${className}
           `}
           disabled={disabled}
@@ -63,15 +63,15 @@ export const TextField: React.FC<TextFieldProps> = ({
         {isError && !rightAddon ? (
           <AlertCircle className="w-4 h-4 text-danger absolute right-4 pointer-events-none" />
         ) : rightAddon ? (
-          <div className="absolute right-3.5 text-[13px] text-text-muted flex items-center">
+          <div className="absolute right-3.5 text-[12px] text-text-muted flex items-center">
             {rightAddon}
           </div>
         ) : null}
       </div>
       {isError && errorText ? (
-        <span className="text-[12px] text-danger font-medium">{errorText}</span>
+        <span className="text-[12px] text-danger animate-dropdown font-outfit">{errorText}</span>
       ) : helperText ? (
-        <span className="text-[12px] text-text-muted">{helperText}</span>
+        <span className="text-[12px] text-text-muted font-outfit">{helperText}</span>
       ) : null}
     </div>
   );

@@ -148,7 +148,7 @@ function HairstyleFormInner({ editId }: { editId: string | null }) {
       </div>
 
       <div className="p-5 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-[13px] text-text-muted">
+        <p className="text-[12px] text-text-muted">
           {hasErrors
             ? 'Perbaiki field yang ditandai, lalu simpan kembali.'
             : 'Lengkapi nama dan foto referensi sebelum menyimpan.'}

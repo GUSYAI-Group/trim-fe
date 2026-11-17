@@ -11,7 +11,7 @@ export function DashboardKpiSection() {
           <Wallet className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <h3 className="text-[28px] font-extrabold text-text-main leading-tight">Rp1.200.000</h3>
+          <h3 className="text-[28px] font-extrabold text-text-main font-mono leading-tight">Rp1.200.000</h3>
           <p className="text-success text-[12px] mt-1">Pembayaran paid • paid_at hari ini</p>
         </div>
       </Card>
@@ -22,7 +22,7 @@ export function DashboardKpiSection() {
           <Scissors className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <h3 className="text-[28px] font-extrabold text-text-main leading-tight">18</h3>
+          <h3 className="text-[28px] font-extrabold text-text-main font-mono leading-tight">18</h3>
           <p className="text-success text-[12px] mt-1">Booking completed • tanggal hari ini</p>
         </div>
       </Card>
@@ -33,7 +33,7 @@ export function DashboardKpiSection() {
           <Star className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <h3 className="text-[28px] font-extrabold text-text-main leading-tight">4,9 / 5</h3>
+          <h3 className="text-[28px] font-extrabold text-text-main font-mono leading-tight">4,9 / 5</h3>
           <p className="text-success text-[12px] mt-1">BARBERS.average_rating • 126 ulasan</p>
         </div>
       </Card>
@@ -44,7 +44,7 @@ export function DashboardKpiSection() {
           <Calendar className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <h3 className="text-[28px] font-extrabold text-text-main leading-tight">28</h3>
+          <h3 className="text-[28px] font-extrabold text-text-main font-mono leading-tight">28</h3>
           <p className="text-warning text-[12px] mt-1">2 booking confirmed belum check-in</p>
         </div>
       </Card>

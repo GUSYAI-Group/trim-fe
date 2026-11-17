@@ -37,7 +37,7 @@ export const Switch: React.FC<SwitchProps> = ({
         />
       </button>
       {(activeLabel || inactiveLabel) && (
-        <span className={`text-[13px] font-bold ${checked ? 'text-success' : 'text-text-muted'}`}>
+        <span className={`text-[12px] font-bold ${checked ? 'text-success' : 'text-text-muted'}`}>
           {checked ? activeLabel : inactiveLabel}
         </span>
       )}

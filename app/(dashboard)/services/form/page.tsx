@@ -89,6 +89,21 @@ function ServiceFormInner({ editId }: { editId: string | null }) {
         description="Harga tersimpan di BOOKING_SERVICES.price_at_booking. Jadwal berada di BOOKINGS.start_time/end_time. Harga tidak boleh negatif."
       />
 
+      {/* Bottom Action Footer */}
+      <div className="p-5 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <p className="text-[12px] text-text-muted">
+          Periksa kembali informasi menu layanan sebelum menyimpan.
+        </p>
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <Button href="/services" variant="outline" size="md">
+            Batal
+          </Button>
+          <Button type="submit" variant="primary" size="md">
+            {isEditMode ? 'Simpan perubahan' : 'Simpan layanan'}
+          </Button>
+        </div>
+      </div>
+
       <div className="fixed bottom-6 right-6 z-50">
         <Toast
           isOpen={toastOpen}

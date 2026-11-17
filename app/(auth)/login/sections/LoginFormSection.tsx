@@ -39,7 +39,7 @@ export function LoginFormSection() {
   return (
     <div className="flex flex-col justify-between h-full py-1 md:py-2 px-2 md:px-4 overflow-y-auto">
       <div className="text-center pt-1">
-        <span className="text-[11px] tracking-[0.25em] text-text-muted uppercase font-bold">
+        <span className="text-[12px] tracking-[0.25em] text-text-muted uppercase font-bold">
           RUANG OPERASIONAL
         </span>
       </div>
@@ -50,7 +50,7 @@ export function LoginFormSection() {
             <h2 className="text-[20px] font-bold tracking-tight text-text-main mb-1">
               Masuk ke Dashboard
             </h2>
-            <p className="text-[13px] text-text-muted leading-relaxed">
+            <p className="text-[14px] text-text-muted leading-relaxed">
               Gunakan akun Admin atau Owner untuk mengakses ruang operasional TRIM.
             </p>
           </div>
@@ -97,7 +97,7 @@ export function LoginFormSection() {
               }
             />
 
-            <div className="text-[13px] text-text-muted pt-0.5">
+            <div className="text-[12px] text-text-muted pt-0.5">
               Lupa kata sandi?{' '}
               <span className="text-secondary font-semibold">
                 Hubungi Owner

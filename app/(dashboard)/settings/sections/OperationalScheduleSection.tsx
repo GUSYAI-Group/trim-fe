@@ -39,13 +39,13 @@ export function OperationalScheduleSection({ onNotify }: OperationalScheduleSect
     <Card variant="surface" padding="none" className="overflow-hidden">
       <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border">
         <div className="space-y-1">
-          <h2 className="text-[20px] font-bold text-white">Jadwal Operasional</h2>
-          <p className="text-[13px] text-text-muted">
+          <h2 className="text-[20px] font-bold text-text-main">Jadwal Operasional</h2>
+          <p className="text-[12px] text-text-muted">
             Jam buka–tutup per hari. Minggu = tutup rutin.
             {editing && <span className="text-warning"> Rancangan — belum disimpan.</span>}
           </p>
         </div>
-        <Button variant="primary" size="sm" onClick={handleToggleEdit} className="shrink-0">
+        <Button variant="primary" size="md" onClick={handleToggleEdit} className="shrink-0">
           {editing ? 'Simpan jadwal' : 'Ubah jadwal'}
         </Button>
       </div>
@@ -102,7 +102,7 @@ export function OperationalScheduleSection({ onNotify }: OperationalScheduleSect
                   value={row.open}
                   disabled={row.locked || !editing}
                   onChange={(e) => handleTimeChange(idx, 'open', e.target.value)}
-                  className={`w-full bg-raised border border-border rounded-lg px-4 py-2.5 text-[14px] font-mono focus:outline-none focus:border-secondary transition-colors ${
+                  className={`w-full h-11 bg-raised/60 border border-border rounded-xl px-4 text-[14px] font-mono focus:outline-none focus:border-secondary transition-colors ${
                     row.locked || !editing
                       ? 'text-text-muted cursor-not-allowed'
                       : 'text-white'
@@ -116,7 +116,7 @@ export function OperationalScheduleSection({ onNotify }: OperationalScheduleSect
                   value={row.close}
                   disabled={row.locked || !editing}
                   onChange={(e) => handleTimeChange(idx, 'close', e.target.value)}
-                  className={`w-full bg-raised border border-border rounded-lg px-4 py-2.5 text-[14px] font-mono focus:outline-none focus:border-secondary transition-colors ${
+                  className={`w-full h-11 bg-raised/60 border border-border rounded-xl px-4 text-[14px] font-mono focus:outline-none focus:border-secondary transition-colors ${
                     row.locked || !editing
                       ? 'text-text-muted cursor-not-allowed'
                       : 'text-white'

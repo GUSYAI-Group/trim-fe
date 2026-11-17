@@ -51,15 +51,15 @@ export function UnpaidPaymentsTableSection({
           {payments.map((p) => (
             <TableRow key={p.id}>
               <TableCell>
-                <p className="text-[13px] font-bold text-white font-mono">{p.qrisRef}</p>
+                <p className="text-[14px] font-bold text-text-main font-mono">{p.qrisRef}</p>
                 <p className="text-[12px] text-text-muted mt-0.5 font-mono">{p.qrisId}</p>
               </TableCell>
-              <TableCell className="text-[13px] text-text-muted font-mono">
+              <TableCell className="text-[12px] text-text-muted font-mono">
                 {p.bookingUuid}
               </TableCell>
-              <TableCell className="text-[14px] font-bold text-white">{p.customer}</TableCell>
-              <TableCell className="text-[13px] text-text-muted">—</TableCell>
-              <TableCell className="text-[14px] font-medium text-white font-mono">
+              <TableCell className="text-[14px] font-bold text-text-main">{p.customer}</TableCell>
+              <TableCell className="text-[12px] text-text-muted">—</TableCell>
+              <TableCell className="text-[14px] font-bold text-text-main font-mono">
                 {p.nominal}
               </TableCell>
               <TableCell>
@@ -69,7 +69,7 @@ export function UnpaidPaymentsTableSection({
                 <button
                   type="button"
                   onClick={() => onDetailClick(p)}
-                  className="flex items-center gap-1 text-[13px] font-bold text-secondary hover:brightness-125 transition-all cursor-pointer"
+                  className="flex items-center gap-1 text-[12px] font-semibold text-secondary hover:brightness-125 transition-all cursor-pointer"
                 >
                   Detail <ArrowRight className="w-3.5 h-3.5" />
                 </button>

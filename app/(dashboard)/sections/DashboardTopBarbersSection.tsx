@@ -47,14 +47,14 @@ export function DashboardTopBarbersSection() {
               </div>
             </TableCell>
             <TableCell className="font-medium text-text-main">{kapster.specialty}</TableCell>
-            <TableCell className="font-bold text-text-main">{kapster.weeklyCuts}</TableCell>
-            <TableCell className="font-bold text-text-main">
+            <TableCell className="font-bold text-text-main font-mono">{kapster.weeklyCuts}</TableCell>
+            <TableCell className="font-bold text-text-main font-mono">
               <span className="inline-flex items-center gap-1.5">
                 <Star className="w-3.5 h-3.5 fill-secondary text-secondary" />
                 {kapster.rating}
               </span>
             </TableCell>
-            <TableCell className="font-bold text-text-main pr-6">{kapster.weeklyIncome}</TableCell>
+            <TableCell className="font-bold text-text-main pr-6 font-mono">{kapster.weeklyIncome}</TableCell>
           </TableRow>
         ))}
       </DataTable>

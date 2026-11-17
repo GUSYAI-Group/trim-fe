@@ -58,7 +58,7 @@ export function BarberProfileFormSection({
                 accept="image/png, image/jpeg"
                 className="hidden"
               />
-              <div className="flex items-center justify-center h-10 px-4 rounded-xl font-bold gap-2 bg-raised border border-border hover:bg-surface-hover text-text-main transition-colors text-[13px] w-fit">
+              <div className="flex items-center justify-center h-11 px-5 rounded-xl font-bold gap-2 bg-raised border border-border hover:bg-surface-hover text-text-main transition-colors text-[14px] w-fit">
                 <Upload className="w-4 h-4" />
                 <span>{isEditMode ? 'Ganti foto' : 'Unggah foto'}</span>
               </div>
@@ -80,6 +80,7 @@ export function BarberProfileFormSection({
           <TextField
             label="Nomor telepon"
             required
+            className="font-mono"
             value={phone}
             onChange={(e) => onPhoneChange(e.target.value)}
             placeholder="Contoh: 081234567890"
@@ -98,7 +99,7 @@ export function BarberProfileFormSection({
 
         <div className="flex items-start gap-3 pt-2 border-t border-border/60">
           <Info className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-          <p className="text-[13px] text-text-muted leading-relaxed">
+          <p className="text-[12px] text-text-muted leading-relaxed">
             Nomor telepon harus unik. Saat disimpan, nomor akan diperiksa agar tidak digunakan profil kapster lain.
           </p>
         </div>
@@ -143,7 +144,7 @@ export function BarberProfileFormSection({
         )}
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-border/60">
-          <p className="text-[13px] text-text-muted">
+          <p className="text-[12px] text-text-muted">
             {isEditMode
               ? 'Tautan akun tidak dapat diubah di halaman ini.'
               : 'Satu akun hanya dapat terhubung ke satu profil kapster.'}
@@ -151,7 +152,7 @@ export function BarberProfileFormSection({
           <Button
             href="/accounts"
             variant="outline"
-            size="sm"
+            size="md"
             icon={<ArrowUpRight className="w-4 h-4" />}
           >
             Kelola akun
