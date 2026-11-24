@@ -7,15 +7,22 @@ import { THairstyle } from '@/types';
 
 interface HairstyleCardProps {
   item: THairstyle;
+  onDetailClick?: (item: THairstyle) => void;
+  onDeleteClick?: (item: THairstyle) => void;
 }
 
-export function HairstyleCard({ item }: HairstyleCardProps) {
+export function HairstyleCard({ item, onDetailClick, onDeleteClick }: HairstyleCardProps) {
+  const imageSrc =
+    item.image && (item.image.startsWith('/') || item.image.startsWith('http'))
+      ? item.image
+      : '/hairstyles/skin-fade.jpg.png';
+
   return (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-secondary/60 transition-all group">
       <div>
         <div className="relative w-full h-48 bg-primary overflow-hidden">
           <Image
-            src={item.image}
+            src={imageSrc}
             alt={item.name}
             fill
             className="object-cover object-center grayscale contrast-125 brightness-90 group-hover:scale-105 transition-transform duration-500"
@@ -67,13 +74,33 @@ export function HairstyleCard({ item }: HairstyleCardProps) {
           label={item.isAiActive ? 'Aktif untuk AI' : 'Nonaktif'}
         />
 
-        <Link
-          href={`/hairstyles/form?id=${item.id}`}
-          className="text-secondary text-[12px] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
-        >
-          <span>Edit</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
+        <div className="flex items-center gap-3">
+          {onDetailClick && (
+            <button
+              type="button"
+              onClick={() => onDetailClick(item)}
+              className="text-text-muted hover:text-text-main text-[12px] font-semibold transition-colors cursor-pointer"
+            >
+              Detail
+            </button>
+          )}
+          {onDeleteClick && (
+            <button
+              type="button"
+              onClick={() => onDeleteClick(item)}
+              className="text-danger hover:brightness-125 text-[12px] font-semibold transition-colors cursor-pointer"
+            >
+              Hapus
+            </button>
+          )}
+          <Link
+            href={`/hairstyles/form?id=${item.id}`}
+            className="text-secondary text-[12px] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+          >
+            <span>Edit</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
     </div>
   );

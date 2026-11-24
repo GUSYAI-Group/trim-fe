@@ -6,13 +6,17 @@ interface PaymentSummarySectionProps {
   totalLunas: number;
   totalMenunggu: number;
   totalGagal: number;
+  totalOmset?: string;
 }
 
 export function PaymentSummarySection({
   totalLunas,
   totalMenunggu,
   totalGagal,
+  totalOmset,
 }: PaymentSummarySectionProps) {
+  const displayOmset = totalOmset || 'Rp0';
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <Card variant="surface" padding="md" className="space-y-3">
@@ -22,9 +26,9 @@ export function PaymentSummarySection({
         </div>
         <div>
           <p className="text-[28px] font-extrabold text-text-main font-mono leading-none mb-2">
-            Rp10.250.000
+            {displayOmset}
           </p>
-          <p className="text-[12px] text-success">{totalLunas} pembayaran paid • 30 Sep–6 Okt</p>
+          <p className="text-[12px] text-success">{totalLunas} pembayaran lunas (paid)</p>
         </div>
       </Card>
 
@@ -37,7 +41,7 @@ export function PaymentSummarySection({
           <p className="text-[28px] font-extrabold text-text-main font-mono leading-none mb-2">
             {totalMenunggu} transaksi
           </p>
-          <p className="text-[12px] text-warning">Tanpa filter paid_at</p>
+          <p className="text-[12px] text-warning">Status pending / walk-in belum dibayar</p>
         </div>
       </Card>
 
@@ -50,7 +54,7 @@ export function PaymentSummarySection({
           <p className="text-[28px] font-extrabold text-text-main font-mono leading-none mb-2">
             {totalGagal} transaksi
           </p>
-          <p className="text-[12px] text-text-muted">{totalGagal} failed • tanpa filter paid_at</p>
+          <p className="text-[12px] text-text-muted">{totalGagal} gagal / dibatalkan</p>
         </div>
       </Card>
     </div>

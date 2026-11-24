@@ -28,17 +28,26 @@ import {
 import { Card, Button, Badge } from '@/components/ui';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
+import { authService } from '@/services/endpoints/auth';
 
 export default function ProfileView() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
 
   // Profile editable state
-  const [name, setName] = useState(user?.name || 'Aditya Pratama');
-  const [email] = useState('aditya@trim.id');
-  const [phone, setPhone] = useState('0812 3456 7890');
-  const [branch, setBranch] = useState('TRIM Barbershop - Outlet Pusat (Jaksel)');
+  const [name, setName] = useState(user?.name || (user?.email ? user.email.split('@')[0] : 'Admin'));
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '-');
+  const [branch, setBranch] = useState('TRIM Barbershop');
   const [isSaved, setIsSaved] = useState(false);
+
+  React.useEffect(() => {
+    if (user?.email) {
+      setEmail(user.email);
+      setName(user.name || user.email.split('@')[0]);
+      if (user.phone) setPhone(user.phone);
+    }
+  }, [user]);
 
   // Password modal state
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -57,8 +66,22 @@ export default function ProfileView() {
   // Active Tab
   const [activeTab, setActiveTab] = useState<'info' | 'security' | 'preferences' | 'activity'>('info');
 
-  // Load persisted preferences on mount
+  // Load persisted preferences on mount & fetch live profile
   React.useEffect(() => {
+    async function loadLiveProfile() {
+      try {
+        const res = await authService.getMe();
+        if (res.data) {
+          setName(res.data.name);
+          setEmail(res.data.email);
+          if (res.data.phone) setPhone(res.data.phone);
+        }
+      } catch (_err) {
+        // Fallback to local storage or auth store
+      }
+    }
+    loadLiveProfile();
+
     if (typeof window !== 'undefined') {
       const savedName = localStorage.getItem('trim_profile_name');
       const savedPhone = localStorage.getItem('trim_profile_phone');
@@ -85,17 +108,24 @@ export default function ProfileView() {
     .slice(0, 2)
     .toUpperCase();
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      await authService.updateProfile({ name, phone });
+    } catch (_err) {
+      // Continue updating UI
+    }
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('trim_profile_name', name);
       localStorage.setItem('trim_profile_phone', phone);
       localStorage.setItem('trim_profile_branch', branch);
     }
     // Update live global Auth store so Navbar & Header reflect changes
-    useAuthStore.getState().login('token-trim-admin-auth', {
+    const currentToken = typeof window !== 'undefined' ? (JSON.parse(localStorage.getItem('trim-auth-storage') || '{}')?.state?.token || 'token') : 'token';
+    useAuthStore.getState().login(currentToken, {
       id: user?.id || 'admin-1',
-      role: user?.role || 'Owner',
+      role: user?.role || 'admin',
       name: name,
       email: email || user?.email || 'owner@trimbarber.id',
       initials: userInitials,
@@ -104,7 +134,7 @@ export default function ProfileView() {
     setTimeout(() => setIsSaved(false), 3000);
   };
 
-  const handleUpdatePassword = (e: React.FormEvent) => {
+  const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError('');
 
@@ -121,14 +151,19 @@ export default function ProfileView() {
       return;
     }
 
-    setPasswordSuccess(true);
-    setTimeout(() => {
-      setPasswordSuccess(false);
-      setIsPasswordModalOpen(false);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    }, 1500);
+    try {
+      await authService.changePassword({ currentPassword, newPassword });
+      setPasswordSuccess(true);
+      setTimeout(() => {
+        setPasswordSuccess(false);
+        setIsPasswordModalOpen(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }, 1500);
+    } catch (err: any) {
+      setPasswordError(err?.message || 'Kata sandi saat ini salah atau gagal diubah.');
+    }
   };
 
   return (

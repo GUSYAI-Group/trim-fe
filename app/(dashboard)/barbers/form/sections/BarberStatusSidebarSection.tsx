@@ -76,8 +76,8 @@ export function BarberStatusSidebarSection({
             <div>
               <p className="text-[12px] text-text-muted">Rata-rata rating</p>
               <div className="flex items-center gap-1.5 text-[28px] font-extrabold font-mono text-text-main mt-1">
-                <Star className="w-5 h-5 text-secondary fill-secondary" />
-                <span>{rating} / 5</span>
+                <Star className={`w-5 h-5 ${Number(rating) > 0 ? 'text-secondary fill-secondary' : 'text-text-muted'}`} />
+                <span>{Number(rating) > 0 ? `${rating} / 5` : '0.0 / 5'}</span>
               </div>
             </div>
 

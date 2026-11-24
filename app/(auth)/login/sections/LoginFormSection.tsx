@@ -2,37 +2,61 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { Card, TextField, Button, Alert } from '@/components/ui';
 import { useAuthStore } from '@/store/useAuthStore';
+import { apiClient } from '@/services/config/apiClient';
+import { loginSchema, LoginFormData } from '@/utils/validations/schemas';
 
 export function LoginFormSection() {
   const router = useRouter();
   const { login } = useAuthStore();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+    mode: 'onBlur',
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
     setErrorMessage('');
 
-    const VALID_EMAIL = 'admin@trim.id';
-    const OWNER_EMAIL = 'aditya@trim.id';
-    const VALID_PASSWORD = 'farhan123';
+    try {
+      const res = await apiClient.post<{
+        token: string;
+        user: {
+          id: string;
+          email: string;
+          name: string;
+          initials: string;
+          role: 'owner' | 'admin' | 'barber' | 'customer';
+        };
+      }>('/auth/login', data);
 
-    if ((email === VALID_EMAIL || email === OWNER_EMAIL) && password === VALID_PASSWORD) {
-      login('mock-jwt-token', {
-        id: email === OWNER_EMAIL ? '8f2c-a1e4' : '9b1a-c7f2',
-        email,
-        name: email === OWNER_EMAIL ? 'Aditya Pratama' : 'Dimas Saputra',
-        initials: email === OWNER_EMAIL ? 'AP' : 'DS',
-        role: email === OWNER_EMAIL ? 'owner' : 'admin',
-      });
+      const { token, user } = res.data;
+
+      if (user.role === 'customer') {
+        setErrorMessage('Akun Pelanggan tidak memiliki izin akses ke Dashboard Operasional.');
+        return;
+      }
+
+      login(token, user);
       router.push('/');
-    } else {
-      setErrorMessage('Email atau kata sandi salah! Gunakan admin@trim.id / farhan123');
+    } catch (err: any) {
+      setErrorMessage(
+        err?.message || 'Email atau kata sandi salah. Pastikan server backend sedang aktif.'
+      );
     }
   };
 
@@ -59,23 +83,25 @@ export function LoginFormSection() {
             <Alert variant="error" title="Gagal Masuk" description={errorMessage} />
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <TextField
               label="Email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@trim.id"
+              placeholder="Masukkan email anda"
               required
+              errorText={errors.email?.message}
+              isError={Boolean(errors.email)}
+              {...register('email')}
             />
 
             <TextField
               label="Kata sandi"
               type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
+              errorText={errors.password?.message}
+              isError={Boolean(errors.password)}
+              {...register('password')}
               rightAddon={
                 <button
                   type="button"
@@ -108,10 +134,11 @@ export function LoginFormSection() {
               type="submit"
               variant="primary"
               fullWidth
+              disabled={isSubmitting}
               rightIcon={<ArrowRight className="w-4 h-4" />}
               className="mt-2"
             >
-              Masuk
+              {isSubmitting ? 'Memverifikasi...' : 'Masuk'}
             </Button>
           </form>
         </Card>
@@ -123,4 +150,3 @@ export function LoginFormSection() {
     </div>
   );
 }
-

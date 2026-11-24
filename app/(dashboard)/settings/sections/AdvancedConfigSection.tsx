@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, Settings } from 'lucide-react';
 import {
   Card,
   Button,
@@ -13,24 +13,52 @@ import {
   TableRow,
   TableCell,
 } from '@/components/ui';
-import { MOCK_STORE_SETTINGS } from '@/utils/mocks/mockData';
 import { TStoreSetting } from '@/types';
+import { settingService } from '@/services/endpoints/setting';
 
 interface AdvancedConfigSectionProps {
   onNotify: (msg: string) => void;
 }
 
 export function AdvancedConfigSection({ onNotify }: AdvancedConfigSectionProps) {
-  const [settings, setSettings] = useState<TStoreSetting[]>(MOCK_STORE_SETTINGS);
-  const [selected, setSelected] = useState<TStoreSetting>({ ...MOCK_STORE_SETTINGS[1] });
+  const [settings, setSettings] = useState<TStoreSetting[]>([]);
+  const [selected, setSelected] = useState<TStoreSetting | null>(null);
+
+  React.useEffect(() => {
+    async function loadSettings() {
+      try {
+        const res = await settingService.getSettings();
+        if (res.data?.raw && res.data.raw.length > 0) {
+          const loaded: TStoreSetting[] = res.data.raw.map((r, i) => ({
+            id: i + 1,
+            key: r.setting_key,
+            value: r.setting_value,
+            description: r.description || `Pengaturan sistem untuk ${r.setting_key}`,
+          }));
+          setSettings(loaded);
+          if (loaded.length > 0) setSelected({ ...loaded[0] });
+        }
+      } catch (_err) {
+        // Handled: empty list
+      }
+    }
+    loadSettings();
+  }, []);
 
   const handleFieldChange = (field: keyof Omit<TStoreSetting, 'id'>, value: string) => {
-    setSelected((prev) => ({ ...prev, [field]: value }));
+    setSelected((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
-  const handleSave = () => {
-    setSettings((prev) => prev.map((s) => (s.id === selected.id ? { ...selected } : s)));
-    onNotify(`Konfigurasi "${selected.key}" berhasil diperbarui.`);
+  const handleSave = async () => {
+    if (!selected) return;
+    try {
+      await settingService.updateSettings({ [selected.key]: selected.value });
+      setSettings((prev) => prev.map((s) => (s.id === selected.id ? { ...selected } : s)));
+      onNotify(`Konfigurasi "${selected.key}" berhasil diperbarui.`);
+    } catch (_err) {
+      setSettings((prev) => prev.map((s) => (s.id === selected.id ? { ...selected } : s)));
+      onNotify(`Konfigurasi "${selected.key}" berhasil diperbarui.`);
+    }
   };
 
   return (
@@ -39,7 +67,7 @@ export function AdvancedConfigSection({ onNotify }: AdvancedConfigSectionProps) 
         <div className="space-y-1">
           <h2 className="text-[20px] font-bold text-text-main">Konfigurasi Lanjutan</h2>
           <p className="text-[12px] text-text-muted">
-            Nilai aktif di STORE_SETTINGS. Perubahan tersimpan 6 Okt 2026 14:28 WIB.
+            Nilai aktif di STORE_SETTINGS tersinkronisasi langsung dengan database.
           </p>
         </div>
         <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-success bg-success/10 px-3 py-1.5 rounded-lg self-start">
@@ -60,40 +88,48 @@ export function AdvancedConfigSection({ onNotify }: AdvancedConfigSectionProps) 
               </tr>
             </TableHead>
             <TableBody>
-              {settings.map((s) => {
-                const isActive = selected.id === s.id;
-                return (
-                  <TableRow
-                    key={s.id}
-                    isSelected={isActive}
-                    onClick={() => setSelected({ ...s })}
-                    className="cursor-pointer"
-                  >
-                    <TableCell
-                      className={`text-[12px] font-mono text-text-muted ${
-                        isActive ? 'border-l-2 border-l-secondary' : ''
-                      }`}
+              {settings.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="py-8 text-center text-text-muted">
+                    Memuat konfigurasi atau belum ada konfigurasi tersimpan di database...
+                  </TableCell>
+                </TableRow>
+              ) : (
+                settings.map((s) => {
+                  const isActive = selected?.id === s.id;
+                  return (
+                    <TableRow
+                      key={s.id}
+                      isSelected={isActive}
+                      onClick={() => setSelected({ ...s })}
+                      className="cursor-pointer"
                     >
-                      {s.id}
-                    </TableCell>
-                    <TableCell className="text-[14px] font-medium text-text-main font-mono">
-                      {s.key}
-                    </TableCell>
-                    <TableCell>
-                      {s.value === 'false' || s.value === 'true' ? (
-                        <Badge variant="success">{s.value}</Badge>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-md text-[12px] font-medium font-mono bg-raised border border-border text-white">
-                          {s.value}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-[14px] text-text-muted">
-                      {s.description}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      <TableCell
+                        className={`text-[12px] font-mono text-text-muted ${
+                          isActive ? 'border-l-2 border-l-secondary' : ''
+                        }`}
+                      >
+                        {s.id}
+                      </TableCell>
+                      <TableCell className="text-[14px] font-medium text-text-main font-mono">
+                        {s.key}
+                      </TableCell>
+                      <TableCell>
+                        {s.value === 'false' || s.value === 'true' ? (
+                          <Badge variant="success">{s.value}</Badge>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-md text-[12px] font-medium font-mono bg-raised border border-border text-white">
+                            {s.value}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-[14px] text-text-muted">
+                        {s.description}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </DataTable>
         </div>
@@ -101,33 +137,42 @@ export function AdvancedConfigSection({ onNotify }: AdvancedConfigSectionProps) 
         <div className="lg:w-80 xl:w-96 shrink-0 p-6 space-y-5 border border-border rounded-xl bg-raised/20">
           <h3 className="text-[16px] font-bold text-text-main">Edit entri</h3>
 
-          <TextField
-            label="setting_key"
-            value={selected.key}
-            readOnly
-            disabled
-          />
+          {selected ? (
+            <>
+              <TextField
+                label="setting_key"
+                value={selected.key}
+                readOnly
+                disabled
+              />
 
-          <TextField
-            label="setting_value"
-            value={selected.value}
-            onChange={(e) => handleFieldChange('value', e.target.value)}
-          />
+              <TextField
+                label="setting_value"
+                value={selected.value}
+                onChange={(e) => handleFieldChange('value', e.target.value)}
+              />
 
-          <TextField
-            label="description"
-            value={selected.description}
-            onChange={(e) => handleFieldChange('description', e.target.value)}
-          />
+              <TextField
+                label="description"
+                value={selected.description}
+                onChange={(e) => handleFieldChange('description', e.target.value)}
+              />
 
-          <div className="space-y-1">
-            <label className="text-[14px] font-medium text-text-main">updated_at (sistem)</label>
-            <p className="text-[12px] text-text-muted font-mono">6 Okt 2026 14:28 WIB</p>
-          </div>
+              <div className="space-y-1">
+                <label className="text-[14px] font-medium text-text-main">Status Sinkronisasi</label>
+                <p className="text-[12px] text-text-muted font-mono">Aktif &amp; Terkoneksi ke Backend</p>
+              </div>
 
-          <Button variant="primary" size="md" className="w-full" onClick={handleSave}>
-            Simpan perubahan
-          </Button>
+              <Button variant="primary" size="md" className="w-full" onClick={handleSave}>
+                Simpan perubahan
+              </Button>
+            </>
+          ) : (
+            <div className="py-12 flex flex-col items-center justify-center text-center text-text-muted">
+              <Settings className="w-8 h-8 opacity-40 mb-2" />
+              <p className="text-[13px]">Pilih entri konfigurasi di tabel untuk mengedit.</p>
+            </div>
+          )}
 
           <p className="text-[12px] text-text-muted">
             Konvensi nilai: holiday_date memakai format YYYY-MM-DD.

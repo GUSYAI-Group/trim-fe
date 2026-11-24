@@ -81,8 +81,13 @@ export function ProductMainFormSection({
           { value: 'Powder', label: 'Powder' },
           { value: 'Hair Tonic', label: 'Hair Tonic' },
           { value: 'Serum', label: 'Serum' },
+          { value: 'Styling', label: 'Styling' },
+          { value: 'Perawatan', label: 'Perawatan' },
+          ...(category && !['Minyak Rambut', 'Hair Spray', 'Powder', 'Hair Tonic', 'Serum', 'Styling', 'Perawatan'].includes(category)
+            ? [{ value: category, label: category }]
+            : []),
         ]}
-        helperText="Pilihan: Minyak Rambut, Hair Spray, Powder, Hair Tonic, Serum."
+        helperText="Pilihan: Minyak Rambut, Hair Spray, Powder, Hair Tonic, Serum, Styling."
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

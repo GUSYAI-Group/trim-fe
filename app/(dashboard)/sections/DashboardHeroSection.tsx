@@ -3,11 +3,14 @@
 import React from 'react';
 import Image from 'next/image';
 import { useAuthStore } from '@/store/useAuthStore';
-import { MOCK_BARBERS } from '@/utils/mocks/mockData';
 
-export function DashboardHeroSection() {
+interface DashboardHeroSectionProps {
+  activeBarbersCount?: number;
+}
+
+export function DashboardHeroSection({ activeBarbersCount }: DashboardHeroSectionProps = {}) {
   const { user } = useAuthStore();
-  const activeCount = MOCK_BARBERS.filter((b) => b.status === 'aktif').length;
+  const activeCount = activeBarbersCount ?? 0;
 
   return (
     <div className="relative rounded-2xl bg-surface border border-border overflow-hidden flex flex-col md:flex-row h-auto md:h-44 shadow-lg">

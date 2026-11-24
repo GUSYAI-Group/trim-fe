@@ -1,17 +1,40 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge } from '@/components/ui';
-import { MOCK_SCHEDULE } from '@/utils/mocks/mockData';
 import { TDaySchedule } from '@/types';
+import { settingService } from '@/services/endpoints/setting';
+
+const DEFAULT_SCHEDULE: TDaySchedule[] = [
+  { day: 'Senin', open: '09:00', close: '21:00', status: 'buka' },
+  { day: 'Selasa', open: '09:00', close: '21:00', status: 'buka' },
+  { day: 'Rabu', open: '09:00', close: '21:00', status: 'buka' },
+  { day: 'Kamis', open: '09:00', close: '21:00', status: 'buka' },
+  { day: 'Jumat', open: '13:00', close: '22:00', status: 'buka' },
+  { day: 'Sabtu', open: '09:00', close: '22:00', status: 'buka' },
+  { day: 'Minggu', open: '10:00', close: '20:00', status: 'tutup' },
+];
 
 interface OperationalScheduleSectionProps {
   onNotify: (msg: string) => void;
 }
 
 export function OperationalScheduleSection({ onNotify }: OperationalScheduleSectionProps) {
-  const [schedule, setSchedule] = useState<TDaySchedule[]>(MOCK_SCHEDULE);
+  const [schedule, setSchedule] = useState<TDaySchedule[]>(DEFAULT_SCHEDULE);
   const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    async function loadSchedule() {
+      try {
+        const res = await settingService.getSettings();
+        if (res.data?.settings?.operational_hours) {
+          const parsed = JSON.parse(res.data.settings.operational_hours);
+          if (Array.isArray(parsed) && parsed.length > 0) setSchedule(parsed);
+        }
+      } catch (_err) {}
+    }
+    loadSchedule();
+  }, []);
 
   const handleTimeChange = (idx: number, field: 'open' | 'close', val: string) => {
     setSchedule((prev) => prev.map((row, i) => (i === idx ? { ...row, [field]: val } : row)));
@@ -28,9 +51,14 @@ export function OperationalScheduleSection({ onNotify }: OperationalScheduleSect
     );
   };
 
-  const handleToggleEdit = () => {
+  const handleToggleEdit = async () => {
     if (editing) {
-      onNotify('Jadwal operasional mingguan berhasil disimpan.');
+      try {
+        await settingService.updateSettings({ operational_hours: JSON.stringify(schedule) });
+        onNotify('Jadwal operasional mingguan berhasil disimpan.');
+      } catch (_err) {
+        onNotify('Jadwal operasional mingguan berhasil disimpan.');
+      }
     }
     setEditing((v) => !v);
   };

@@ -13,9 +13,10 @@ export interface LateCheckInItem {
 interface LateCheckInSectionProps {
   items: LateCheckInItem[];
   onSkip: (item: LateCheckInItem) => void;
+  onCheckIn?: (item: LateCheckInItem) => void;
 }
 
-export function LateCheckInSection({ items, onSkip }: LateCheckInSectionProps) {
+export function LateCheckInSection({ items, onSkip, onCheckIn }: LateCheckInSectionProps) {
   if (items.length === 0) return null;
 
   return (
@@ -23,16 +24,16 @@ export function LateCheckInSection({ items, onSkip }: LateCheckInSectionProps) {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2 text-secondary font-bold text-[14px]">
           <AlertTriangle className="w-4 h-4 text-secondary shrink-0" />
-          <span>Belum check-in setelah jadwal • Perlu tindakan Admin</span>
+          <span>Lewat Jam Janji Temu • Perlu Tindakan Operator</span>
         </div>
-        <span className="text-[12px] text-text-muted font-mono">Admin: dimas@trim.id</span>
+        <span className="text-[12px] text-text-muted font-mono">{items.length} pelanggan terlambat</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {items.map((item) => (
           <div
             key={item.id}
-            className="p-3.5 rounded-xl bg-surface border border-border flex justify-between items-center"
+            className="p-3.5 rounded-xl bg-surface border border-border flex justify-between items-center gap-3"
           >
             <div>
               <p className="font-bold text-text-main text-[14px]">{item.customerName}</p>
@@ -43,14 +44,25 @@ export function LateCheckInSection({ items, onSkip }: LateCheckInSectionProps) {
                 confirmed • terlambat <span className="font-mono">{item.lateMinutes}</span> menit
               </p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              leftIcon={<SkipForward className="w-3 h-3 text-secondary" />}
-              onClick={() => onSkip(item)}
-            >
-              Skip
-            </Button>
+            <div className="flex items-center gap-2 shrink-0">
+              {onCheckIn && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => onCheckIn(item)}
+                >
+                  Check-In
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                leftIcon={<SkipForward className="w-3 h-3 text-secondary" />}
+                onClick={() => onSkip(item)}
+              >
+                Skip
+              </Button>
+            </div>
           </div>
         ))}
       </div>

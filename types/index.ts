@@ -59,12 +59,17 @@ export interface TProduct {
 
 export interface TPayment {
   id: number;
+  paymentId?: string;
   qrisRef: string;
   qrisId: string;
   bookingUuid: string;
+  rawBookingId?: string;
   customer: string;
+  barber?: string;
+  services?: string;
   paidAt: string;
   nominal: string;
+  rawNominal?: number;
   status: 'lunas' | 'menunggu' | 'gagal' | 'dikembalikan';
   hasPaidAt: boolean;
 }

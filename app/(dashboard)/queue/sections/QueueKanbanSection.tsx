@@ -1,173 +1,261 @@
-import React from 'react';
-import { Card } from '@/components/ui';
-import { QueueCard } from '../components/QueueCard';
+'use client';
+
+import React, { useState } from 'react';
+import { QueueCard, QueueCardProps } from '../components/QueueCard';
+import { Scissors, CheckCircle2, Clock, Inbox, RefreshCw } from 'lucide-react';
+
+export interface KanbanItem extends QueueCardProps {
+  id?: string;
+  customerPhone?: string;
+  totalPrice?: number;
+}
 
 interface QueueKanbanSectionProps {
   selectedKapster: string;
-  onCardAction: (msg: string) => void;
+  searchQuery?: string;
+  waitingItems?: KanbanItem[];
+  inProgressItems?: KanbanItem[];
+  doneItems?: KanbanItem[];
+  onStartCut?: (item: KanbanItem) => void;
+  onFinishCut?: (item: KanbanItem) => void;
+  onRevertToWaiting?: (item: KanbanItem) => void;
+  onRevertToProgress?: (item: KanbanItem) => void;
+  onDeleteRequest?: (item: KanbanItem) => void;
+  onMoveItem?: (itemId: string, targetStatus: 'waiting' | 'in_progress' | 'completed') => void;
+  onDetailRequest?: (item: KanbanItem) => void;
+  onRefresh?: () => void;
 }
 
-const WAITING_ITEMS = [
-  {
-    queueNo: 'A-019',
-    timeRange: '14:35–15:10',
-    customerName: 'Andi Wijaya',
-    serviceDetail: 'Potong reguler • 35 menit',
-    kapsterName: 'Arief Nugraha',
-    statusText: 'Tunggu 5 menit',
-    statusFlowText: 'waiting / in_queue',
-    checkInTime: 'Check-in 14:20',
-    actionText: 'Mulai cukur →',
-  },
-  {
-    queueNo: 'A-020',
-    timeRange: '14:45–15:30',
-    customerName: 'Kevin Pratama',
-    serviceDetail: 'Skin fade • 45 menit',
-    kapsterName: 'Raka Putra',
-    statusText: 'Tunggu 15 menit',
-    statusFlowText: 'waiting / in_queue',
-    checkInTime: 'Check-in 14:25',
-    actionText: 'Mulai cukur →',
-  },
-  {
-    queueNo: 'A-021',
-    timeRange: '15:00–15:35',
-    customerName: 'Rian Hidayat',
-    serviceDetail: 'Potong reguler • 35 menit',
-    kapsterName: 'Dion Mahendra',
-    statusText: 'Tunggu 30 menit',
-    statusFlowText: 'waiting / in_queue',
-    checkInTime: 'Check-in 14:28',
-    actionText: 'Mulai cukur →',
-  },
-];
+export function QueueKanbanSection({
+  selectedKapster,
+  searchQuery = '',
+  waitingItems = [],
+  inProgressItems = [],
+  doneItems = [],
+  onStartCut,
+  onFinishCut,
+  onRevertToWaiting,
+  onRevertToProgress,
+  onDeleteRequest,
+  onMoveItem,
+  onDetailRequest,
+  onRefresh,
+}: QueueKanbanSectionProps) {
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
 
-const IN_PROGRESS_ITEMS = [
-  {
-    queueNo: 'A-018',
-    timeRange: '14:00–14:45',
-    customerName: 'Daffa Saputra',
-    serviceDetail: 'Skin fade • 45 menit',
-    kapsterName: 'Raka Putra',
-    statusFlowText: 'Queue / Booking: in_progress / in_service',
-    progressMinutes: 30,
-    totalMinutes: 45,
-    actionText: 'Selesaikan →',
-  },
-  {
-    queueNo: 'A-017',
-    timeRange: '14:05–15:05',
-    customerName: 'Naufal Ramadhan',
-    serviceDetail: 'Potong + beard trim • 60 menit',
-    kapsterName: 'Bima Saputra',
-    statusFlowText: 'Queue / Booking: in_progress / in_service',
-    progressMinutes: 25,
-    totalMinutes: 60,
-    actionText: 'Selesaikan →',
-  },
-];
+  const filterItems = (items: KanbanItem[]) => {
+    return items.filter((item) => {
+      const matchKapster =
+        selectedKapster === 'Semua kapster' ||
+        item.kapsterName.toLowerCase() === selectedKapster.toLowerCase();
 
-const DONE_ITEMS = [
-  {
-    queueNo: 'A-015',
-    timeRange: 'Selesai 14:00',
-    customerName: 'Rangga Utama',
-    serviceDetail: 'Potong reguler • Rp60.000',
-    kapsterName: 'Bima Saputra',
-    statusFlowText: 'Queue / Booking: completed / completed',
-    paymentStatus: 'paid' as const,
-  },
-  {
-    queueNo: 'A-014',
-    timeRange: 'Selesai 13:30',
-    customerName: 'Bagas Putra',
-    serviceDetail: 'Skin fade • Rp75.000',
-    kapsterName: 'Raka Putra',
-    statusFlowText: 'Queue / Booking: completed / completed',
-    paymentStatus: 'pending' as const,
-  },
-];
+      const q = searchQuery.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        item.customerName.toLowerCase().includes(q) ||
+        item.queueNo.toLowerCase().includes(q) ||
+        item.serviceDetail.toLowerCase().includes(q);
 
-export function QueueKanbanSection({ selectedKapster, onCardAction }: QueueKanbanSectionProps) {
-  const filterByKapster = <T extends { kapsterName: string }>(items: T[]) =>
-    selectedKapster === 'Semua kapster'
-      ? items
-      : items.filter((item) => item.kapsterName === selectedKapster);
+      return matchKapster && matchSearch;
+    });
+  };
 
-  const waitingFiltered = filterByKapster(WAITING_ITEMS);
-  const inProgressFiltered = filterByKapster(IN_PROGRESS_ITEMS);
-  const doneFiltered = filterByKapster(DONE_ITEMS);
+  const waitingFiltered = filterItems(waitingItems);
+  const inProgressFiltered = filterItems(inProgressItems);
+  const doneFiltered = filterItems(doneItems);
+
+  // Drag over handlers
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, colName: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverColumn !== colName) {
+      setDragOverColumn(colName);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    // Only clear if leaving the drop container
+    const related = e.relatedTarget as Node | null;
+    if (!e.currentTarget.contains(related)) {
+      setDragOverColumn(null);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetCol: 'waiting' | 'in_progress' | 'completed') => {
+    e.preventDefault();
+    setDragOverColumn(null);
+
+    try {
+      const dataStr = e.dataTransfer.getData('application/json');
+      if (!dataStr) return;
+      const data = JSON.parse(dataStr);
+      if (data.id && data.columnStatus !== targetCol) {
+        onMoveItem?.(data.id, targetCol);
+      }
+    } catch (_err) {
+      // ignore
+    }
+  };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
       {/* Kolom 1: Menunggu */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center px-1">
+      <div
+        onDragOver={(e) => handleDragOver(e, 'waiting')}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, 'waiting')}
+        className={`p-4 rounded-2xl border transition-all duration-200 flex flex-col gap-3 min-h-[350px] ${
+          dragOverColumn === 'waiting'
+            ? 'border-amber-500 bg-amber-500/10 ring-2 ring-amber-500/30'
+            : 'border-border/70 bg-surface/40'
+        }`}
+      >
+        <div className="flex justify-between items-center px-1 pb-1 border-b border-border/40">
           <span className="text-[14px] font-bold text-text-main flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-500" /> Menunggu
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+            <Clock className="w-4 h-4 text-amber-500" />
+            Menunggu
           </span>
-          <span className="text-[12px] font-bold font-mono text-text-muted">5</span>
+          <span className="text-[12px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            {waitingFiltered.length}
+          </span>
         </div>
 
-        <div className="space-y-3">
-          {waitingFiltered.map((item) => (
-            <QueueCard
-              key={item.queueNo}
-              {...item}
-              onAction={() => onCardAction(`Antrean ${item.queueNo} (${item.customerName}) dimulai!`)}
-            />
-          ))}
-        </div>
+        {waitingFiltered.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-border/60 rounded-xl">
+            <Inbox className="w-8 h-8 text-text-muted/40 mb-2" />
+            <p className="text-[13px] font-semibold text-text-muted">Tidak ada antrean menunggu</p>
+            <p className="text-[11px] text-text-muted/70 mt-1 max-w-[200px]">
+              Tarik kartu ke sini atau klik Tambah Walk-in di atas.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {waitingFiltered.map((item) => (
+              <QueueCard
+                key={item.id || item.queueNo}
+                {...item}
+                columnStatus="waiting"
+                actionText="Mulai cukur"
+                onAction={() => onStartCut?.(item)}
+                onDetailClick={() => onDetailRequest?.(item)}
+                onDeleteClick={() => onDeleteRequest?.(item)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Kolom 2: Sedang Cukur */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center px-1">
+      <div
+        onDragOver={(e) => handleDragOver(e, 'in_progress')}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, 'in_progress')}
+        className={`p-4 rounded-2xl border transition-all duration-200 flex flex-col gap-3 min-h-[350px] ${
+          dragOverColumn === 'in_progress'
+            ? 'border-secondary bg-secondary/10 ring-2 ring-secondary/30'
+            : 'border-border/70 bg-surface/40'
+        }`}
+      >
+        <div className="flex justify-between items-center px-1 pb-1 border-b border-border/40">
           <span className="text-[14px] font-bold text-text-main flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-secondary" /> Sedang Cukur
+            <span className="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse" />
+            <Scissors className="w-4 h-4 text-secondary" />
+            Sedang Cukur
           </span>
-          <span className="text-[12px] font-bold font-mono text-text-muted">3</span>
+          <span className="text-[12px] font-bold font-mono px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
+            {inProgressFiltered.length}
+          </span>
         </div>
 
-        <div className="space-y-3">
-          {inProgressFiltered.map((item) => (
-            <QueueCard
-              key={item.queueNo}
-              {...item}
-              onAction={() => onCardAction(`Antrean ${item.queueNo} (${item.customerName}) diselesaikan!`)}
-            />
-          ))}
-        </div>
+        {inProgressFiltered.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-border/60 rounded-xl">
+            <Scissors className="w-8 h-8 text-text-muted/40 mb-2" />
+            <p className="text-[13px] font-semibold text-text-muted">Kursi kapster sedang kosong</p>
+            <p className="text-[11px] text-text-muted/70 mt-1 max-w-[200px]">
+              Tarik antrean dari kolom Menunggu untuk memulai proses potong rambut.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {inProgressFiltered.map((item) => (
+              <QueueCard
+                key={item.id || item.queueNo}
+                {...item}
+                columnStatus="in_progress"
+                actionText="Selesaikan"
+                onAction={() => onFinishCut?.(item)}
+                secondaryActionText="Kembalikan"
+                onSecondaryAction={() => onRevertToWaiting?.(item)}
+                onDetailClick={() => onDetailRequest?.(item)}
+                onDeleteClick={() => onDeleteRequest?.(item)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Kolom 3: Selesai */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center px-1">
+      <div
+        onDragOver={(e) => handleDragOver(e, 'completed')}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, 'completed')}
+        className={`p-4 rounded-2xl border transition-all duration-200 flex flex-col gap-3 min-h-[350px] ${
+          dragOverColumn === 'completed'
+            ? 'border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-500/30'
+            : 'border-border/70 bg-surface/40'
+        }`}
+      >
+        <div className="flex justify-between items-center px-1 pb-1 border-b border-border/40">
           <span className="text-[14px] font-bold text-text-main flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" /> Selesai
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            Selesai
           </span>
-          <span className="text-[12px] font-bold font-mono text-text-muted">18</span>
+          <span className="text-[12px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            {doneFiltered.length}
+          </span>
         </div>
 
-        <div className="space-y-3">
-          {doneFiltered.map((item) => (
-            <QueueCard key={item.queueNo} {...item} />
-          ))}
+        {doneFiltered.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-border/60 rounded-xl">
+            <CheckCircle2 className="w-8 h-8 text-text-muted/40 mb-2" />
+            <p className="text-[13px] font-semibold text-text-muted">Belum ada layanan selesai</p>
+            <p className="text-[11px] text-text-muted/70 mt-1 max-w-[200px]">
+              Tarik kartu ke sini setelah kapster selesai memberikan pelayanan.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {doneFiltered.map((item) => (
+              <QueueCard
+                key={item.id || item.queueNo}
+                {...item}
+                columnStatus="completed"
+                secondaryActionText="Buka kembali"
+                onSecondaryAction={() => onRevertToProgress?.(item)}
+                onDetailClick={() => onDetailRequest?.(item)}
+                onDeleteClick={() => onDeleteRequest?.(item)}
+              />
+            ))}
+          </div>
+        )}
 
-          <Card variant="surface" padding="sm" className="space-y-1">
-            <p className="text-[14px] font-bold text-text-main">+15 pelanggan selesai sebelumnya</p>
+        {/* Quick Refresh card */}
+        <div className="mt-auto pt-3 border-t border-border/40 flex items-center justify-between text-[12px] text-text-muted">
+          <span>Sinkron otomatis live</span>
+          {onRefresh && (
             <button
               type="button"
-              onClick={() => onCardAction('Menampilkan seluruh riwayat selesai hari ini.')}
-              className="text-[12px] font-semibold text-secondary hover:underline cursor-pointer"
+              onClick={onRefresh}
+              className="text-secondary hover:text-secondary/80 font-semibold flex items-center gap-1.5 cursor-pointer py-1 px-2 rounded-lg hover:bg-raised transition-colors"
             >
-              Lihat seluruh riwayat →
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Segarkan</span>
             </button>
-          </Card>
+          )}
         </div>
       </div>
     </div>
   );
 }
-

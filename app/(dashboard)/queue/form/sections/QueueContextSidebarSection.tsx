@@ -26,6 +26,17 @@ export function QueueContextSidebarSection({
   estimatedWaitTime,
   onEstimatedWaitTimeChange,
 }: QueueContextSidebarSectionProps) {
+  const endTimeFormatted = React.useMemo(() => {
+    if (!startTime) return 'Waktu live';
+    const cleanTime = startTime.replace(' WIB', '').trim();
+    const parts = cleanTime.split(':').map(Number);
+    if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return startTime;
+    const totalMins = parts[0] * 60 + parts[1] + (totalDuration || 30);
+    const endH = String(Math.floor(totalMins / 60) % 24).padStart(2, '0');
+    const endM = String(totalMins % 60).padStart(2, '0');
+    return `${cleanTime}–${endH}:${endM} WIB`;
+  }, [startTime, totalDuration]);
+
   return (
     <div className="space-y-6">
       <Card variant="surface" padding="md" className="space-y-4">
@@ -41,14 +52,14 @@ export function QueueContextSidebarSection({
             Rp{totalPrice.toLocaleString('id-ID')}
           </h2>
           <p className="text-[12px] text-text-muted mt-1">
-            <span className="font-mono">{selectedServicesCount}</span> layanan • <span className="font-mono">{totalDuration}</span> menit • Tanpa perubahan tersimpan
+            <span className="font-mono">{selectedServicesCount}</span> layanan • <span className="font-mono">{totalDuration}</span> menit
           </p>
         </div>
 
         <div className="pt-3 border-t border-border/60 text-[12px] space-y-1">
-          <p className="font-bold text-text-main">{bookingDate}</p>
+          <p className="font-bold text-text-main">{bookingDate || 'Hari ini'}</p>
           <p className="text-text-muted">
-            <span className="font-mono">{startTime}–10:50 WIB</span> • {barber}
+            <span className="font-mono">{endTimeFormatted}</span> • {barber || 'Kapster Terpilih'}
           </p>
         </div>
       </Card>
@@ -64,7 +75,7 @@ export function QueueContextSidebarSection({
         <TextField
           label="Nomor antrean • queue_number"
           disabled
-          value="A-029 • Pratinjau"
+          value="Otomatis diterbitkan sistem (A-xxx)"
           className="font-mono"
           rightAddon={
             <span className="text-[12px] uppercase bg-surface px-1.5 py-0.5 rounded border border-border text-text-muted font-mono">

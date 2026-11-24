@@ -21,6 +21,8 @@ interface ServiceTableSectionProps {
   onSearchChange: (val: string) => void;
   selectedCategory: string;
   onCategoryChange: (val: string) => void;
+  onDeleteRequest?: (service: TService) => void;
+  onDetailRequest?: (service: TService) => void;
 }
 
 export function ServiceTableSection({
@@ -30,6 +32,8 @@ export function ServiceTableSection({
   onSearchChange,
   selectedCategory,
   onCategoryChange,
+  onDeleteRequest,
+  onDetailRequest,
 }: ServiceTableSectionProps) {
   return (
     <div className="space-y-4">
@@ -94,6 +98,15 @@ export function ServiceTableSection({
               </TableCell>
               <TableCell className="pr-6 text-right">
                 <div className="flex items-center justify-end gap-4">
+                  {onDetailRequest && (
+                    <button
+                      type="button"
+                      onClick={() => onDetailRequest(item)}
+                      className="text-text-muted hover:text-text-main text-[12px] font-semibold cursor-pointer"
+                    >
+                      Detail
+                    </button>
+                  )}
                   <Link
                     href={`/services/form?id=${item.id}`}
                     className="text-secondary font-semibold text-[12px] hover:underline inline-flex items-center gap-1.5 cursor-pointer"
@@ -101,9 +114,15 @@ export function ServiceTableSection({
                     <Edit className="w-3.5 h-3.5" />
                     <span>Edit</span>
                   </Link>
-                  <span className="text-text-muted text-[12px] select-none">
-                    {item.isActive ? 'Nonaktifkan' : 'Aktifkan'}
-                  </span>
+                  {onDeleteRequest && (
+                    <button
+                      type="button"
+                      onClick={() => onDeleteRequest(item)}
+                      className="text-danger hover:underline font-semibold text-[12px] cursor-pointer"
+                    >
+                      Hapus
+                    </button>
+                  )}
                 </div>
               </TableCell>
             </TableRow>

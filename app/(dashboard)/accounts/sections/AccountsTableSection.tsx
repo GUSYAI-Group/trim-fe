@@ -33,6 +33,7 @@ interface AccountsTableSectionProps {
   onRoleFilterChange: (val: TRole | 'all') => void;
   onDeleteRequest: (account: TAccount) => void;
   onResetFilters: () => void;
+  onDetailRequest?: (account: TAccount) => void;
 }
 
 export function AccountsTableSection({
@@ -43,6 +44,7 @@ export function AccountsTableSection({
   onRoleFilterChange,
   onDeleteRequest,
   onResetFilters,
+  onDetailRequest,
 }: AccountsTableSectionProps) {
   return (
     <div className="space-y-4">
@@ -124,28 +126,39 @@ export function AccountsTableSection({
                   <TableCell className="text-[12px] font-mono text-text-muted">{acc.createdAt}</TableCell>
                   <TableCell className="text-[12px] font-mono text-text-muted">{acc.updatedAt}</TableCell>
                   <TableCell>
-                    {acc.isOwner ? (
-                      <div className="flex items-center gap-2 text-[12px] text-text-muted">
-                        <Shield className="w-3.5 h-3.5 shrink-0" />
-                        <span>Akun utama • Dilindungi</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-4">
-                        <Link
-                          href={`/accounts/form?id=${acc.slug}`}
-                          className="text-[12px] font-semibold text-secondary hover:brightness-125 transition-all cursor-pointer"
-                        >
-                          Edit
-                        </Link>
+                    <div className="flex items-center gap-3">
+                      {onDetailRequest && (
                         <button
                           type="button"
-                          onClick={() => onDeleteRequest(acc)}
-                          className="text-[12px] font-semibold text-danger hover:brightness-125 transition-all cursor-pointer"
+                          onClick={() => onDetailRequest(acc)}
+                          className="text-[12px] font-semibold text-text-muted hover:text-text-main transition-colors cursor-pointer"
                         >
-                          Hapus
+                          Detail
                         </button>
-                      </div>
-                    )}
+                      )}
+                      {acc.isOwner ? (
+                        <div className="flex items-center gap-1.5 text-[12px] text-text-muted">
+                          <Shield className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+                          <span>Owner</span>
+                        </div>
+                      ) : (
+                        <>
+                          <Link
+                            href={`/accounts/form?id=${acc.uuid || acc.slug}`}
+                            className="text-[12px] font-semibold text-secondary hover:brightness-125 transition-all cursor-pointer"
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => onDeleteRequest(acc)}
+                            className="text-[12px] font-semibold text-danger hover:brightness-125 transition-all cursor-pointer"
+                          >
+                            Hapus
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

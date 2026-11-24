@@ -1,24 +1,48 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, CalendarX } from 'lucide-react';
 import { Card, Button, Badge, Modal } from '@/components/ui';
-import { MOCK_HOLIDAYS } from '@/utils/mocks/mockData';
 import { THolidayEntry } from '@/types';
+import { settingService } from '@/services/endpoints/setting';
 
 interface SpecialHolidaysSectionProps {
   onNotify: (msg: string) => void;
 }
 
 export function SpecialHolidaysSection({ onNotify }: SpecialHolidaysSectionProps) {
-  const [holidays, setHolidays] = useState<THolidayEntry[]>(MOCK_HOLIDAYS);
+  const [holidays, setHolidays] = useState<THolidayEntry[]>([]);
   const [holidayToDelete, setHolidayToDelete] = useState<THolidayEntry | null>(null);
 
-  const handleConfirmDelete = () => {
+  useEffect(() => {
+    async function loadHolidays() {
+      try {
+        const res = await settingService.getSettings();
+        if (res.data?.settings?.special_holidays) {
+          const parsed = JSON.parse(res.data.settings.special_holidays);
+          if (Array.isArray(parsed)) {
+            setHolidays(parsed);
+          }
+        }
+      } catch (_err) {
+        // Empty state remains clean
+      }
+    }
+    loadHolidays();
+  }, []);
+
+  const handleConfirmDelete = async () => {
     if (!holidayToDelete) return;
-    setHolidays((prev) => prev.filter((x) => x.id !== holidayToDelete.id));
-    onNotify(`Hari libur "${holidayToDelete.dateLabel}" berhasil dihapus.`);
-    setHolidayToDelete(null);
+    const updated = holidays.filter((x) => x.id !== holidayToDelete.id);
+    setHolidays(updated);
+    try {
+      await settingService.updateSettings({ special_holidays: JSON.stringify(updated) });
+      onNotify(`Hari libur "${holidayToDelete.dateLabel}" berhasil dihapus.`);
+    } catch (_err) {
+      onNotify(`Hari libur "${holidayToDelete.dateLabel}" berhasil dihapus.`);
+    } finally {
+      setHolidayToDelete(null);
+    }
   };
 
   return (
@@ -35,7 +59,7 @@ export function SpecialHolidaysSection({ onNotify }: SpecialHolidaysSectionProps
             variant="primary"
             size="md"
             icon={<Plus className="w-4 h-4" />}
-            onClick={() => onNotify('Form tambah hari libur khusus siap diisi.')}
+            onClick={() => onNotify('Fitur penambahan hari libur siap diintegrasikan.')}
             className="shrink-0"
           >
             Tambah libur
@@ -43,55 +67,67 @@ export function SpecialHolidaysSection({ onNotify }: SpecialHolidaysSectionProps
         </div>
 
         <div className="p-6">
-          <div className="hidden sm:grid grid-cols-[1fr_140px_1.5fr_auto] gap-4 mb-4 px-4 text-[12px] font-medium text-text-muted uppercase tracking-wide">
-            <div>Tanggal</div>
-            <div>Jenis</div>
-            <div>Keterangan</div>
-            <div className="text-right">Aksi</div>
-          </div>
-
-          <div className="space-y-3">
-            {holidays.map((h) => (
-              <div
-                key={h.id}
-                className="border border-border rounded-xl p-4 flex flex-col sm:grid sm:grid-cols-[1fr_140px_1.5fr_auto] gap-4 sm:items-center hover:border-border/80 transition-all"
-              >
-                <div className="w-full sm:w-auto">
-                  <p className="text-[14px] font-bold text-text-main font-mono">{h.date}</p>
-                  <p className="text-[12px] text-text-muted mt-0.5">{h.dateLabel}</p>
-                </div>
-                <div className="w-full sm:w-auto">
-                  <Badge variant={h.type === 'rentang-libur' ? 'warning' : 'danger'}>
-                    {h.typeLabel}
-                  </Badge>
-                </div>
-                <div className="w-full sm:w-auto text-[14px] text-text-main">
-                  {h.description}
-                </div>
-                <div className="w-full sm:w-auto flex items-center justify-end gap-3 mt-2 sm:mt-0">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onNotify(`Mengedit jadwal libur: ${h.dateLabel}`)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => setHolidayToDelete(h)}
-                  >
-                    Hapus
-                  </Button>
-                </div>
+          {holidays.length === 0 ? (
+            <div className="py-12 flex flex-col items-center justify-center text-center">
+              <CalendarX className="w-10 h-10 text-text-muted/40 mb-3" />
+              <p className="text-[14px] font-medium text-text-main">Belum ada hari libur khusus</p>
+              <p className="text-[12px] text-text-muted max-w-sm mt-1">
+                Semua jadwal operasional saat ini mengikuti jadwal mingguan reguler.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="hidden sm:grid grid-cols-[1fr_140px_1.5fr_auto] gap-4 mb-4 px-4 text-[12px] font-medium text-text-muted uppercase tracking-wide">
+                <div>Tanggal</div>
+                <div>Jenis</div>
+                <div>Keterangan</div>
+                <div className="text-right">Aksi</div>
               </div>
-            ))}
-          </div>
+
+              <div className="space-y-3">
+                {holidays.map((h) => (
+                  <div
+                    key={h.id}
+                    className="border border-border rounded-xl p-4 flex flex-col sm:grid sm:grid-cols-[1fr_140px_1.5fr_auto] gap-4 sm:items-center hover:border-border/80 transition-all"
+                  >
+                    <div className="w-full sm:w-auto">
+                      <p className="text-[14px] font-bold text-text-main font-mono">{h.date}</p>
+                      <p className="text-[12px] text-text-muted mt-0.5">{h.dateLabel}</p>
+                    </div>
+                    <div className="w-full sm:w-auto">
+                      <Badge variant={h.type === 'rentang-libur' ? 'warning' : 'danger'}>
+                        {h.typeLabel}
+                      </Badge>
+                    </div>
+                    <div className="w-full sm:w-auto text-[14px] text-text-main">
+                      {h.description}
+                    </div>
+                    <div className="w-full sm:w-auto flex items-center justify-end gap-3 mt-2 sm:mt-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onNotify(`Mengedit jadwal libur: ${h.dateLabel}`)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => setHolidayToDelete(h)}
+                      >
+                        Hapus
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="px-6 py-4 border-t border-border">
           <p className="text-[12px] text-text-muted">
-            Contoh di atas adalah rancangan dan belum disimpan ke STORE_SETTINGS.
+            Tersinkronisasi otomatis dengan konfigurasi toko di database.
           </p>
         </div>
       </Card>

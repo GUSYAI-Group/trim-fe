@@ -1,39 +1,113 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Alert, Card, Toast } from '@/components/ui';
-import { MOCK_ACCOUNTS } from '@/utils/mocks/mockData';
+import { Button, Alert, Card, Toast, Spinner, Modal } from '@/components/ui';
+import { accountService } from '@/services/endpoints/account';
 import { TRole } from '@/store/useAuthStore';
 import { AccountMainFormSection } from './sections/AccountMainFormSection';
 import { AccountSidebarSection } from './sections/AccountSidebarSection';
 
 function AccountFormInner({ editId }: { editId: string | null }) {
+  const router = useRouter();
   const isEditMode = Boolean(editId);
-  const found = isEditMode && editId
-    ? MOCK_ACCOUNTS.find((a) => a.slug === editId || String(a.id) === editId)
-    : undefined;
 
-  const [initials] = useState(found?.initials ?? 'US');
-  const [email, setEmail] = useState(found?.email ?? '');
+  const [initials, setInitials] = useState('US');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<TRole>(found?.role ?? 'admin');
+  const [role, setRole] = useState<TRole>('admin');
 
-  const [uuid] = useState(found?.uuid ?? 'Belum dibuat');
-  const [createdAt] = useState(found?.createdAt ?? 'Belum dibuat');
-  const [updatedAt] = useState(found?.updatedAt ?? 'Belum dibuat');
+  const [uuid, setUuid] = useState('Belum dibuat');
+  const [createdAt, setCreatedAt] = useState('Belum dibuat');
+  const [updatedAt, setUpdatedAt] = useState('Belum dibuat');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(Boolean(editId));
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setToastMsg(
-      isEditMode
-        ? `Akun "${email}" berhasil diperbarui!`
-        : `Akun "${email}" berhasil dibuat!`
-    );
+  const handleDelete = async () => {
+    if (!editId) return;
+    setIsDeleting(true);
+    try {
+      await accountService.deleteAccount(uuid || editId);
+      setToastMsg(`Akun "${email}" berhasil dihapus.`);
+      setTimeout(() => {
+        router.push('/accounts');
+      }, 800);
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Gagal menghapus akun');
+      setShowDeleteModal(false);
+    } finally {
+      setIsDeleting(false);
+    }
   };
+
+  useEffect(() => {
+    if (!editId) return;
+
+    async function loadAccount(id: string) {
+      try {
+        setIsLoading(true);
+        const res = await accountService.getAccountDetail(id);
+        const found = res.data;
+        if (found) {
+          setEmail(found.email);
+          setRole(found.role);
+          setInitials(found.initials);
+          setUuid(found.uuid);
+          setCreatedAt(found.createdAt);
+          setUpdatedAt(found.updatedAt);
+        }
+      } catch (_err) {
+        setErrorMsg('Data akun tidak ditemukan atau gagal dimuat dari server.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadAccount(editId);
+  }, [editId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+
+    try {
+      if (isEditMode && editId) {
+        await accountService.updateAccount(uuid || editId, {
+          email,
+          role,
+          password: password || undefined,
+        });
+        setToastMsg(`Akun "${email}" berhasil diperbarui!`);
+      } else {
+        await accountService.createAccount({
+          email,
+          password: password || 'password123',
+          role,
+          displayName: email.split('@')[0],
+        });
+        setToastMsg(`Akun "${email}" berhasil dibuat!`);
+      }
+
+      setTimeout(() => {
+        router.push('/accounts');
+      }, 1000);
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Gagal menyimpan data akun');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-24">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 selection:bg-secondary selection:text-white">
@@ -70,6 +144,14 @@ function AccountFormInner({ editId }: { editId: string | null }) {
           </Button>
         </div>
       </div>
+
+      {errorMsg && (
+        <Alert
+          variant="error"
+          title="Gagal menyimpan akun"
+          description={errorMsg}
+        />
+      )}
 
       <Alert
         variant="accent"
@@ -108,6 +190,16 @@ function AccountFormInner({ editId }: { editId: string | null }) {
               : 'Lengkapi email, kata sandi, dan peran sebelum membuat akun.'}
           </p>
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            {isEditMode && (
+              <Button
+                type="button"
+                variant="danger"
+                size="md"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Hapus Akun
+              </Button>
+            )}
             <Button href="/accounts" variant="outline" size="md">
               Batal
             </Button>
@@ -117,6 +209,24 @@ function AccountFormInner({ editId }: { editId: string | null }) {
           </div>
         </div>
       </form>
+
+      {showDeleteModal && (
+        <Modal
+          isOpen={true}
+          onClose={() => setShowDeleteModal(false)}
+          title="Konfirmasi Hapus Akun"
+          description={`Apakah Anda yakin ingin menghapus akun "${email}"? Tindakan ini tidak dapat dibatalkan.`}
+        >
+          <div className="flex justify-end gap-3 pt-3">
+            <Button variant="outline" onClick={() => setShowDeleteModal(false)} disabled={isDeleting}>
+              Batal
+            </Button>
+            <Button variant="danger" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? 'Menghapus...' : 'Ya, Hapus Akun'}
+            </Button>
+          </div>
+        </Modal>
+      )}
 
       {toastMsg && (
         <div className="fixed bottom-6 right-6 z-50">

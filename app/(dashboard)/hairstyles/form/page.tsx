@@ -1,39 +1,54 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Alert, Toast, Spinner } from '@/components/ui';
-import { MOCK_HAIRSTYLES } from '@/utils/mocks/mockData';
+import { Button, Alert, Toast, Spinner, Modal } from '@/components/ui';
+import { hairstyleService } from '@/services/endpoints/hairstyle';
 import { HairstyleMainFormSection, FaceShapeMap } from './sections/HairstyleMainFormSection';
 import { HairstyleSidebarSection } from './sections/HairstyleSidebarSection';
 
 function HairstyleFormInner({ editId }: { editId: string | null }) {
+  const router = useRouter();
   const isEditMode = Boolean(editId);
-  const found = isEditMode && editId
-    ? MOCK_HAIRSTYLES.find((h) => h.id === editId)
-    : undefined;
 
-  const [name, setName] = useState(found?.name ?? '');
-  const [imageUrl, setImageUrl] = useState(found?.image ?? '');
-  const [description, setDescription] = useState(found?.description ?? '');
-  const [hairType, setHairType] = useState(found?.hairType ?? '');
-  const [careLevel, setCareLevel] = useState(found ? String(found.maintenanceLevel) : '');
-  const [status, setStatus] = useState<'aktif' | 'nonaktif'>(
-    found ? (found.isAiActive ? 'aktif' : 'nonaktif') : 'aktif'
-  );
-  const [imageName] = useState(found?.imageName ?? '');
-  const [uuid] = useState(found?.uuid ?? '');
+  const [name, setName] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [description, setDescription] = useState('');
+  const [hairType, setHairType] = useState('Lurus');
+  const [careLevel, setCareLevel] = useState('2');
+  const [status, setStatus] = useState<'aktif' | 'nonaktif'>('aktif');
+  const [imageName, setImageName] = useState('');
+  const [uuid, setUuid] = useState('');
   const [toastOpen, setToastOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(Boolean(editId));
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!editId && !uuid) return;
+    setIsDeleting(true);
+    try {
+      await hairstyleService.deleteHairstyle(uuid || editId!);
+      setTimeout(() => {
+        router.push('/hairstyles');
+      }, 800);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Gagal menghapus model rambut');
+      setShowDeleteModal(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const [faceShapes, setFaceShapes] = useState<FaceShapeMap>({
-    oval: found ? found.faceShapes.includes('Oval') : false,
-    bulat: found ? found.faceShapes.includes('Bulat') : false,
-    persegi: found ? found.faceShapes.includes('Persegi') : false,
-    lonjong: found ? found.faceShapes.includes('Lonjong') : false,
-    berlian: found ? found.faceShapes.includes('Berlian') : false,
-    segitiga: found ? found.faceShapes.includes('Segitiga') : false,
+    oval: true,
+    bulat: false,
+    persegi: false,
+    lonjong: false,
+    berlian: false,
+    segitiga: false,
   });
 
   const [hasErrors, setHasErrors] = useState(false);
@@ -43,7 +58,44 @@ function HairstyleFormInner({ editId }: { editId: string | null }) {
     careLevel?: string;
   }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!editId) return;
+
+    async function loadHairstyle(id: string) {
+      try {
+        setIsLoading(true);
+        const res = await hairstyleService.getHairstyleDetail(id);
+        const found = res.data;
+        if (found) {
+          setName(found.name);
+          setImageUrl(found.image || '');
+          setDescription(found.description || '');
+          setHairType(found.hairType || 'Lurus');
+          setCareLevel(String(found.maintenanceLevel || 2));
+          setStatus(found.isAiActive ? 'aktif' : 'nonaktif');
+          setImageName(found.imageName || '');
+          setUuid(found.uuid || '');
+
+          setFaceShapes({
+            oval: found.faceShapes.includes('Oval'),
+            bulat: found.faceShapes.includes('Bulat'),
+            persegi: found.faceShapes.includes('Persegi'),
+            lonjong: found.faceShapes.includes('Lonjong'),
+            berlian: found.faceShapes.includes('Berlian'),
+            segitiga: found.faceShapes.includes('Segitiga'),
+          });
+        }
+      } catch (_err) {
+        setHasErrors(true);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadHairstyle(editId);
+  }, [editId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: typeof errors = {};
 
@@ -63,16 +115,57 @@ function HairstyleFormInner({ editId }: { editId: string | null }) {
       setErrors(newErrors);
       setHasErrors(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      setErrors({});
-      setHasErrors(false);
+      return;
+    }
+
+    setErrors({});
+    setHasErrors(false);
+
+    try {
+      const activeShapes: string[] = [];
+      if (faceShapes.oval) activeShapes.push('Oval');
+      if (faceShapes.bulat) activeShapes.push('Bulat');
+      if (faceShapes.persegi) activeShapes.push('Persegi');
+      if (faceShapes.lonjong) activeShapes.push('Lonjong');
+      if (faceShapes.berlian) activeShapes.push('Berlian');
+      if (faceShapes.segitiga) activeShapes.push('Segitiga');
+
+      const payload = {
+        name,
+        hairType,
+        maintenanceLevel: Number(careLevel) || 2,
+        description,
+        isAiActive: status === 'aktif',
+        faceShapes: activeShapes.length > 0 ? activeShapes : ['Oval'],
+      };
+
+      if (isEditMode && editId) {
+        await hairstyleService.updateHairstyle(editId, payload);
+      } else {
+        await hairstyleService.createHairstyle(payload);
+      }
+
       setToastOpen(true);
+      setTimeout(() => {
+        router.push('/hairstyles');
+      }, 1000);
+    } catch (err) {
+      setErrors({ name: err instanceof Error ? err.message : 'Gagal menyimpan model rambut' });
+      setHasErrors(true);
     }
   };
 
   const toggleFaceShape = (shape: keyof FaceShapeMap) => {
     setFaceShapes((prev) => ({ ...prev, [shape]: !prev[shape] }));
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-24">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -154,6 +247,16 @@ function HairstyleFormInner({ editId }: { editId: string | null }) {
             : 'Lengkapi nama dan foto referensi sebelum menyimpan.'}
         </p>
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          {isEditMode && (
+            <Button
+              type="button"
+              variant="danger"
+              size="md"
+              onClick={() => setShowDeleteModal(true)}
+            >
+              Hapus Model
+            </Button>
+          )}
           <Button href="/hairstyles" variant="outline" size="md">
             Batal
           </Button>
@@ -162,6 +265,24 @@ function HairstyleFormInner({ editId }: { editId: string | null }) {
           </Button>
         </div>
       </div>
+
+      {showDeleteModal && (
+        <Modal
+          isOpen={true}
+          onClose={() => setShowDeleteModal(false)}
+          title="Konfirmasi Hapus Model Rambut"
+          description={`Apakah Anda yakin ingin menghapus model rambut "${name}" dari katalog?`}
+        >
+          <div className="flex justify-end gap-3 pt-3">
+            <Button variant="outline" onClick={() => setShowDeleteModal(false)} disabled={isDeleting}>
+              Batal
+            </Button>
+            <Button variant="danger" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? 'Menghapus...' : 'Ya, Hapus Model'}
+            </Button>
+          </div>
+        </Modal>
+      )}
 
       <div className="fixed bottom-6 right-6 z-50">
         <Toast

@@ -1,27 +1,60 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Card, Toast } from '@/components/ui';
-import { MOCK_SERVICES, MOCK_BARBERS } from '@/utils/mocks/mockData';
+import { Button, Card, Toast, Spinner } from '@/components/ui';
+import { servicesService } from '@/services/endpoints/service';
+import { barberService } from '@/services/endpoints/barber';
+import { queueService } from '@/services/endpoints/queue';
+import { TService, TKapster } from '@/types';
 import { BookingFormSection } from './sections/BookingFormSection';
 import { QueueContextSidebarSection } from './sections/QueueContextSidebarSection';
 
-export default function QueueFormPage() {
-  const [customer, setCustomer] = useState('Satria Wibowo');
-  const [barber, setBarber] = useState('Raka Putra');
-  const [bookingDate, setBookingDate] = useState('7 Oktober 2026');
-  const [startTime, setStartTime] = useState('10:00 WIB');
+function QueueFormContent() {
+  const router = useRouter();
+  const [customer, setCustomer] = useState('Pelanggan Walk-in');
+  const [barber, setBarber] = useState('');
+  const [bookingDate, setBookingDate] = useState('');
+  const [startTime, setStartTime] = useState('');
   const [bookingStatus, setBookingStatus] = useState('confirmed');
 
-  // Default terpilih: Potong reguler ('1') & Hair wash ('5')
-  const [selectedServices, setSelectedServices] = useState<string[]>(['1', '5']);
+  const [availableServices, setAvailableServices] = useState<TService[]>([]);
+  const [availableBarbers, setAvailableBarbers] = useState<TKapster[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [queueStatus, setQueueStatus] = useState('waiting');
   const [estimatedWaitTime, setEstimatedWaitTime] = useState('0');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const availableServices = useMemo(() => MOCK_SERVICES.slice(0, 6), []);
+  useEffect(() => {
+    const now = new Date();
+    setBookingDate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+    setStartTime(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB');
+
+    async function loadData() {
+      try {
+        const [srvRes, brbRes] = await Promise.all([
+          servicesService.getServices(),
+          barberService.getBarbers(),
+        ]);
+        if (srvRes.data && srvRes.data.length > 0) {
+          setAvailableServices(srvRes.data);
+          setSelectedServices([srvRes.data[0].id]);
+        }
+        if (brbRes.data && brbRes.data.length > 0) {
+          setAvailableBarbers(brbRes.data);
+          setBarber(brbRes.data[0].name);
+        }
+      } catch (_err) {
+        // Handled: empty states remain clean
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const selectedServiceObjects = useMemo(() => {
     return availableServices.filter((srv) => selectedServices.includes(srv.id));
@@ -43,10 +76,34 @@ export default function QueueFormPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setToastMsg(`Antrean untuk ${customer} bersama kapster ${barber} berhasil dibuat!`);
+    try {
+      const selectedBarberObj = availableBarbers.find((b) => b.name === barber);
+      const barberId = selectedBarberObj ? (selectedBarberObj.id || selectedBarberObj.uuid) : undefined;
+
+      await queueService.createWalkIn({
+        customerName: customer,
+        barberId,
+        serviceIds: selectedServices,
+      });
+
+      setToastMsg(`Antrean untuk ${customer} bersama kapster ${barber} berhasil dibuat!`);
+      setTimeout(() => {
+        router.push('/queue');
+      }, 800);
+    } catch (err) {
+      setToastMsg(err instanceof Error ? err.message : 'Gagal membuat antrean');
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-24">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 selection:bg-secondary selection:text-white">
@@ -65,7 +122,7 @@ export default function QueueFormPage() {
               Tambah Antrean
             </h1>
             <p className="text-text-muted text-[14px] mt-0.5">
-              Buat booking beserta antreannya dalam satu penyimpanan.
+              Buat booking beserta antreannya langsung tersimpan ke database.
             </p>
           </div>
 
@@ -88,7 +145,7 @@ export default function QueueFormPage() {
               onCustomerChange={setCustomer}
               barber={barber}
               onBarberChange={setBarber}
-              barbers={MOCK_BARBERS}
+              barbers={availableBarbers}
               bookingDate={bookingDate}
               onBookingDateChange={setBookingDate}
               startTime={startTime}
@@ -144,5 +201,19 @@ export default function QueueFormPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function QueueFormPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center py-24">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
+      <QueueFormContent />
+    </Suspense>
   );
 }

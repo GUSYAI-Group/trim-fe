@@ -5,14 +5,21 @@ import { TProduct } from '@/types';
 
 interface ProductStatsSectionProps {
   products: TProduct[];
+  metaCounts?: {
+    totalCount: number;
+    activeCount: number;
+    amanCount: number;
+    menipisCount: number;
+    habisCount: number;
+  };
 }
 
-export function ProductStatsSection({ products }: ProductStatsSectionProps) {
-  const totalCount = products.length;
-  const activeCount = products.filter((p) => p.isActive).length;
-  const amanCount = products.filter((p) => p.stockStatus === 'Aman').length;
-  const menipisCount = products.filter((p) => p.stockStatus === 'Menipis').length;
-  const habisCount = products.filter((p) => p.stockStatus === 'Habis').length;
+export function ProductStatsSection({ products, metaCounts }: ProductStatsSectionProps) {
+  const totalCount = metaCounts?.totalCount ?? products.length;
+  const activeCount = metaCounts?.activeCount ?? products.filter((p) => p.isActive).length;
+  const amanCount = metaCounts?.amanCount ?? products.filter((p) => p.stockStatus === 'Aman').length;
+  const menipisCount = metaCounts?.menipisCount ?? products.filter((p) => p.stockStatus === 'Menipis').length;
+  const habisCount = metaCounts?.habisCount ?? products.filter((p) => p.stockStatus === 'Habis').length;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

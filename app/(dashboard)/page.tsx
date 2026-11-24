@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
 import { Button, Toast } from '@/components/ui';
+import { dashboardService, DashboardStats } from '@/services/endpoints/dashboard';
 import { DashboardHeroSection } from './sections/DashboardHeroSection';
 import { DashboardKpiSection } from './sections/DashboardKpiSection';
 import { DashboardRevenueQueueSection } from './sections/DashboardRevenueQueueSection';
@@ -10,6 +11,21 @@ import { DashboardTopBarbersSection } from './sections/DashboardTopBarbersSectio
 
 export default function DashboardPage() {
   const [toastOpen, setToastOpen] = useState(false);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const res = await dashboardService.getStats();
+        if (res.data) setStats(res.data);
+      } catch (_err) {
+        // Fallback to static if backend not responding
+      }
+    }
+    loadStats();
+    const interval = setInterval(loadStats, 15000); // Refresh live every 15s
+    return () => clearInterval(interval);
+  }, []);
 
   const handleDownloadReport = () => {
     const now = new Date();
@@ -43,6 +59,19 @@ export default function DashboardPage() {
 
     const fileTimestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
 
+    const kpi = stats?.kpi;
+    const topBarbersList =
+      Array.isArray(stats?.topBarbers) && stats.topBarbers.length > 0
+        ? stats.topBarbers.map((b) => [
+            b.barber_id ? b.barber_id.slice(0, 8) : 'id',
+            b.barber_name || b.name || 'Kapster',
+            b.specialty || 'General Cut',
+            String(b.total_completed_services || 0),
+            `${Number(b.average_rating || 5.0).toFixed(1)} Star`,
+            `Rp ${Number(b.total_revenue_generated || 0).toLocaleString('id-ID')}`,
+          ])
+        : [['-', 'Belum ada data aktivitas kapster', '-', '0', '-', 'Rp 0']];
+
     const reportRows = [
       ['sep=;'],
       ['========================================================================='],
@@ -55,26 +84,23 @@ export default function DashboardPage() {
       ['1. METRIK KINERJA UTAMA'],
       ['-------------------------------------------------------------------------'],
       ['Metrik Operasional', 'Nilai Saat Ini', 'Keterangan Status'],
-      ['Pendapatan Hari Ini', 'Rp 1.200.000', `Pembayaran paid - Status per ${liveTimeString}`],
-      ['Cukuran Selesai Hari Ini', '18 Cukuran', 'Booking completed - Tanggal hari ini'],
-      ['Rata-rata Rating Kapster', '4.9 / 5.0', 'BARBERS.average_rating (126 ulasan)'],
-      ['Booking Hari Ini', '28 Booking', '2 booking confirmed belum check-in'],
-      ['Total Pendapatan Mingguan', 'Rp 10.250.000', `Periode ${livePeriodString} (+18.4% minggu lalu)`],
+      ['Pendapatan Hari Ini', `Rp ${Number(kpi?.today_revenue || 0).toLocaleString('id-ID')}`, `Pembayaran paid - Status per ${liveTimeString}`],
+      ['Cukuran Selesai Hari Ini', `${kpi?.completed_services ?? 0} Cukuran`, 'Booking completed - Tanggal hari ini'],
+      ['Rata-rata Rating Kapster', `${Number(kpi?.average_rating || 0).toFixed(1)} / 5.0`, 'BARBERS.average_rating'],
+      ['Booking Hari Ini', `${kpi?.today_appointments ?? 0} Booking`, 'Status antrean & booking live'],
+      ['Total Pendapatan Mingguan', stats?.weeklyRevenue?.formattedTotal || `Rp ${Number(kpi?.today_revenue || 0).toLocaleString('id-ID')}`, `Sinkron database MySQL`],
       [],
       ['2. RINGKASAN LANTAI TOKO (STATUS ANTREAN)'],
       ['-------------------------------------------------------------------------'],
       ['Status Antrean', 'Jumlah Pelanggan', 'Keterangan'],
-      ['Menunggu', '5 Pelanggan', 'Menunggu giliran di ruang tunggu'],
-      ['Sedang Cukur', '3 Pelanggan', 'Dalam proses pengerjaan oleh kapster'],
-      ['Selesai Hari Ini', '18 Pelanggan', 'Selesai dan terbayar'],
-      ['Peringatan Jadwal', '2 Booking', 'Rizky & Fajar melewatkan jadwal check-in'],
+      ['Antrean Aktif', `${kpi?.currently_in_queue ?? 0} Pelanggan`, 'Menunggu giliran di ruang tunggu / kursi'],
+      ['Pelanggan Hari Ini', `${kpi?.today_customers ?? 0} Pelanggan`, 'Tercatat di sistem hari ini'],
+      ['Layanan Selesai', `${kpi?.completed_services ?? 0} Layanan`, 'Selesai dan terbayar'],
       [],
       ['3. PERFORMA KAPSTER TERBAIK MINGGU INI'],
       ['-------------------------------------------------------------------------'],
       ['UUID Singkat', 'Nama Kapster', 'Spesialisasi', 'Jumlah Cukuran', 'Rating', 'Pendapatan'],
-      ['6f3a1c7e', 'Gus Farhan', 'Fade & taper', '42', '4.9 Star', 'Rp 2.940.000'],
-      ['7b2d9e4f', 'Lefi Dian', 'Classic & pompadour', '36', '4.9 Star', 'Rp 2.520.000'],
-      ['8c1a5b6d', 'Zidan Alex', 'Texture & crop', '31', '4.8 Star', 'Rp 2.170.000'],
+      ...topBarbersList,
       ['-------------------------------------------------------------------------'],
       [`Diunduh secara otomatis dari TRIM Barbershop System pada ${liveDateString} pukul ${liveTimeString}.`],
     ];
@@ -120,10 +146,14 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      <DashboardHeroSection />
-      <DashboardKpiSection />
-      <DashboardRevenueQueueSection />
-      <DashboardTopBarbersSection />
+      <DashboardHeroSection activeBarbersCount={stats?.kpi?.active_barbers_count} />
+      <DashboardKpiSection kpi={stats?.kpi} />
+      <DashboardRevenueQueueSection
+        kpi={stats?.kpi}
+        weeklyRevenue={stats?.weeklyRevenue}
+        floorStatus={stats?.floorStatus}
+      />
+      <DashboardTopBarbersSection topBarbers={stats?.topBarbers} />
 
       <div className="fixed bottom-6 right-6 z-50">
         <Toast

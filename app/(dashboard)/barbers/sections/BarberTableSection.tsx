@@ -24,6 +24,8 @@ interface BarberTableSectionProps {
   onSearchChange: (val: string) => void;
   selectedStatus: 'Semua' | 'Aktif' | 'Nonaktif';
   onStatusChange: (val: 'Semua' | 'Aktif' | 'Nonaktif') => void;
+  onDeleteRequest?: (barber: TKapster) => void;
+  onDetailRequest?: (barber: TKapster) => void;
 }
 
 export function BarberTableSection({
@@ -35,6 +37,8 @@ export function BarberTableSection({
   onSearchChange,
   selectedStatus,
   onStatusChange,
+  onDeleteRequest,
+  onDetailRequest,
 }: BarberTableSectionProps) {
   const tabs: { key: 'Semua' | 'Aktif' | 'Nonaktif'; label: string }[] = [
     { key: 'Semua', label: `Semua (${totalCount})` },
@@ -119,26 +123,46 @@ export function BarberTableSection({
               </TableCell>
               <TableCell className="font-bold font-mono">
                 <span className="inline-flex items-center gap-1.5">
-                  <Star className="w-3.5 h-3.5 fill-secondary text-secondary" />
-                  {kapster.rating}
+                  <Star className={`w-3.5 h-3.5 ${Number(kapster.rating) > 0 ? 'fill-secondary text-secondary' : 'text-text-muted'}`} />
+                  {Number(kapster.rating) > 0 ? kapster.rating : '0.0'}
                 </span>
               </TableCell>
               <TableCell className="font-bold font-mono">{kapster.finished}</TableCell>
               <TableCell className="pr-6">
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-4">
                   <Link
-                    href={`/barbers/form?id=${kapster.rawPhone}`}
+                    href={`/barbers/form?id=${kapster.id || kapster.rawPhone}`}
                     className="text-secondary font-semibold hover:underline transition-colors text-[12px] cursor-pointer"
                   >
                     Edit
                   </Link>
-                  <Link
-                    href={`/barbers/form?id=${kapster.rawPhone}`}
-                    className="text-text-muted hover:text-text-main transition-colors flex items-center gap-1.5 font-semibold text-[12px] cursor-pointer"
-                  >
-                    <span>Detail</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  {onDeleteRequest && (
+                    <button
+                      type="button"
+                      onClick={() => onDeleteRequest(kapster)}
+                      className="text-danger hover:underline font-semibold text-[12px] cursor-pointer"
+                    >
+                      Hapus
+                    </button>
+                  )}
+                  {onDetailRequest ? (
+                    <button
+                      type="button"
+                      onClick={() => onDetailRequest(kapster)}
+                      className="text-text-muted hover:text-text-main transition-colors flex items-center gap-1.5 font-semibold text-[12px] cursor-pointer"
+                    >
+                      <span>Detail</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/barbers/form?id=${kapster.id || kapster.rawPhone}`}
+                      className="text-text-muted hover:text-text-main transition-colors flex items-center gap-1.5 font-semibold text-[12px] cursor-pointer"
+                    >
+                      <span>Detail</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  )}
                 </div>
               </TableCell>
             </TableRow>

@@ -10,6 +10,8 @@ interface HairstyleCatalogSectionProps {
   onSearchChange: (val: string) => void;
   selectedShape: string;
   onShapeChange: (val: string) => void;
+  onDetailRequest?: (item: THairstyle) => void;
+  onDeleteRequest?: (item: THairstyle) => void;
 }
 
 export function HairstyleCatalogSection({
@@ -18,6 +20,8 @@ export function HairstyleCatalogSection({
   onSearchChange,
   selectedShape,
   onShapeChange,
+  onDetailRequest,
+  onDeleteRequest,
 }: HairstyleCatalogSectionProps) {
   return (
     <div className="space-y-5">
@@ -54,7 +58,12 @@ export function HairstyleCatalogSection({
       {hairstyles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {hairstyles.map((item) => (
-            <HairstyleCard key={item.id} item={item} />
+            <HairstyleCard
+              key={item.id}
+              item={item}
+              onDetailClick={onDetailRequest}
+              onDeleteClick={onDeleteRequest}
+            />
           ))}
         </div>
       ) : (

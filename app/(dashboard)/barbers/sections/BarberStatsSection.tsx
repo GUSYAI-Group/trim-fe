@@ -5,9 +5,18 @@ import { Card } from '@/components/ui';
 interface BarberStatsSectionProps {
   totalCount: number;
   activeCount: number;
+  inServiceCount?: number;
+  averageRating?: string;
+  totalReviews?: number;
 }
 
-export function BarberStatsSection({ totalCount, activeCount }: BarberStatsSectionProps) {
+export function BarberStatsSection({
+  totalCount,
+  activeCount,
+  inServiceCount = 0,
+  averageRating = '0.0',
+  totalReviews = 0,
+}: BarberStatsSectionProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card className="p-6 flex flex-col justify-between gap-4">
@@ -27,8 +36,8 @@ export function BarberStatsSection({ totalCount, activeCount }: BarberStatsSecti
           <Scissors className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <h3 className="text-[28px] font-extrabold font-mono text-text-main mb-1">3</h3>
-          <p className="text-[12px] text-text-muted">3 kursi sedang terisi</p>
+          <h3 className="text-[28px] font-extrabold font-mono text-text-main mb-1">{inServiceCount}</h3>
+          <p className="text-[12px] text-text-muted">{inServiceCount} kursi sedang aktif melayani</p>
         </div>
       </Card>
 
@@ -38,8 +47,10 @@ export function BarberStatsSection({ totalCount, activeCount }: BarberStatsSecti
           <Star className="w-5 h-5 text-secondary shrink-0" />
         </div>
         <div>
-          <h3 className="text-[28px] font-extrabold font-mono text-text-main mb-1">4,9 / 5</h3>
-          <p className="text-[12px] text-success font-medium">126 ulasan pelanggan bulan ini</p>
+          <h3 className="text-[28px] font-extrabold font-mono text-text-main mb-1">
+            {totalReviews > 0 ? `${averageRating} / 5` : '0.0 / 5'}
+          </h3>
+          <p className="text-[12px] text-text-muted font-medium">{totalReviews} ulasan terverifikasi</p>
         </div>
       </Card>
     </div>

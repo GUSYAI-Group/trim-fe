@@ -29,6 +29,9 @@ interface ProductTableSectionProps {
   onActiveStatusChange: (val: string) => void;
   onToggleActive: (id: string) => void;
   onResetFilters: () => void;
+  onDetailRequest?: (product: TProduct) => void;
+  onAdjustStockRequest?: (product: TProduct) => void;
+  onDeleteRequest?: (product: TProduct) => void;
 }
 
 export function ProductTableSection({
@@ -44,6 +47,9 @@ export function ProductTableSection({
   onActiveStatusChange,
   onToggleActive,
   onResetFilters,
+  onDetailRequest,
+  onAdjustStockRequest,
+  onDeleteRequest,
 }: ProductTableSectionProps) {
   const getStockBadgeVariant = (status: TProduct['stockStatus']) => {
     if (status === 'Aman') return 'aman' as const;
@@ -160,13 +166,40 @@ export function ProductTableSection({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-3">
+                      {onAdjustStockRequest && (
+                        <button
+                          type="button"
+                          onClick={() => onAdjustStockRequest(item)}
+                          className="text-secondary hover:brightness-125 text-[12px] font-semibold cursor-pointer"
+                        >
+                          Restock
+                        </button>
+                      )}
+                      {onDetailRequest && (
+                        <button
+                          type="button"
+                          onClick={() => onDetailRequest(item)}
+                          className="text-text-muted hover:text-text-main text-[12px] font-semibold cursor-pointer"
+                        >
+                          Detail
+                        </button>
+                      )}
                       <Link
-                        href={`/products/form?id=${item.rawId}`}
+                        href={`/products/form?id=${item.id}`}
                         className="text-secondary font-semibold text-[12px] hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                         <span>Edit</span>
                       </Link>
+                      {onDeleteRequest && (
+                        <button
+                          type="button"
+                          onClick={() => onDeleteRequest(item)}
+                          className="text-danger hover:brightness-125 text-[12px] font-semibold cursor-pointer"
+                        >
+                          Hapus
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => onToggleActive(item.id)}
