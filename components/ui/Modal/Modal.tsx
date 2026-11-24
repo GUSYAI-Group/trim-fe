@@ -21,6 +21,7 @@ interface ModalProps {
   onConfirm?: () => void;
   children?: React.ReactNode;
   hideHeaderBadge?: boolean;
+  hideActions?: boolean;
 }
 
 const variantConfig: Record<ModalVariant, { icon: React.ReactNode; labelColor: string; primaryBtnClass: string }> = {
@@ -62,11 +63,34 @@ export const Modal: React.FC<ModalProps> = ({
   onConfirm,
   children,
   hideHeaderBadge,
+  hideActions = false,
 }) => {
   const config = variantConfig[variant];
-  const resolvedPrimaryLabel = confirmText ?? primaryLabel ?? 'Mengerti';
-  const resolvedSecondaryLabel = cancelText ?? secondaryLabel;
+
+  // Smart defaults based on variant:
+  // info -> 'Mengerti' (khusus notifikasi/pemberitahuan)
+  // confirmation -> 'Konfirmasi' & 'Batal'
+  // destructive -> 'Hapus' & 'Batal'
+  const defaultPrimaryLabel =
+    variant === 'info'
+      ? 'Mengerti'
+      : variant === 'destructive'
+      ? 'Hapus'
+      : 'Konfirmasi';
+
+  const defaultSecondaryLabel =
+    variant === 'info'
+      ? undefined
+      : 'Batal';
+
+  const resolvedPrimaryLabel = confirmText ?? primaryLabel ?? defaultPrimaryLabel;
+  const resolvedSecondaryLabel = cancelText ?? secondaryLabel ?? defaultSecondaryLabel;
   const resolvedOnPrimary = onConfirm ?? onPrimary ?? onClose;
+
+  // Sembunyikan actions otomatis jika children sudah memiliki aksi custom dan tidak ada handler onConfirm/onPrimary di prop Modal
+  const shouldHideActions =
+    hideActions ||
+    (!onConfirm && !onPrimary && !confirmText && !primaryLabel && Boolean(children));
 
   return (
     <AnimatePresence>
@@ -119,24 +143,26 @@ export const Modal: React.FC<ModalProps> = ({
             {children && <div className="mb-8">{children}</div>}
 
             {/* Actions */}
-            <div className="flex gap-3">
-              {resolvedSecondaryLabel && (
+            {!shouldHideActions && (
+              <div className="flex gap-3">
+                {resolvedSecondaryLabel && (
+                  <button
+                    type="button"
+                    onClick={onSecondary || onClose}
+                    className="flex-1 h-12 px-6 rounded-xl border border-border text-text-main font-semibold text-[14px] hover:bg-surface-hover active:scale-[0.98] transition-all duration-150 cursor-pointer motion-reduce:transform-none"
+                  >
+                    {resolvedSecondaryLabel}
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={onSecondary || onClose}
-                  className="flex-1 h-12 px-6 rounded-xl border border-border text-text-main font-semibold text-[14px] hover:bg-surface-hover active:scale-[0.98] transition-all duration-150 cursor-pointer motion-reduce:transform-none"
+                  onClick={resolvedOnPrimary}
+                  className={`flex-1 h-12 px-6 rounded-xl font-semibold text-[14px] active:scale-[0.98] transition-all duration-150 cursor-pointer motion-reduce:transform-none ${config.primaryBtnClass}`}
                 >
-                  {resolvedSecondaryLabel}
+                  {resolvedPrimaryLabel}
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={resolvedOnPrimary}
-                className={`flex-1 h-12 px-6 rounded-xl font-semibold text-[14px] active:scale-[0.98] transition-all duration-150 cursor-pointer motion-reduce:transform-none ${config.primaryBtnClass}`}
-              >
-                {resolvedPrimaryLabel}
-              </button>
-            </div>
+              </div>
+            )}
           </motion.div>
         </div>
       )}

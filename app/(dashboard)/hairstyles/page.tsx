@@ -196,18 +196,13 @@ export default function HairstylesPage() {
         <Modal
           isOpen={true}
           onClose={() => setHairstyleToDelete(null)}
+          variant="destructive"
           title="Konfirmasi Hapus Model Rambut"
           description={`Apakah Anda yakin ingin menghapus model rambut "${hairstyleToDelete.name}" dari katalog?`}
-        >
-          <div className="flex justify-end gap-3 pt-3">
-            <Button variant="outline" onClick={() => setHairstyleToDelete(null)}>
-              Batal
-            </Button>
-            <Button variant="danger" onClick={handleConfirmDelete}>
-              Hapus Model
-            </Button>
-          </div>
-        </Modal>
+          confirmText="Hapus Model"
+          cancelText="Batal"
+          onConfirm={handleConfirmDelete}
+        />
       )}
 
       {toastMsg && (

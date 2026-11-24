@@ -168,20 +168,13 @@ export default function AccountsPage() {
         <Modal
           isOpen={true}
           onClose={() => setAccountToDelete(null)}
+          variant="destructive"
           title="Konfirmasi Hapus Akun"
           description={`Apakah kamu yakin ingin menghapus akun ${accountToDelete.email}? Tindakan ini tidak dapat dibatalkan.`}
-        >
-          <div className="space-y-4">
-            <div className="flex justify-end gap-3 pt-2">
-              <Button variant="ghost" onClick={() => setAccountToDelete(null)}>
-                Batal
-              </Button>
-              <Button variant="danger" onClick={handleConfirmDelete}>
-                Hapus Akun
-              </Button>
-            </div>
-          </div>
-        </Modal>
+          confirmText="Hapus Akun"
+          cancelText="Batal"
+          onConfirm={handleConfirmDelete}
+        />
       )}
 
       {toastMsg && (

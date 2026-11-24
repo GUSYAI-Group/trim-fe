@@ -25,7 +25,7 @@ import {
   LogOut,
   FileText,
 } from 'lucide-react';
-import { Card, Button, Badge } from '@/components/ui';
+import { Card, Button, Badge, Modal } from '@/components/ui';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/endpoints/auth';
@@ -40,6 +40,7 @@ export default function ProfileView() {
   const [phone, setPhone] = useState(user?.phone || '-');
   const [branch, setBranch] = useState('TRIM Barbershop');
   const [isSaved, setIsSaved] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   React.useEffect(() => {
     if (user?.email) {
@@ -193,16 +194,30 @@ export default function ProfileView() {
 
         <button
           type="button"
-          onClick={() => {
-            logout();
-            window.location.href = '/login';
-          }}
+          onClick={() => setIsLogoutModalOpen(true)}
           className="self-start sm:self-auto px-4 py-2.5 rounded-xl border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-[13px] font-bold font-outfit flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           <span>Keluar Sesi</span>
         </button>
       </motion.div>
+
+      {/* Modal Konfirmasi Logout */}
+      <Modal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        variant="destructive"
+        title="Konfirmasi Keluar"
+        description="Apakah Anda yakin ingin mengakhiri sesi dan keluar dari sistem operasional TRIM?"
+        confirmText="Keluar Sesi"
+        cancelText="Batal"
+        onConfirm={() => {
+          setIsLogoutModalOpen(false);
+          sessionStorage.setItem('trim_logout_toast', 'true');
+          logout();
+          window.location.href = '/login?logout=1';
+        }}
+      />
 
       {/* ── Profile Hero Card ── */}
       <motion.div

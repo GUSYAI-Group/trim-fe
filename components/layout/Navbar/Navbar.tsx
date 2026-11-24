@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTrimStore, AppNotification } from '@/store/useTrimStore';
 import { useRouter } from 'next/navigation';
+import { Modal } from '@/components/ui';
 import {
   Bell,
   Search,
@@ -38,6 +39,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
   const [currentTime, setCurrentTime] = useState('');
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -648,8 +650,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                       type="button"
                       onClick={() => {
                         setIsProfileOpen(false);
-                        useAuthStore.getState().logout();
-                        window.location.href = '/login';
+                        setIsLogoutModalOpen(true);
                       }}
                       className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-[13px] font-bold text-rose-400 hover:bg-rose-500/10 transition-all cursor-pointer"
                     >
@@ -662,6 +663,23 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Modal Konfirmasi Logout */}
+        <Modal
+          isOpen={isLogoutModalOpen}
+          onClose={() => setIsLogoutModalOpen(false)}
+          variant="destructive"
+          title="Konfirmasi Keluar"
+          description="Apakah Anda yakin ingin mengakhiri sesi dan keluar dari sistem operasional TRIM?"
+          confirmText="Keluar"
+          cancelText="Batal"
+          onConfirm={() => {
+            setIsLogoutModalOpen(false);
+            sessionStorage.setItem('trim_logout_toast', 'true');
+            useAuthStore.getState().logout();
+            window.location.href = '/login?logout=1';
+          }}
+        />
       </header>
 
       {/* ── Mobile Global Search Modal Overlay ── */}

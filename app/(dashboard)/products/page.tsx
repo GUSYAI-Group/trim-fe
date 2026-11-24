@@ -346,18 +346,13 @@ export default function ProductsPage() {
         <Modal
           isOpen={true}
           onClose={() => setProductToDelete(null)}
+          variant="destructive"
           title="Konfirmasi Hapus Produk"
           description={`Apakah Anda yakin ingin menghapus produk "${productToDelete.name}"? Jika produk memiliki riwayat transaksi/stok, produk akan dinonaktifkan secara aman.`}
-        >
-          <div className="flex justify-end gap-3 pt-3">
-            <Button variant="outline" onClick={() => setProductToDelete(null)}>
-              Batal
-            </Button>
-            <Button variant="danger" onClick={handleConfirmDelete}>
-              Hapus Produk
-            </Button>
-          </div>
-        </Modal>
+          confirmText="Hapus Produk"
+          cancelText="Batal"
+          onConfirm={handleConfirmDelete}
+        />
       )}
 
       <Alert

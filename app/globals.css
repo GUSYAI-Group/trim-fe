@@ -39,6 +39,8 @@
   /* Font Family */
   --font-outfit: var(--font-outfit), sans-serif;
   --font-space-grotesk: var(--font-space-grotesk), sans-serif;
+  --font-sans: var(--font-outfit), sans-serif;
+  --font-heading: var(--font-space-grotesk), sans-serif;
 }
 
 /* === Base Reset & Global Styles === */

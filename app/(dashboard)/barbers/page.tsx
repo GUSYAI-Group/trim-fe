@@ -185,18 +185,13 @@ export default function BarbersPage() {
         <Modal
           isOpen={true}
           onClose={() => setBarberToDelete(null)}
+          variant="destructive"
           title="Konfirmasi Hapus Kapster"
           description={`Apakah kamu yakin ingin menghapus ${barberToDelete.name}? Jika memiliki riwayat booking, status kapster akan diubah menjadi nonaktif.`}
-        >
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="ghost" onClick={() => setBarberToDelete(null)}>
-              Batal
-            </Button>
-            <Button variant="danger" onClick={handleConfirmDelete}>
-              Hapus Kapster
-            </Button>
-          </div>
-        </Modal>
+          confirmText="Hapus Kapster"
+          cancelText="Batal"
+          onConfirm={handleConfirmDelete}
+        />
       )}
 
       {toastMsg && (

@@ -46,7 +46,7 @@ export const TextField: React.FC<TextFieldProps> = ({
           className={`
             w-full h-12 px-4 text-[14px] font-medium font-outfit
             bg-raised/60 border rounded-xl
-            text-text-main placeholder:text-text-muted
+            text-text-main placeholder:text-text-muted/70 placeholder:font-normal
             outline-none transition-all duration-200
             ${leftAddon ? 'pl-11' : ''}
             ${rightAddon || isError ? 'pr-12' : ''}

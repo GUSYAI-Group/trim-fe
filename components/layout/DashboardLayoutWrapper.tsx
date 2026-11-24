@@ -1,12 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Sidebar, Navbar, Footer } from '@/components/layout';
+import { Toast } from '@/components/ui';
 
 export function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [welcomeToast, setWelcomeToast] = useState<{ name: string } | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const savedName = sessionStorage.getItem('trim_login_toast');
+    if (savedName) {
+      setWelcomeToast({ name: savedName });
+      sessionStorage.removeItem('trim_login_toast');
+    }
+  }, []);
 
   return (
     <div className="flex h-screen bg-primary overflow-hidden">
@@ -42,6 +52,19 @@ export function DashboardLayoutWrapper({ children }: { children: React.ReactNode
           </div>
         </main>
       </div>
+
+      {/* Welcome Toast upon Login */}
+      {welcomeToast && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <Toast
+            isOpen={true}
+            onClose={() => setWelcomeToast(null)}
+            variant="success"
+            title="Berhasil Masuk"
+            description={`Selamat datang kembali, ${welcomeToast.name}! Ruang operasional TRIM aktif.`}
+          />
+        </div>
+      )}
     </div>
   );
 }

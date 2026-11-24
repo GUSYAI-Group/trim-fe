@@ -168,18 +168,13 @@ export default function ServicesPage() {
         <Modal
           isOpen={true}
           onClose={() => setServiceToDelete(null)}
+          variant="destructive"
           title="Konfirmasi Hapus Layanan"
           description={`Apakah kamu yakin ingin menghapus layanan "${serviceToDelete.name}"? Jika terkait dengan riwayat booking, status layanan akan otomatis dinonaktifkan.`}
-        >
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="ghost" onClick={() => setServiceToDelete(null)}>
-              Batal
-            </Button>
-            <Button variant="danger" onClick={handleConfirmDelete}>
-              Hapus Layanan
-            </Button>
-          </div>
-        </Modal>
+          confirmText="Hapus Layanan"
+          cancelText="Batal"
+          onConfirm={handleConfirmDelete}
+        />
       )}
 
       {toastMsg && (
